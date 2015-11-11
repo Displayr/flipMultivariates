@@ -12,29 +12,27 @@
 #' @details Cretes a \code{\link{tree:tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
-CART <- function(formula, data, traditional.plot = FALSE, ...)
+CART <- function(formula, data, weights = NULL, subset = NULL, ...)
 {
-    if (is.null(data$QCalibratedWeight))
+    if (is.null(weights))
     {
-        if(is.null(data$QFilter))
+        if(is.null(subset) | length(subset) == 1)
         {
             result <- tree::tree(formula, data = data, model = TRUE, ...)
         }
         else
-            result <- tree::tree(formula, data = data, subset = data$QFilter, model = TRUE, ...)
+            result <- tree::tree(formula, data = data, subset = subset, model = TRUE, ...)
     }
     else
     {
-        if(is.null(data$QFilter))
-            result <- tree::tree(formula, data = data, weights = data$QCalibratedWeight, model = TRUE, ...)
+        if(is.null(subset) | length(subset) == 1)
+            result <- tree::tree(formula, data = data, weights = weights, model = TRUE, ...)
         else
-            result <- tree::tree(formula, data = data, subset = data$QFilter,
-                           weights = data$QCalibratedWeight, model = TRUE, ...)
+            result <- tree::tree(formula, data = data, subset = subset,
+                           weights = weights, model = TRUE, ...)
     }
     result$predicted <- predict(result, newdata = data, type = "tree", na.action = na.exclude)
     class(result) <- append("CART", class(result))
-    #class(result) <- append("flip", class(result))
-    result$traditional.plot = traditional.plot
     return(result)
 }
 
@@ -260,17 +258,9 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 #' @export
 print.CART <- function(CART.object)
 {
-    if (CART.object$traditional.plot)
-    {
-        plt = plot(CART.object)
-        #plt = text(CART.object)
-    }
-    else
-    {
-        tree.list <- treeFrameToList(CART.object)
-        plt = sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
+    tree.list <- treeFrameToList(CART.object)
+    plt = sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
                          nodeHeight = 100, tooltip = c("n", "Description"))
-    }
     print(plt)
 }
 
