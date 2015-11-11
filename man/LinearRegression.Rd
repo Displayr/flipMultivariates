@@ -2,12 +2,9 @@
 % Please edit documentation in R/regression.R
 \name{LinearRegression}
 \alias{LinearRegression}
-\title{Object Goodness-of-Fit Plot
-\code{Linear Regression} A generic function used to produce plots showing outliers in the data from
-a model object.  The function invokes particular \code{\link{methods}}
-which depend on the \code{\link{class}} of the first argument.}
+\title{\code{Linear Regression} Linear Regression.}
 \usage{
-LinearRegression(formula, data, ...)
+LinearRegression(formula, data, weights = NULL, subset = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}
@@ -16,5 +13,9 @@ LinearRegression(formula, data, ...)
 }
 \description{
 reports the goodness-of-fit of an object.
+}
+\details{
+Uses \code{\link{Zelig:zelimethods}}
+which depend on the \code{\link{class}} of the first argument.
 }
 

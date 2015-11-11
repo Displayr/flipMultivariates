@@ -4,7 +4,7 @@
 \alias{CART}
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
-CART(formula, data, traditional.plot = FALSE, ...)
+CART(formula, data, weights = NULL, subset = NULL, ...)
 }
 \arguments{
 \item{formula}{A formula expression. The left-hand-side (response) should

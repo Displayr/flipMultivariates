@@ -7,4 +7,4 @@ Depends: R (>= 3.1.1)
 License: What license is it under?
 LazyData: true
 Suggests:
-imports: testthat, Zelig, sankeytreeR, MASS, hash, colorspace, survey, testthat, MASS, rpart, tree
+imports: testthat, Zelig, sankeytreeR, MASS, hash, colorspace, survey, rpart, tree

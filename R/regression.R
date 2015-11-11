@@ -9,9 +9,11 @@
 #'
 #' @export
 LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) {
-    if(is.factor(data[,1])) {
+    dependent.name = dependentName(formula)
+    dependent.variable <- data[[dependent.name]]
+    if(is.factor(dependent.variable)) {
         WarningFactorToNumeric()
-        data[,1] <- unclass(data[,1])
+        data[[dependent.name]] <- unclass(dependentVariable)
     }
     if (is.null(weights))
     {
@@ -21,39 +23,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
         }
         else
             result <- Zelig::zelig(formula,  data = data , model = "ls", subset = subset, ...)
-    }
-    else
-    {
-        if(is.null(subset) | length(subset) == 1)-
-            result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-        else
-            result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
-    }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    class(result) = append("Regression", class(result))
-result}
-
-#' @export
-print.Regression <- function(flipRegression.object)
-{
-    print(summary(flipRegression.object))
-}
-
-
-LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) {
-    if(is.factor(data[,1])) {
-        WarningFactorToNumeric()
-        data[,1] <- unclass(data[,1])
-    }
-    if (is.null(weights))
-    {
-        if(is.null(subset) | length(subset) == 1)
-        {
-            result <- Zelig::zelig(formula,  data = data , model = "ls", ...)
-        }
-        else
-            result <- Zelig::zelig(formula,  data = data , model = "ls", subset = subset, ...)
-            class(result) = append(class(result), "lm")
+        class(result) = append(class(result), "lm")
     }
     else
     {
@@ -63,13 +33,34 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
             result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
         class(result) = append(class(result), "survey.glm")
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    result$predicted <- predict(result$result, newdata = data, na.action = na.exclude)
+    result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
 
-cpuss <- cpus
-cpus$QPopulationWeight = runif(nrow(cpus))
-z <- LinearRegression(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, cpuss)
+#' @export
+print.Regression <- function(Regression.object)
+{
+    print(summary(Regression.object))
+}
+
+#' @export
+predict.Regression <- function(Regression.object)
+{
+    Regression.object$predicted
+}
+
+#' @export
+fitted.Regression <- function(Regression.object)
+{
+    Regression.object$predicted
+}
+
+#' @export
+resid.Regression <- function(Regression.object)
+{
+    Regression.object$resid
+}
 
 
 BinaryLogit = function(formula, data) {
