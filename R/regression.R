@@ -19,21 +19,22 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     {
         if(is.null(subset) | length(subset) == 1)
         {
-            result <- Zelig::zelig(formula,  data = data , model = "ls", ...)
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", ...)
         }
         else
-            result <- Zelig::zelig(formula,  data = data , model = "ls", subset = subset, ...)
-        class(result) = append(class(result), "lm")
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", subset = subset, ...)
     }
     else
     {
         if(is.null(subset) | length(subset) == 1)-
-            result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-        else
-            result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
-        class(result) = append(class(result), "survey.glm")
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
+        elseLinea
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
-    result$predicted <- predict(result$result, newdata = data, na.action = na.exclude)
+    result <- zelig.result$zelig.out$z.out[[1]]
+    zelig.result$zelig.out$z.out <- NULL
+    result$zelig <- zelig.result
+    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
