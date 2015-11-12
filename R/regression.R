@@ -9,7 +9,7 @@
 #'
 #' @export
 LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) {
-    dependent.name = dependentName(formula)
+    dependent.name <- dependentName(formula)
     dependent.variable <- data[[dependent.name]]
     if(is.factor(dependent.variable)) {
         WarningFactorToNumeric()
@@ -22,18 +22,29 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
             zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", ...)
         }
         else
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", subset = subset, ...)
+        {
+            data$sb = subset
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", subset = sb, ...)
+        }
+        result <- zelig.result$zelig.out$z.out[[1]]
+        zelig.result$zelig.out$z.out <- NULL
+        result$zelig <- zelig.result
     }
     else
     {
-        if(is.null(subset) | length(subset) == 1)-
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-        elseLinea
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
+       if(is.null(subset) | length(subset) == 1)
+    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights))
+         else
+         {
+            data$sb = subset
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb)
+         }
+#        data$weights = weights
+#         if(is.null(subset) | length(subset) == 1)-
+#             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
+#         elseLinea
+#             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
-    result <- zelig.result$zelig.out$z.out[[1]]
-    zelig.result$zelig.out$z.out <- NULL
-    result$zelig <- zelig.result
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
@@ -55,16 +66,66 @@ predict.Regression <- function(Regression.object)
 fitted.Regression <- function(Regression.object)
 {
     Regression.object$predicted
-}
+ }
+#
+# #' @export
+# resid.Regression <- function(Regression.object)
+# {
+#     Regression.object$resid
+# }
 
-#' @export
-resid.Regression <- function(Regression.object)
+BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...) {
+    dependent.name <- dependentName(formula)
+    dependent.variable <- data[[dependent.name]]
+    n.unique <- length(unique(dependent.variable))
+    if (n.unique < 2)
+        stopTooFewForBinary()
+    else
+    {
+        if(!is.factor(dependent.variable))
+            data[[dependent.name]] <- factor(dependent.variable)
+        if (nlevels(dependent.variable) > 2)
+            data[[dependent.name]] <- DichotomizeFactor(dependent.variable, warning = TRUE, variable.name = dependent.name)
+    }
+    if (is.null(weights))
+    {
+        if(is.null(subset) | length(subset) == 1)
+        {
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "logit", ...)
+        }
+        else
+        {
+            data$sb = subset
+            zelig.result <- Zelig::zelig(formula,  data = data , model = "logit", subset = sb, ...)
+        }
+        result <- zelig.result$zelig.out$z.out[[1]]
+        zelig.result$zelig.out$z.out <- NULL
+        result$zelig <- zelig.result
+    }
+    else
+    {
+       if(is.null(subset) | length(subset) == 1)
+    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = binomial)
+         else
+         {
+            data$sb = subset
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = binomial)
+         }
+    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    result$resid <- dependent.variable - result$predicted
+    class(result) = append("Regression", class(result))
+result}
+
+
+
+
+
+BinaryLogit = function(formula, data)
 {
-    Regression.object$resid
-}
+    dependent.name <- dependentName(formula)
+    dependent.variable <- data[[dependent.name]]
 
 
-BinaryLogit = function(formula, data) {
     data[,1] <- DichotomizeFactor(data[,1], warning = TRUE, variable.name = names(data)[1])
 	if (is.null(data$QCalibratedWeight))
         result <- glm(formula, data = data, subset = data$QFilter, family = binomial)
@@ -72,6 +133,11 @@ BinaryLogit = function(formula, data) {
 	    result <- svyglm(formula, weightedSurveyDesign(data), subset = data$QFilter, family = binomial)
     }
 result}
+
+
+
+
+
 
 PoissonRegression = function(formula, data) {
     stopIfNotCount(data[,1], variable.name = names(data)[1])

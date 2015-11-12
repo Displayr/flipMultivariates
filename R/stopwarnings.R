@@ -6,7 +6,11 @@ StopIfNotCount = function(variable, variable.name) {
                          "is not a count (i.e., it has negative or non-integer values."))
     }
 
-WarningFactorToNumeric <- function() {warning("Outcome variable is a factor; it has been made numeric.")}
+
+
+WarningFactorToNumeric <- function() {warning("Outcome variable is a factor; it has been made numeric. Consider using another type of regression (e.g., Ordered Logit or Binary Logit)")}
 
 WarningMakingNumericBinary <- function() {warning("Outcome variable is numeric and contains more than two unique
                                                   values. It has been xxxis a factor; it has been made numeric.")}
+
+stopTooFewForBinary <- function() {warning("The Outcome variable needs to contain two or more categories. It does not.")}
