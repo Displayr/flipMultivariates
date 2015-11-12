@@ -74,30 +74,13 @@ fitted.Regression <- function(Regression.object)
 #     Regression.object$resid
 # }
 
-creatingBinaryDependentVariableIfNecessary <- function(formula, data)
-{
-    dependent.name <- dependentName(formula)
-    dependent.variable <- data[[dependent.name]]
-    n.unique <- length(unique(dependent.variable))
-    if (n.unique < 2)
-        stopTooFewForBinary()
-    else
-    {
-        if (n.unique > 2) {
-            if(!is.factor(dependent.variable))
-                dependent.variable <- factor(dependent.variable)
-            if (nlevels(dependent.variable) > 2)
-                dependent.variable <- DichotomizeFactor(dependent.variable, warning = TRUE, variable.name = dependent.name)
-            data[[dependent.name]] <- dependent.variable
-        }
-    }
-    data
-}
+
+
 
 #' @export
 BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
 {
-    data = creatingBinaryDependentVariableIfNecessary(formula, data)
+    data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
     if (is.null(weights))
     {
         if(is.null(subset) | length(subset) == 1)

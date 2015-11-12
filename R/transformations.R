@@ -1,3 +1,52 @@
+#' \code{DichotomizeFactor} Converts a list of variable or data frames into a data.frame.
+#'
+#' @param list.of.variables A variable in a DataSet or data.frame.
+#' @param coerce.to.numeric Makes factors and ordered factors numeric.
+#' @export
+DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(x))) {
+    if (!is.factor(variable))
+        variable = factor(variable)
+    if (nlevels(variable) == 1)
+        stop(paste(deparse(substitute(variable)), "cannot be dichotimized as it only contains one level."))
+    else if (nlevels(variable) == 2)
+        return(variable)
+    cumulative.probs = cumsum(prop.table(table(variable)))
+    cut.point = match(TRUE, cumulative.probs >= cutoff)
+    if (cut.point == 1)
+        stop(paste(variable.name, "cannot be dichotimized (e.g., perhaps only has 1 value)."))
+    new.factor = factor(unclass(variable) >= cut.point)
+    levels(new.factor) = paste0(c("<=",">="), levels(variable)[c(cut.point - 1, cut.point)])
+    if (warning)
+        warning(paste(variable.name, "has been dichotimized into", paste(levels(new.factor), collapse = " & ")))
+    new.factor
+}
+
+#' @export
+CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
+{
+    CreatingBinaryVariableIfNecessary(data, dependentName(data, variable.name))
+}
+
+#' @export
+CreatingBinaryVariableIfNecessary <- function(data, variable.name)
+{
+    variable <- data[[variable.name]]
+    n.unique <- length(unique(variable))
+    if (n.unique < 2)
+        stopTooFewForBinary()
+    else
+    {
+        if (n.unique > 2) {
+            if(!is.factor(variable))
+                variable <- factor(variable)
+            if (nlevels(variable) > 2)
+                variable <- DichotomizeFactor(variable, warning = TRUE, variable.name = dependent.name)
+            data[[variable.name]] <- variable
+        }
+    }
+    data
+}
+
 #' \code{FactorToIndicators} Converts a factor into an indicator matrix.
 #'
 #' @param variable A variable in a DataSet or data.frame.
@@ -76,25 +125,3 @@ ListToDataFrame <- function(list.of.variables, coerce.to.numeric = FALSE) {
        }
 result}
 
-#' \code{DichotomizeFactor} Converts a list of variable or data frames into a data.frame.
-#'
-#' @param list.of.variables A variable in a DataSet or data.frame.
-#' @param coerce.to.numeric Makes factors and ordered factors numeric.
-#' @export
-DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(x))) {
-    if (!is.factor(variable))
-        variable = factor(variable)
-    if (nlevels(variable) == 1)
-        stop(paste(deparse(substitute(variable)), "cannot be dichotimized as it only contains one level."))
-    else if (nlevels(variable) == 2)
-        return(variable)
-    cumulative.probs = cumsum(prop.table(table(variable)))
-    cut.point = match(TRUE, cumulative.probs >= cutoff)
-    if (cut.point == 1)
-        stop(paste(variable.name, "cannot be dichotimized (e.g., perhaps only has 1 value)."))
-    new.factor = factor(unclass(variable) >= cut.point)
-    levels(new.factor) = paste0(c("<=",">="), levels(variable)[c(cut.point - 1, cut.point)])
-    if (warning)
-        warning(paste(variable.name, "has been dichotimized into", paste(levels(new.factor), collapse = " & ")))
-    new.factor
-}
