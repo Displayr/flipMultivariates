@@ -1,5 +1,17 @@
 # Properties of data.
 
+allIntegers <- function(x)
+{
+    all(x%%1==0)
+}
+
+
+anyNegative <- function(x)
+{
+    min(c(x, NA), na.rm = TRUE) < 0
+}
+
+
 isCount = function(x) {
     if(!is.numeric(x))
         return(FALSE)
