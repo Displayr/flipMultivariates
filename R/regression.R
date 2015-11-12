@@ -19,16 +19,16 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     {
         if(is.null(subset) | length(subset) == 1)
         {
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", ...)
+            result <- lm(formula,  data = data, ...)
         }
         else
         {
             data$sb = subset
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "ls", subset = sb, ...)
+            result <- lm(formula,  data = data, subset = sb, ...)
         }
-        result <- zelig.result$zelig.out$z.out[[1]]
-        zelig.result$zelig.out$z.out <- NULL
-        result$zelig <- zelig.result
+        #result <- zelig.result$zelig.out$z.out[[1]]
+        #zelig.result$zelig.out$z.out <- NULL
+        #result$zelig <- zelig.result
     }
     else
     {
@@ -83,25 +83,25 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
         stopTooFewForBinary()
     else
     {
-        if(!is.factor(dependent.variable))
-            data[[dependent.name]] <- factor(dependent.variable)
-        if (nlevels(dependent.variable) > 2)
-            data[[dependent.name]] <- DichotomizeFactor(dependent.variable, warning = TRUE, variable.name = dependent.name)
+        if (n.unique > 2) {
+            if(!is.factor(dependent.variable))
+                dependent.variable <- factor(dependent.variable)
+            if (nlevels(dependent.variable) > 2)
+                dependent.variable <- DichotomizeFactor(dependent.variable, warning = TRUE, variable.name = dependent.name)
+            data[[dependent.name]] <- dependent.variable
+        }
     }
     if (is.null(weights))
     {
         if(is.null(subset) | length(subset) == 1)
         {
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "logit", ...)
+            result <- glm(formula,  data = data , family = binomial, ...)
         }
         else
         {
             data$sb = subset
-            zelig.result <- Zelig::zelig(formula,  data = data , model = "logit", subset = sb, ...)
+            result <-glm(formula,  data = data , family = binomial, subset = sb, ...)
         }
-        result <- zelig.result$zelig.out$z.out[[1]]
-        zelig.result$zelig.out$z.out <- NULL
-        result$zelig <- zelig.result
     }
     else
     {
@@ -117,27 +117,6 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
     #result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
-
-
-
-
-
-BinaryLogit = function(formula, data)
-{
-    dependent.name <- dependentName(formula)
-    dependent.variable <- data[[dependent.name]]
-
-
-    data[,1] <- DichotomizeFactor(data[,1], warning = TRUE, variable.name = names(data)[1])
-	if (is.null(data$QCalibratedWeight))
-        result <- glm(formula, data = data, subset = data$QFilter, family = binomial)
-    else {
-	    result <- svyglm(formula, weightedSurveyDesign(data), subset = data$QFilter, family = binomial)
-    }
-result}
-
-
-
 
 
 
