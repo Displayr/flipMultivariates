@@ -13,7 +13,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     dependent.variable <- data[[dependent.name]]
     if(is.factor(dependent.variable)) {
         WarningFactorToNumeric()
-        data[[dependent.name]] <- unclass(dependentVariable)
+        data[[dependent.name]] <- unclass(dependent.variable)
     }
     if (is.null(weights))
     {
@@ -74,7 +74,8 @@ fitted.Regression <- function(Regression.object)
 #     Regression.object$resid
 # }
 
-BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...) {
+BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
+{
     dependent.name <- dependentName(formula)
     dependent.variable <- data[[dependent.name]]
     n.unique <- length(unique(dependent.variable))
@@ -111,8 +112,9 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...) {
             data$sb = subset
 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = binomial)
          }
+    }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    result$resid <- dependent.variable - result$predicted
+    #result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
 
