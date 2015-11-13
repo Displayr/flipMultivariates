@@ -32,12 +32,13 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     }
     else
     {
+       design <- weightedSurveyDesign(data, weights)
        if(is.null(subset) | length(subset) == 1)
-    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
+    	    result <- survey::svyglm(formula, design, ...)
          else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, ...)
+	        result <- survey::svyglm(formula, design, subset = sb, ...)
          }
 #        data$weights = weights
 #         if(is.null(subset) | length(subset) == 1)-
@@ -45,8 +46,12 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
 #         elseLinea
 #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    result$resid <- dependent.variable - result$predicted
+    # Changes to prevent errors when inputs are categorical, and some categories get dropped
+    # due to the overall pattern of missing data in the data.
+#    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    result$predicted <- predict(result, na.action = na.exclude)
+#    result$resid <- dependent.variable - result$predicted
+    result$resid <- residuals(result)
     class(result) = append("Regression", class(result))
 result}
 
