@@ -24,7 +24,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
         else
         {
             data$sb = subset
-            result <- lm(formula,  data = data, subset = sb, ...)
+            result <- lm(formula,  data = data, subset = data$sb, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
         #zelig.result$zelig.out$z.out <- NULL
@@ -32,13 +32,16 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     }
     else
     {
-       design <- weightedSurveyDesign(data, weights)
-       if(is.null(subset) | length(subset) == 1)
+
+       if(is.null(subset) | length(subset) == 1) {
+           design <- weightedSurveyDesign(data, weights)
+
     	    result <- survey::svyglm(formula, design, ...)
-         else
+        } else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, design, subset = sb, ...)
+            design <- weightedSurveyDesign(data, weights)
+	        result <- survey::svyglm(formula, design, subset = data$sb, ...)
          }
 #        data$weights = weights
 #         if(is.null(subset) | length(subset) == 1)-
@@ -95,7 +98,7 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
         else
         {
             data$sb = subset
-            result <-glm(formula,  data = data , family = binomial, subset = sb, ...)
+            result <-glm(formula,  data = data , family = binomial, subset = data$sb, ...)
         }
     }
     else
@@ -105,7 +108,7 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
          else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = binomial, ...)
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = data$sb, family = binomial, ...)
          }
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
@@ -153,7 +156,7 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
         else
         {
             data$sb = subset
-            result <- glm(formula, data = data, subset = sb, family = poisson, ...)
+            result <- glm(formula, data = data, subset = data$sb, family = poisson, ...)
         }
 	}
     else
@@ -163,7 +166,7 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
          else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = poisson(), ...)
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = data$sb, family = poisson(), ...)
          }
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
@@ -211,7 +214,7 @@ QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, 
         else
         {
             data$sb = subset
-            result <- glm(formula, data = data, subset = sb, family = quasipoisson, ...)
+            result <- glm(formula, data = data, subset = data$sb, family = quasipoisson, ...)
         }
 	}
     else
@@ -221,7 +224,7 @@ QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, 
          else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = quasipoisson(), ...)
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = data$sb, family = quasipoisson(), ...)
          }
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
@@ -245,7 +248,7 @@ OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
         else
         {
             data$sb = subset
-            result <- MASS::polr(formula, data, subset = sb, Hess = TRUE, ...)
+            result <- MASS::polr(formula, data, subset = data$sb, Hess = TRUE, ...)
         }
 	}
     else
@@ -255,7 +258,7 @@ OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
          else
          {
             data$sb = subset
-            result <- MASS::polr(formula, data = data, subset = sb, weights = weights, Hess = TRUE,  ...)
+            result <- MASS::polr(formula, data = data, subset = data$sb, weights = weights, Hess = TRUE,  ...)
          }
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)

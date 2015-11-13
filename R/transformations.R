@@ -24,7 +24,7 @@ DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.
 #' @export
 CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
 {
-    CreatingBinaryVariableIfNecessary(data, dependentName(data, variable.name))
+    CreatingBinaryVariableIfNecessary(data, dependentName(data))
 }
 
 #' @export
