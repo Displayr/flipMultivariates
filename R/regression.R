@@ -23,8 +23,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
         }
         else
         {
-            data$sb = subset
-            result <- lm(formula,  data = data, subset = sb, ...)
+            result <- lm(formula,  data = data, subset = subset, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
         #zelig.result$zelig.out$z.out <- NULL
