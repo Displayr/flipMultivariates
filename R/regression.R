@@ -104,7 +104,7 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = binomial, ...)
          }
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     #result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
@@ -162,8 +162,8 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = poisson(), ...)
          }
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+#     result$resid <- dependentVariable(formula, data) - result$predicted
     class(result) = append("Regression", class(result))
 result}
 
@@ -220,8 +220,8 @@ QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, 
 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = quasipoisson(), ...)
          }
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+#     result$resid <- dependentVariable(formula, data) - result$predicted
     class(result) = append("Regression", class(result))
 result}
 
@@ -254,7 +254,7 @@ OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
             result <- MASS::polr(formula, data = data, subset = sb, weights = weights, Hess = TRUE,  ...)
          }
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     #result$resid <- dependentVariable(formula, data) - result$predicted
     class(result) = append("Regression", class(result))
 result}
