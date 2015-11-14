@@ -13,7 +13,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     dependent.variable <- data[[dependent.name]]
     if(is.factor(dependent.variable)) {
         WarningFactorToNumeric()
-        data[[dependent.name]] <- unclass(dependent.variable)
+        data[[dependent.name]] <- dependent.variable <- unclass(dependent.variable)
     }
     if (is.null(weights))
     {
