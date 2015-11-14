@@ -37,7 +37,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
          else
          {
             data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, ...)
+	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = subset, ...)
          }
 #        data$weights = weights
 #         if(is.null(subset) | length(subset) == 1)-
