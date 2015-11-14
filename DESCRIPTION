@@ -6,5 +6,4 @@ Description: What the package does (one paragraph)
 Depends: R (>= 3.1.1)
 License: What license is it under?
 LazyData: true
-Suggests:
-imports: testthat, Zelig, sankeytreeR, MASS, hash, colorspace, survey, rpart, tree, stats
+Imports: testthat, Zelig, sankeytreeR, MASS, hash, colorspace, survey, rpart, tree, stats

@@ -24,7 +24,7 @@ DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.
 #' @export
 CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
 {
-    CreatingBinaryVariableIfNecessary(data, dependentName(data, variable.name))
+    CreatingBinaryVariableIfNecessary(data, dependentName(data))
 }
 
 #' @export
@@ -40,7 +40,7 @@ CreatingBinaryVariableIfNecessary <- function(data, variable.name)
             if(!is.factor(variable))
                 variable <- factor(variable)
             if (nlevels(variable) > 2)
-                variable <- DichotomizeFactor(variable, warning = TRUE, variable.name = dependent.name)
+                variable <- DichotomizeFactor(variable, warning = TRUE, variable.name = variable.name)
             data[[variable.name]] <- variable
         }
     }
