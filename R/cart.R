@@ -21,15 +21,21 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
             result <- tree::tree(formula, data = data, model = TRUE, ...)
         }
         else
-            result <- tree::tree(formula, data = data, subset = subset, model = TRUE, ...)
+        {
+            data$sb = subset
+            result <- tree::tree(formula, data = data, subset = sb, model = TRUE, ...)
+        }
     }
     else
     {
         if(is.null(subset) | length(subset) == 1)
             result <- tree::tree(formula, data = data, weights = weights, model = TRUE, ...)
         else
-            result <- tree::tree(formula, data = data, subset = subset,
+        {
+            data$sb = subset
+            result <- tree::tree(formula, data = data, subset = sb,
                            weights = weights, model = TRUE, ...)
+        }
     }
     result$predicted <- predict(result, newdata = data, type = "tree", na.action = na.exclude)
     class(result) <- append("CART", class(result))
