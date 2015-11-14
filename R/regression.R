@@ -23,7 +23,8 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
         }
         else
         {
-            result <- lm(formula,  data = data, subset = subset, ...)
+            data$sb = subset
+            result <- lm(formula,  data = data, subset = sb, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
         #zelig.result$zelig.out$z.out <- NULL
@@ -35,8 +36,9 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
          else
          {
+            data$sb = subset
 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
-	                                 subset = subset, ...)
+	                                 subset = sb, ...)
          }
 #        data$weights = weights
 #         if(is.null(subset) | length(subset) == 1)-
