@@ -32,6 +32,7 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
             result <- tree::tree(formula, data = data, weights = weights, model = TRUE, ...)
         else
         {
+            print("dog")
             data$sb = subset
             result <- tree::tree(formula, data = data, subset = sb,
                            weights = weights, model = TRUE, ...)
@@ -271,4 +272,19 @@ print.CART <- function(CART.object)
 }
 
 
+# set.seed(132)
+# data(cpus, package="MASS")
+# cpuss <- cpus
+# cpuss$weights = runif(nrow(cpus))
+# cpuss$subset = runif(nrow(cpus)) > 0.5
+# library(devtools)
+# install_github("xtmwang/sankeytree")
+# library(sankeytreeR)
+# z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
+# z
+# cpuss$weights
 
+
+z <- tree::tree(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
+plot(z)
+text(z)
