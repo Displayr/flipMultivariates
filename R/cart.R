@@ -267,24 +267,27 @@ print.CART <- function(CART.object)
 {
     tree.list <- treeFrameToList(CART.object)
     plt = sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
-                         nodeHeight = 100, tooltip = c("n", "Description"))
+                         nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
     print(plt)
 }
 
-
-# set.seed(132)
-# data(cpus, package="MASS")
-# cpuss <- cpus
-# cpuss$weights = runif(nrow(cpus))
-# cpuss$subset = runif(nrow(cpus)) > 0.5
-# library(devtools)
-# install_github("xtmwang/sankeytree")
-# library(sankeytreeR)
-# z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
-# z
-# cpuss$weights
-
-
-z <- tree::tree(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
-plot(z)
-text(z)
+#
+#  set.seed(132)
+#  data(cpus, package="MASS")
+#  cpuss <- cpus
+#  cpuss$weights = runif(nrow(cpus))
+#  cpuss$subset = runif(nrow(cpus)) > 0.5
+#  library(devtools)
+# # install_github("NumbersInternational/sankeytree")
+#  install_github("xtmwang/sankeytree")
+# # install_github("NumbersInternational/flipMultivariates")
+#  library(sankeytreeR)
+#  #ibrary(flipMultivariates)
+#  z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
+#  z
+# # # cpuss$weights
+# #
+#
+# #z <- tree::tree(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
+#plot(z)
+#text(z)
