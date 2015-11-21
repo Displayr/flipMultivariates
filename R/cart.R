@@ -152,15 +152,15 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     { # Regression tree.
         if (numeric.distribution)
         {
-            node.mean <- paste0("<br>Mean(", outcome.name, ")", " = ", asMean(frame$yval, digits = 1, format = "f")) # Mean
-            node.sse <- paste0("SumSE(", outcome.name, ")", " = ", asMean(frame$dev, digits = 1, format = "f")) # Sum of Square Error
-            node.rmse <- paste0("RMSE(", outcome.name, ")", " = ", asMean(sqrt(frame$dev/frame$n), digits = 1, format = "f")) # Root Mean Square Error
+            node.mean <- paste0("<br>Mean(", outcome.name, ")", " = ", FormatAsReal(frame$yval, digits = 1, format = "f")) # Mean
+            node.sse <- paste0("SumSE(", outcome.name, ")", " = ", FormatAsReal(frame$dev, digits = 1, format = "f")) # Sum of Square Error
+            node.rmse <- paste0("RMSE(", outcome.name, ")", " = ", FormatAsReal(sqrt(frame$dev/frame$n), digits = 1, format = "f")) # Root Mean Square Error
             x <- matrix(cbind(node.mean,node.rmse, node.sse), ncol = 3)
             node.descriptions <- apply(x, 1, function(x) paste0(x,collapse = "<br>"))
         }
         else
         {
-            node.mean = paste0("Mean(", outcome.name, ")", " = ", asMean(frame$yval, digits = 1, format = "f"), ":") # Mean
+            node.mean = paste0("Mean(", outcome.name, ")", " = ", FormatAsReal(frame$yval, digits = 1, format = "f"), ":") # Mean
             node.descriptions <- node.mean
         }
         ymin <- min(frame$yval)
@@ -198,7 +198,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             }
             node.color[i] <- hcl.color[div.idx]
         }
-        terminal.description <- paste0("; Mean = ",asMean(frame$yval)) # Change 2
+        terminal.description <- paste0("; Mean = ",FormatAsReal(frame$yval)) # Change 2
     }
 
     root.name <- outcome.name
@@ -248,7 +248,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         i.parent <- match(parent.node, nodes)
         i <- match(node, nodes)
         result <- list(name = .constructNodeName(node, i, i.parent, frame, tree.hash),
-                      n = frame$n[i], Percentage = asPercent(frame$n[i]/frame$n[1], digits = 1),
+                      n = frame$n[i], Percentage = FormatAsPercent(frame$n[i]/frame$n[1], digits = 1),
                       id = node, Description = node.descriptions[i], color = node.color[i])
         if((node * 2) %in% nodes) { # Adding child nodes, if they exist.
             result$children = vector("list", 2)
@@ -266,7 +266,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 print.CART <- function(CART.object)
 {
     tree.list <- treeFrameToList(CART.object)
-    plt = sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
+    plt <- sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
                          nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
     print(plt)
 }

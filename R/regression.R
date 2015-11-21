@@ -46,8 +46,8 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
 #         elseLinea
 #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
-    #result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    #result$resid <- dependent.variable - result$predicted
+    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    result$resid <- dependent.variable - result$predicted
     class(result) = append("Regression", class(result))
 result}
 
