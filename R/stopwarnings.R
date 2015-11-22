@@ -12,6 +12,9 @@ stopIfNotCount = function(formula, data)
             to zero. However", dependent.name, "contains negative values."))
 }
 
+
+warningPredictorVariableDoesNotExist <- function() {"The specified predictor variable does not exist."}
+
 warningNotCountAsNegatives <- function() {warning("This analysis assumes that your Outcome variable is a count variable
                                                   (e.g., number of products purchased per week. Your data is not ")}
 

@@ -19,12 +19,12 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     {
         if(is.null(subset) | length(subset) == 1)
         {
-            result <- lm(formula,  data = data, ...)
+            result <- lm(formula,  data, ...)
         }
         else
         {
             data$sb = subset
-            result <- lm(formula,  data = data, subset = sb, ...)
+            result <- lm(formula,  data, subset = sb, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
         #zelig.result$zelig.out$z.out <- NULL
@@ -86,12 +86,12 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
     {
         if(is.null(subset) | length(subset) == 1)
         {
-            result <- glm(formula,  data = data , family = binomial, ...)
+            result <- glm(formula,  data , family = binomial, ...)
         }
         else
         {
             data$sb = subset
-            result <-glm(formula,  data = data , family = binomial, subset = sb, ...)
+            result <-glm(formula,  data , family = binomial, subset = sb, ...)
         }
     }
     else
@@ -145,11 +145,11 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 	if (is.null(weights))
 	{
         if(is.null(subset) | length(subset) == 1)
-            result <- glm(formula, data = data, family = poisson)
+            result <- glm(formula, data, family = poisson)
         else
         {
             data$sb = subset
-            result <- glm(formula, data = data, subset = sb, family = poisson, ...)
+            result <- glm(formula, data, subset = sb, family = poisson, ...)
         }
 	}
     else
@@ -203,11 +203,11 @@ QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, 
 	if (is.null(weights))
 	{
         if(is.null(subset) | length(subset) == 1)
-            result <- glm(formula, data = data, family = quasipoisson)
+            result <- glm(formula, data, family = quasipoisson)
         else
         {
             data$sb = subset
-            result <- glm(formula, data = data, subset = sb, family = quasipoisson, ...)
+            result <- glm(formula, data, subset = sb, family = quasipoisson, ...)
         }
 	}
     else
@@ -247,11 +247,11 @@ OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
     else
     {
        if(is.null(subset) | length(subset) == 1)
-            result <- MASS::polr(formula, data = data, weights = weights, Hess = TRUE,  ...)
+            result <- MASS::polr(formula, data, weights = weights, Hess = TRUE,  ...)
          else
          {
             data$sb = subset
-            result <- MASS::polr(formula, data = data, subset = sb, weights = weights, Hess = TRUE,  ...)
+            result <- MASS::polr(formula, data, subset = sb, weights = weights, Hess = TRUE,  ...)
          }
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)

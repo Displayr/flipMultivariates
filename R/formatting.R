@@ -5,11 +5,12 @@
 #' @param digits Number of significant digits
 #' @param format See \code{\link{formatC}}.
 #' @param suffix The text to appear after a percent. Defaults to %.
-#' @param ... Additional arguments that are passed to  \code{\link{formatC}}.
+#' @param ... Additional arguments that are passed to \code{\link{formatC}}.
 
 #' @export
 
-FormatAsPercent <- function(x, digits = 2, format = "fg", suffix = "%",  ...) {
+FormatAsPercent <- function(x, digits = 2, format = "fg", suffix = "%",  ...)
+{
     paste0(formatC(100 * x, format = format, digits = digits, ...), suffix)
 }
 
@@ -17,11 +18,12 @@ FormatAsPercent <- function(x, digits = 2, format = "fg", suffix = "%",  ...) {
 #' @param x The number(s)
 #' @param digits Number of significant digits
 #' @param format See \code{\link{formatC}}.
-#' @param ... Additional arguments that are passed to  \code{\link{formatC}}.
+#' @param ... Additional arguments that are passed to \code{\link{formatC}}.
 
 #' @export
 
-FormatAsReal <- function(x, digits = 2, format = "fg", ...) {
+FormatAsReal <- function(x, digits = 2, format = "fg", ...)
+    {
     formatC(x, digits = digits, format = format ,...)
 }
 
@@ -32,10 +34,17 @@ FormatAsReal <- function(x, digits = 2, format = "fg", ...) {
 #' @export
 setGeneric("Equation",  function(object)
 {
-    variable.names <- names(object$model)
-    predictor.names <- c("", nms[-1])
-    equation <- paste0(variable.names[1], " = ",
-                       paste0(coefs(object), variable.names, sep = " + "))
+    coefs <- coef(object)
+    parameter.names <- names(coefs)
+    parameter.names[1] <- "" #Intercept.
+    signs <- sign(coefs)
+    operator <- rep(" + ", length(signs))
+    if (sum(signs == -1) > 0)
+        operator[signs == -1] <- " - "
+    operator[1] <- ifelse(signs[1] == 1, "", " -")
+    coefs <- FormatAsReal(abs(coefs))
+    equation <- paste0(parameter.names[1], " = ",
+                       paste0(operator, coefs, parameter.names, collapse = ""))
     strwrap(equation)
 })
 

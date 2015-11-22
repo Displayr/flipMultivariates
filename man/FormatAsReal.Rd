@@ -13,7 +13,7 @@ FormatAsReal(x, digits = 2, format = "fg", ...)
 
 \item{format}{See \code{\link{formatC}}.}
 
-\item{...}{Additional arguments that are passed to  \code{\link{formatC}}.}
+\item{...}{Additional arguments that are passed to \code{\link{formatC}}.}
 }
 \description{
 \code{FormatAsReal} Formats real numbers nicely, as if they are to presented as a an average.
