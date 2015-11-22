@@ -36,6 +36,7 @@ setGeneric("Equation",  function(object)
 {
     coefs <- coef(object)
     parameter.names <- names(coefs)
+    dependent.name <- parameter.names[1]
     parameter.names[1] <- "" #Intercept.
     signs <- sign(coefs)
     operator <- rep(" + ", length(signs))
@@ -43,7 +44,7 @@ setGeneric("Equation",  function(object)
         operator[signs == -1] <- " - "
     operator[1] <- ifelse(signs[1] == 1, "", " -")
     coefs <- FormatAsReal(abs(coefs))
-    equation <- paste0(parameter.names[1], " = ",
+    equation <- paste0(dependent.name, " = ",
                        paste0(operator, coefs, parameter.names, collapse = ""))
     strwrap(equation)
 })

@@ -276,3 +276,13 @@ result}
 # })
 #
 
+a1 <- rnorm(1000)
+b1 <- c1 <- d1 <- rep(NA,1000)
+y1 <- a1
+a2 <- rnorm(1000)
+b2 <- rnorm(1000)
+c2 <- rnorm(1000)
+d2 <- rnorm(1000)
+y2 <- (a2 + b2 + c2 + d2)/4
+dat <- data.frame(y = c(y1, y2), a = c(a1, a2), b = c(b1, b2), c = c(c1, c2), d = c(d1, d2))
+mat.regress(1, 2:5, data = dat)

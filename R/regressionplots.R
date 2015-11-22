@@ -1,4 +1,4 @@
-#' \code{PredictionPlot}
+#' #' \code{PredictionPlot}
 #' \description Plots the observed, predict and an independent variable from a
 #'  regression model.
 #' @param Regression.object The model.
@@ -40,9 +40,11 @@ setGeneric("PredictionPlot", function(Regression.object, predictor.number = NULL
         n.parameters[!factors] <- 1
         n.parameters[factors] <- n.parameters[factors] - 1
         cum.parameters <- cumsum(n.parameters)
-        par.indices <- c(1, cum.parameters[predictor.number]:cum.parameters[predictor.number])
+        par.indices <- c(1, (cum.parameters[predictor.number] + 1):cum.parameters[predictor.number + 1])
         pars <- coefs[par.indices]
-        for (i in 1:(n.parameters[factors] + 1))
+        pars[-1] <- pars[-1] + pars[1]
+        n.pars <- n.parameters[variable.number] + 1
+        for (i in 1:n.pars)
             segments(i - 0.5, pars[i], i + 0.5, pars[i], col = "red", lwd = "2", lty = 2)
     }
     else
