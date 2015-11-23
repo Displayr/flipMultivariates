@@ -67,6 +67,13 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     # "c" -> "MuWo"
     .getNodeHash <- function(tree.attri)
     {
+        .appendNum <- function(text, text.hash, c) {
+            text1 <- paste0(text,c)
+            if (hash::has.key(text1, text.hash)) {
+                text1 <- .appendNum(text, text.hash, c+1)
+            }
+            return(text1)
+        }
         xlevels <- tree.attri$xlevels
         xlevels.fac <- xlevels[!sapply(xlevels, is.null)] # strip null
         if (length(xlevels.fac) == 0)
@@ -77,6 +84,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         xlevels.fac <- lapply(xlevels.fac, function(obj) gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", obj, perl=TRUE))
         # get the first two or three letters of the words
         for (i in 1:length(xlevels.fac)) {
+            text.hash = hash::hash()
             node.texts <- rep("",length(xlevels.fac[[i]]))
             for (j in 1:length(xlevels.fac[[i]])) {
                 text <- xlevels.fac[[i]][j]
@@ -93,8 +101,14 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
                     }
                 }
                 node.text <- paste(node.text, collapse = "")
+                if (!hash::has.key(node.text, text.hash)) {
+                    hash::.set(text.hash, keys=node.text, values=TRUE)
+                } else {
+                    node.text <- .appendNum(node.text, text.hash, 1)
+                }
                 node.texts[j] <- node.text
             }
+            hash::clear(text.hash)
             xlevels.fac[[i]] <- node.texts
         }
         # make hash tables to search for names
