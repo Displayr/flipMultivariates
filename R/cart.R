@@ -47,10 +47,12 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
 #' @param max.tooltip.length The maximum length of the tooltip (determines the scale of the tree).
 #' @param show.whole.factor Controls whether or not all the factor levels are displayed in the tooltip.
 #' @param numeric.distribution Outputs additional diagnostics in the tooltip.
-#' @param num.color.div ??.
-#' @param const.bin.size ??.
-treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE,
-                               numeric.distribution = FALSE, num.color.div = 5, const.bin.size = TRUE)
+#' @param custom.color logical; if \code{true}, generates custom tree color, else use colors provided by sankeyTree package.
+#' @param num.color.div positive integer in the range [2,inf]. Controls the color resolution of the tree. A higher value gives a smoother color transition.
+#' @param const.bin.size logical; if \code{true}, each color spans an equal step of y-value or an equal number of points.
+
+treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE, numeric.distribution = FALSE,
+                            custom.color = TRUE, num.color.div = 101, const.bin.size = TRUE)
 {
     # Creating the names of a node from the frame.
     frame <- tree$frame
@@ -113,7 +115,9 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     outcome.variable = tree$model[,1]
     outcome.is.factor = is.factor(outcome.variable)
     outcome.name = names(tree$model)[[1]]
-    if (outcome.is.factor) { # Classification tree.
+
+    if (outcome.is.factor)
+    { # Classification tree.
         yprob = frame$yprob
         nms = colnames(yprob)
         if (show.whole.factor)
@@ -132,19 +136,32 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             }
         }
         node.descriptions <- paste0("<br>",node.descriptions)
+
+        if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
         hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
         divisions <- seq(0, 1, 1/num.color.div)
         node.color <- rep("0", nrow(frame))
-        node.color[1] <- "#ccc"
-        for (i in 2:nrow(frame))
+
+        if (custom.color)
         {
-            y <- max(yprob[i,])
-            div.idx = max(which(y >= divisions))
-            if (div.idx == length(divisions))
+            node.color[1] <- "#ccc"
+            for (i in 2:nrow(frame))
             {
-                div.idx <- div.idx - 1
+                y <- max(yprob[i,])
+                div.idx = max(which(y >= divisions))
+                if (div.idx == length(divisions))
+                {
+                    div.idx <- div.idx - 1
+                }
+                node.color[i] <- hcl.color[div.idx]
             }
-            node.color[i] <- hcl.color[div.idx]
+        }
+        else
+        {
+            for (i in 1:nrow(frame))
+            {
+                node.color[i] <- ""
+            }
         }
         terminal.description <- paste(" Highest =",frame$yval) # Change 1
     }
@@ -165,7 +182,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         }
         ymin <- min(frame$yval)
         ymax <- max(frame$yval)
-        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90))) # 1 - blue, n - red
+
         eps <- 0.001 # error margin
         # if y is too small, scale it first!
         if (ymin < -eps && ymax > eps) {
@@ -186,18 +203,32 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             }
         }
 
+        if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
+        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
         node.color <- rep("0", nrow(frame))
-        node.color[1] <- "#ccc"
-        for (i in 2:nrow(frame))
+
+        if (custom.color)
         {
-            y <- frame$yval[i]
-            div.idx <- max(which(y >= divisions))
-            if (div.idx == length(divisions))
+            node.color[1] <- "#ccc"
+            for (i in 2:nrow(frame))
             {
-                div.idx <- div.idx - 1
+                y <- frame$yval[i]
+                div.idx <- max(which(y >= divisions))
+                if (div.idx == length(divisions))
+                {
+                    div.idx <- div.idx - 1
+                }
+                node.color[i] <- hcl.color[div.idx]
             }
-            node.color[i] <- hcl.color[div.idx]
         }
+        else
+        {
+            for (i in 1:nrow(frame))
+            {
+                node.color[i] <- ""
+            }
+        }
+
         terminal.description <- paste0("; Mean = ",FormatAsReal(frame$yval)) # Change 2
     }
 
@@ -265,8 +296,8 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 #' @export
 print.CART <- function(CART.object)
 {
-    tree.list <- treeFrameToList(CART.object)
-    plt <- sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
+    tree.list <- treeFrameToList(CART.object, custom.color = TRUE)
+    plt <- sankeytreeR::sankeytree(tree.list, value = "n",
                          nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
     print(plt)
 }
