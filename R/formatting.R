@@ -1,10 +1,10 @@
-#' \code{FormatAsPercent}
-#' \Description  Converts a proportion to a percent and
+#' Converts a proportion to a percent and
 #' formats it nicely and with a percentage sign.
+#'
 #' @param x The number(s)
 #' @param digits Number of significant digits
 #' @param format See \code{\link{formatC}}.
-#' @param suffix The text to appear after a percent. Defaults to %.
+#' @param suffix The text to appear after a percent. Defaults to \%.
 #' @param ... Additional arguments that are passed to \code{\link{formatC}}.
 
 #' @export
@@ -14,7 +14,8 @@ FormatAsPercent <- function(x, digits = 2, format = "fg", suffix = "%",  ...)
     paste0(formatC(100 * x, format = format, digits = digits, ...), suffix)
 }
 
-#' \code{FormatAsReal} Formats real numbers nicely, as if they are to presented as a an average.
+#' Formats real numbers nicely, as if they are to be presented as an average.
+#'
 #' @param x The number(s)
 #' @param digits Number of significant digits
 #' @param format See \code{\link{formatC}}.
@@ -23,16 +24,17 @@ FormatAsPercent <- function(x, digits = 2, format = "fg", suffix = "%",  ...)
 #' @export
 
 FormatAsReal <- function(x, digits = 2, format = "fg", ...)
-    {
+{
     formatC(x, digits = digits, format = format ,...)
 }
 
 
-#' \code{Equation} Formats a model as an equation (string), for
+#' Formats a model as an equation (string), for
 #' description purposes.
+#'
 #' @param object The model.
 #' @export
-setGeneric("Equation",  function(object)
+setGeneric("Equation", function(object)
 {
     coefs <- coef(object)
     parameter.names <- names(coefs)
@@ -48,5 +50,3 @@ setGeneric("Equation",  function(object)
                        paste0(operator, coefs, parameter.names, collapse = ""))
     strwrap(equation)
 })
-
-

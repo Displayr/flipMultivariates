@@ -3,7 +3,19 @@ Title: What the package does (one line)
 Version: 0.1
 Authors@R: "First Last <first.last@example.com> [aut, cre]"
 Description: What the package does (one paragraph)
-Depends: R (>= 3.1.1)
+Depends:
+    R (>= 3.1.1)
 License: What license is it under?
 LazyData: true
-Imports: testthat, sankeytreeR, MASS, hash, colorspace, survey, rpart, tree, stats, graphics
+Imports:
+    testthat,
+    sankeytreeR,
+    MASS,
+    hash,
+    colorspace,
+    survey,
+    rpart,
+    tree,
+    stats,
+    graphics
+RoxygenNote: 5.0.1

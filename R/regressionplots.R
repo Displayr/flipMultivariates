@@ -1,6 +1,6 @@
-#' #' \code{PredictionPlot}
-#' \description Plots the observed, predict and an independent variable from a
-#'  regression model.
+#' Plots the observed, predict and an independent variable from a
+#' regression model.
+#'
 #' @param Regression.object The model.
 #' @param predictor.number The index of the predictor to be used in the plot,
 #' where 1 means the first predictor.
