@@ -2,14 +2,14 @@
 #' @param formula A formula expression. The left-hand-side (response) should
 #' be either a numerical vector when a regression tree will be fitted or
 #' a factor, when a classification tree is produced. The right-hand-side should
-#' be a series of numeric or factor variables separated by +; there should be
-#' no interaction terms. Both . and - are allowed: regression trees can have
+#' be a series of numeric or factor variables separated by \code{+}; there should be
+#' no interaction terms. Both \code{.} and \code{-} are allowed: regression trees can have
 #' offset terms
 #' @param data A data frame in which to preferentially interpret formula, weights and subset
-#' @param ... Additional arguments that are passed to  \code{\link{tree::tree}}
-#' and \code{\link{tree::tree.control}}. Normally used for mincut, minsize or mindev
+#' @param ... Additional arguments that are passed to  \code{\link{tree}}
+#' and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev
 #'
-#' @details Creates a \code{\link{tree::tree}} and plots it as a \code{\link{sankeytree}}
+#' @details Creates a \code{\link{tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
 CART <- function(formula, data, weights = NULL, subset = NULL, ...)
