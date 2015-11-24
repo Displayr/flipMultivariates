@@ -47,10 +47,13 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
 #' @param max.tooltip.length The maximum length of the tooltip (determines the scale of the tree).
 #' @param show.whole.factor Controls whether or not all the factor levels are displayed in the tooltip.
 #' @param numeric.distribution Outputs additional diagnostics in the tooltip.
-#' @param num.color.div ??.
-#' @param const.bin.size ??.
-treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE,
-                               numeric.distribution = FALSE, num.color.div = 5, const.bin.size = TRUE)
+#' @param custom.color logical; if \code{true}, generates custom tree color, else use colors provided by sankeyTree package.
+#' @param num.color.div positive integer in the range [2,inf]. Controls the color resolution of the tree. A higher value gives a smoother color transition.
+#' @param const.bin.size logical; if \code{true}, each color spans an equal step of y-value or an equal number of points.
+#' @param draw.legend logical; if \code{true}, output the colors as a sorted RBG value list to draw legend
+
+treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE, numeric.distribution = FALSE,
+                            custom.color = TRUE, num.color.div = 101, const.bin.size = TRUE, draw.legend = TRUE)
 {
     # Creating the names of a node from the frame.
     frame <- tree$frame
@@ -65,6 +68,13 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     # "c" -> "MuWo"
     .getNodeHash <- function(tree.attri)
     {
+        .appendNum <- function(text, text.hash, c) {
+            text1 <- paste0(text,c)
+            if (hash::has.key(text1, text.hash)) {
+                text1 <- .appendNum(text, text.hash, c+1)
+            }
+            return(text1)
+        }
         xlevels <- tree.attri$xlevels
         xlevels.fac <- xlevels[!sapply(xlevels, is.null)] # strip null
         if (length(xlevels.fac) == 0)
@@ -75,6 +85,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         xlevels.fac <- lapply(xlevels.fac, function(obj) gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", obj, perl=TRUE))
         # get the first two or three letters of the words
         for (i in 1:length(xlevels.fac)) {
+            text.hash = hash::hash()
             node.texts <- rep("",length(xlevels.fac[[i]]))
             for (j in 1:length(xlevels.fac[[i]])) {
                 text <- xlevels.fac[[i]][j]
@@ -91,8 +102,14 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
                     }
                 }
                 node.text <- paste(node.text, collapse = "")
+                if (!hash::has.key(node.text, text.hash)) {
+                    hash::.set(text.hash, keys=node.text, values=TRUE)
+                } else {
+                    node.text <- .appendNum(node.text, text.hash, 1)
+                }
                 node.texts[j] <- node.text
             }
+            hash::clear(text.hash)
             xlevels.fac[[i]] <- node.texts
         }
         # make hash tables to search for names
@@ -113,7 +130,9 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     outcome.variable = tree$model[,1]
     outcome.is.factor = is.factor(outcome.variable)
     outcome.name = names(tree$model)[[1]]
-    if (outcome.is.factor) { # Classification tree.
+
+    if (outcome.is.factor)
+    { # Classification tree.
         yprob = frame$yprob
         nms = colnames(yprob)
         if (show.whole.factor)
@@ -132,19 +151,32 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             }
         }
         node.descriptions <- paste0("<br>",node.descriptions)
-        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
-        divisions <- seq(0, 1, 1/num.color.div)
+
         node.color <- rep("0", nrow(frame))
-        node.color[1] <- "#ccc"
-        for (i in 2:nrow(frame))
+        if (custom.color)
         {
-            y <- max(yprob[i,])
-            div.idx = max(which(y >= divisions))
-            if (div.idx == length(divisions))
+            if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
+            if (num.color.div %% 2 == 0) num.color.div = num.color.div + 1
+            hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
+            divisions <- seq(0, 1, 1/num.color.div)
+            node.color[1] <- "#ccc"
+            for (i in 2:nrow(frame))
             {
-                div.idx <- div.idx - 1
+                y <- max(yprob[i,])
+                div.idx = max(which(y >= divisions))
+                if (div.idx == length(divisions))
+                {
+                    div.idx <- div.idx - 1
+                }
+                node.color[i] <- hcl.color[div.idx]
             }
-            node.color[i] <- hcl.color[div.idx]
+        }
+        else
+        {
+            for (i in 1:nrow(frame))
+            {
+                node.color[i] <- ""
+            }
         }
         terminal.description <- paste(" Highest =",frame$yval) # Change 1
     }
@@ -165,7 +197,7 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         }
         ymin <- min(frame$yval)
         ymax <- max(frame$yval)
-        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90))) # 1 - blue, n - red
+
         eps <- 0.001 # error margin
         # if y is too small, scale it first!
         if (ymin < -eps && ymax > eps) {
@@ -187,17 +219,31 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         }
 
         node.color <- rep("0", nrow(frame))
-        node.color[1] <- "#ccc"
-        for (i in 2:nrow(frame))
+        if (custom.color)
         {
-            y <- frame$yval[i]
-            div.idx <- max(which(y >= divisions))
-            if (div.idx == length(divisions))
+            if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
+            if (num.color.div %% 2 == 0) num.color.div = num.color.div + 1
+            hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
+            node.color[1] <- "#ccc"
+            for (i in 2:nrow(frame))
             {
-                div.idx <- div.idx - 1
+                y <- frame$yval[i]
+                div.idx <- max(which(y >= divisions))
+                if (div.idx == length(divisions))
+                {
+                    div.idx <- div.idx - 1
+                }
+                node.color[i] <- hcl.color[div.idx]
             }
-            node.color[i] <- hcl.color[div.idx]
         }
+        else
+        {
+            for (i in 1:nrow(frame))
+            {
+                node.color[i] <- ""
+            }
+        }
+
         terminal.description <- paste0("; Mean = ",FormatAsReal(frame$yval)) # Change 2
     }
 
@@ -259,15 +305,29 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     }
     # Creating the recrusive list.
     nodes <- as.numeric(dimnames(frame)[[1]])
-    .constructNodes(1, nodes, frame, tree.hash)
+    tree.list <- .constructNodes(1, nodes, frame, tree.hash)
+    if (custom.color && draw.legend)
+    {
+        if (outcome.is.factor) {
+            tree.list <- c(list(hcl.color), list(paste0(seq(0,100,10), "%")), tree.list)
+        } else {
+            if (const.bin.size){
+                tree.list <- c(list(hcl.color), list(FormatAsReal(seq(ymin, ymax,(ymax - ymin)/10),digits = 1, format = "f")), tree.list)
+            } else {
+                tree.list <- c(list(hcl.color), list(FormatAsReal(quantile(frame$yval, seq(0, 1, 1/10)),digits = 1, format = "f")), tree.list)
+            }
+        }
+        names(tree.list)[1:2] = c("legendColor","legendText")
+    }
+    tree.list
 }
 
 #' @export
 print.CART <- function(x, ...)
 {
-    tree.list <- treeFrameToList(x)
-    plt <- sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
-                         nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
+    tree.list <- treeFrameToList(x, custom.color = TRUE)
+    plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
+        tooltip = c("n", "Description"), treeColors = TRUE, legend = TRUE)
     print(plt)
 }
 
