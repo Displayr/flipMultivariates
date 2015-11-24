@@ -6,10 +6,10 @@
 #' no interaction terms. Both . and - are allowed: regression trees can have
 #' offset terms
 #' @param data A data frame in which to preferentially interpret formula, weights and subset
-#' @param ... Additional arguments that are passed to  \code{\link{tree:tree}}
-#' and \code{\link{tree:tree.control}}. Normally used for mincut, minsize or mindev
+#' @param ... Additional arguments that are passed to  \code{\link{tree::tree}}
+#' and \code{\link{tree::tree.control}}. Normally used for mincut, minsize or mindev
 #'
-#' @details Cretes a \code{\link{tree:tree}} and plots it as a \code{\link{sankeytree}}
+#' @details Creates a \code{\link{tree::tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
 CART <- function(formula, data, weights = NULL, subset = NULL, ...)
@@ -23,7 +23,7 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
         else
         {
             data$sb = subset
-            result <- tree::tree(formula, data = data, subset = sb, model = TRUE, ...)
+            result <- tree::tree(formula, data = data, subset = data$sb, model = TRUE, ...)
         }
     }
     else
@@ -34,7 +34,7 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
         {
             print("dog")
             data$sb = subset
-            result <- tree::tree(formula, data = data, subset = sb,
+            result <- tree::tree(formula, data = data, subset = data$sb,
                            weights = weights, model = TRUE, ...)
         }
     }
@@ -263,9 +263,9 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 }
 
 #' @export
-print.CART <- function(CART.object)
+print.CART <- function(x, ...)
 {
-    tree.list <- treeFrameToList(CART.object)
+    tree.list <- treeFrameToList(x)
     plt <- sankeytreeR::sankeytree(tree.list, value = "n", maxLabelLength = 10,
                          nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
     print(plt)

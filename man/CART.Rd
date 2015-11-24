@@ -16,13 +16,13 @@ offset terms}
 
 \item{data}{A data frame in which to preferentially interpret formula, weights and subset}
 
-\item{...}{Additional arguments that are passed to  \code{\link{tree:tree}}
-and \code{\link{tree:tree.control}}. Normally used for mincut, minsize or mindev}
+\item{...}{Additional arguments that are passed to  \code{\link{tree::tree}}
+and \code{\link{tree::tree.control}}. Normally used for mincut, minsize or mindev}
 }
 \description{
 \code{CART} Creats a classification or regression tree.
 }
 \details{
-Cretes a \code{\link{tree:tree}} and plots it as a \code{\link{sankeytree}}
+Creates a \code{\link{tree::tree}} and plots it as a \code{\link{sankeytree}}
 }
 

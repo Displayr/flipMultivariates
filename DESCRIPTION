@@ -1,21 +1,20 @@
 Package: flipMultivariates
-Title: What the package does (one line)
+Title: Multivariate models
 Version: 0.1
-Authors@R: "First Last <first.last@example.com> [aut, cre]"
-Description: What the package does (one paragraph)
+Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
+Description: Multivariate models and supporting code.
 Depends:
     R (>= 3.1.1)
 License: What license is it under?
 LazyData: true
 Imports:
-    testthat,
     sankeytreeR,
     MASS,
     hash,
     colorspace,
     survey,
     rpart,
-    tree,
-    stats,
-    graphics
+    tree
+Suggests:
+    testthat
 RoxygenNote: 5.0.1

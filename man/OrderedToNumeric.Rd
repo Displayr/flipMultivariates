@@ -2,16 +2,14 @@
 % Please edit documentation in R/transformations.R
 \name{OrderedToNumeric}
 \alias{OrderedToNumeric}
-\title{\code{OrderedToNumeric} Converts an ordered factor into a numeric variable}
+\title{Converts an ordered factor into a numeric variable}
 \usage{
 OrderedToNumeric(ordered.factor)
 }
 \arguments{
-\item{variable}{A variable in a DataSet or data.frame.}
-
-\item{variable.name}{The name of the variable.}
+\item{ordered.factor}{A variable in a \code{DataSet} or \code{data.frame}.}
 }
 \description{
-\code{OrderedToNumeric} Converts an ordered factor into a numeric variable
+Converts an ordered factor into a numeric variable
 }
 

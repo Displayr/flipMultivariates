@@ -2,16 +2,16 @@
 % Please edit documentation in R/transformations.R
 \name{ListToDataFrame}
 \alias{ListToDataFrame}
-\title{\code{ListToDataFrame} Converts a list of variable or data frames into a data.frame.}
+\title{Converts a list of variable or data frames into a data.frame.}
 \usage{
 ListToDataFrame(list.of.variables, coerce.to.numeric = FALSE)
 }
 \arguments{
-\item{list.of.variables}{A variable in a DataSet or data.frame.}
+\item{list.of.variables}{A variable in a \code{DataSet} or \code{data.frame}.}
 
 \item{coerce.to.numeric}{Makes factors and ordered factors numeric.}
 }
 \description{
-\code{ListToDataFrame} Converts a list of variable or data frames into a data.frame.
+Converts a list of variable or data frames into a data.frame.
 }
 

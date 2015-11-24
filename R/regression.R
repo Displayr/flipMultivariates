@@ -1,10 +1,10 @@
-#' \code{Linear Regression} Linear Regression.
+#' Linear Regression.
 #'
-#' reports the goodness-of-fit of an object.
+#' Reports the goodness-of-fit of an object.
 #' @param object An object for which a summary is desired..
 #' @param ... Additional arguments affecting the goodness-of-fit displayed.
 #' @details
-#' Uses \code{\link{Zelig:zelimethods}}
+#' Uses \code{\link{Zelig::zelimethods}}
 #' which depend on the \code{\link{class}} of the first argument.
 #'
 #' @export
@@ -23,7 +23,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
         }
         else
         {
-            data$sb = subset
+            data$sb <- subset
             result <- lm(formula,  data, subset = sb, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
@@ -32,14 +32,14 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     }
     else
     {
-       if(is.null(subset) | length(subset) == 1)
-    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
-         else
-         {
-            data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
-	                                 subset = sb, ...)
-         }
+        if(is.null(subset) | length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
+        else
+        {
+            data$sb <- subset
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                                     subset = data$sb, ...)
+        }
 #        data$weights = weights
 #         if(is.null(subset) | length(subset) == 1)-
 #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
@@ -48,216 +48,245 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     result$resid <- dependent.variable - result$predicted
-    class(result) = append("Regression", class(result))
-result}
+    class(result) <- append("Regression", class(result))
 
-#' @export
-print.Regression <- function(Regression.object)
-{
-    print(summary(Regression.object))
+    result
 }
 
 #' @export
-predict.Regression <- function(Regression.object)
+print.Regression <- function(x, ...)
 {
-    Regression.object$predicted
+    print(summary(x), ...)
 }
 
 #' @export
-fitted.Regression <- function(Regression.object)
+predict.Regression <- function(object, ...)
 {
-    Regression.object$predicted
- }
+    object$predicted
+}
+
+#' @export
+fitted.Regression <- function(object, ...)
+{
+    object$predicted
+}
 #
 # #' @export
-# resid.Regression <- function(Regression.object)
+# resid.Regression <- function(object, ...)
 # {
-#     Regression.object$resid
+#     object$resid
 # }
 
 
 
 
+#' Binary Logistic Regression
+#'
+#' @inheritParams LinearRegression
 #' @export
 BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
 {
     data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
     if (is.null(weights))
     {
-        if(is.null(subset) | length(subset) == 1)
+        if (is.null(subset) || length(subset) == 1)
         {
             result <- glm(formula,  data , family = binomial, ...)
         }
         else
         {
-            data$sb = subset
-            result <-glm(formula,  data , family = binomial, subset = sb, ...)
+            data$sb <- subset
+            result <- glm(formula,  data , family = binomial, subset = data$sb, ...)
         }
     }
     else
     {
-       if(is.null(subset) | length(subset) == 1)
-    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = binomial, ...)
-         else
-         {
-            data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = binomial, ...)
-         }
+        if (is.null(subset) || length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = binomial, ...)
+        else
+        {
+            data$sb <- subset
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                subset = data$sb, family = binomial, ...)
+        }
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    #result$resid <- dependent.variable - result$predicted
-    class(result) = append("Regression", class(result))
-result}
+    # result$resid <- dependent.variable - result$predicted
+    class(result) <- append("Regression", class(result))
+    result
+}
 
+# #' Quasi-Binomial Regression
+# #'
+# #' @inheritParams LinearRegression
 # #' @export
 # QuasiBinomialRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 # {
 #     stopIfNotCount(formula, data)
-# 	if (is.null(weights))
-# 	{
-#         if(is.null(subset) | length(subset) == 1)
+#     if (is.null(weights))
+#     {
+#         if (is.null(subset) || length(subset) == 1)
 #             result <- glm(formula, data = data, family = quasibinomial)
 #         else
 #         {
-#             data$sb = subset
-#             result <- glm(formula, data = data, subset = sb, family = quasipoisson, ...)
+#             data$sb <- subset
+#             result <- glm(formula, data = data, subset = data$sb, family = quasipoisson, ...)
 #         }
-# 	}
+#     }
 #     else
 #     {
-#        if(is.null(subset) | length(subset) == 1)
-#     	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = quasipoisson(), ...)
-#          else
-#          {
-#             data$sb = subset
-# 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = quasipoisson(), ...)
-#          }
+#         if (is.null(subset) || length(subset) == 1)
+#             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = quasipoisson(), ...)
+#         else
+#         {
+#             data$sb <- subset
+#             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+#                 subset = data$sb, family = quasipoisson(), ...)
+#         }
 #     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
-#     class(result) = append("Regression", class(result))
-# result}
+#     class(result) <- append("Regression", class(result))
+#     result
+# }
 
+#' Poisson Regression
+#'
+#' @inheritParams LinearRegression
 #' @export
 PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 {
     stopIfNotCount(formula, data)
-	if (is.null(weights))
-	{
-        if(is.null(subset) | length(subset) == 1)
+    if (is.null(weights))
+    {
+        if (is.null(subset) || length(subset) == 1)
             result <- glm(formula, data, family = poisson)
         else
         {
             data$sb = subset
-            result <- glm(formula, data, subset = sb, family = poisson, ...)
+            result <- glm(formula, data, subset = data$sb, family = poisson, ...)
         }
-	}
+    }
     else
     {
-       if(is.null(subset) | length(subset) == 1)
-    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = poisson(), ...)
-         else
-         {
-            data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = poisson(), ...)
-         }
+        if (is.null(subset) || length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = poisson(), ...)
+        else
+        {
+            data$sb <- subset
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                subset = data$sb, family = poisson(), ...)
+        }
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
-    class(result) = append("Regression", class(result))
-result}
+    class(result) <- append("Regression", class(result))
+    result
+}
 
 # generalizedLinearModel = function(formula, data, weights = NULL, subset = NULL,
 #     family = c(normal, binomial, poisson, quasipoisson)[1], ...)
 # {
-# 	if (is.null(weights))
-# 	{
-#         if(is.null(subset) | length(subset) == 1)
+#     if (is.null(weights))
+#     {
+#         if (is.null(subset) || length(subset) == 1)
 #             result <- glm(formula, data = data, family = family)
 #         else
 #         {
-#             data$sb = subset
-#             result <- glm(formula, data = data, subset = sb, family = family, ...)
+#             data$sb <- subset
+#             result <- glm(formula, data = data, subset = data$sb, family = family, ...)
 #         }
-# 	}
+#     }
 #     else
 #     {
-#        if(is.null(subset) | length(subset) == 1)
-#     	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = family, ...)
-#          else
-#          {
-#             data$sb = subset
-# 	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = family, ...)
-#          }
+#         if(is.null(subset) || length(subset) == 1)
+#             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = family, ...)
+#         else
+#         {
+#             data$sb <- subset
+#             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+#                 subset = data$sb, family = family, ...)
+#         }
 #     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
-#     class(result) = append("Regression", class(result))
-# result}
+#     class(result) <- append("Regression", class(result))
+#     result
+# }
 
 
+#' Quasi-Poisson Regression
+#'
+#' @inheritParams LinearRegression
 #' @export
 QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 {
     stopIfNotCount(formula, data)
-	if (is.null(weights))
-	{
-        if(is.null(subset) | length(subset) == 1)
+    if (is.null(weights))
+    {
+        if (is.null(subset) || length(subset) == 1)
             result <- glm(formula, data, family = quasipoisson)
         else
         {
-            data$sb = subset
-            result <- glm(formula, data, subset = sb, family = quasipoisson, ...)
+            data$sb <- subset
+            result <- glm(formula, data, subset = data$sb, family = quasipoisson, ...)
         }
-	}
+    }
     else
     {
-       if(is.null(subset) | length(subset) == 1)
-    	    result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = quasipoisson(), ...)
-         else
-         {
-            data$sb = subset
-	        result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),subset = sb, family = quasipoisson(), ...)
-         }
+        if (is.null(subset) || length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                family = quasipoisson(), ...)
+        else
+        {
+            data$sb <- subset
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                subset = data$sb, family = quasipoisson(), ...)
+        }
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
-    class(result) = append("Regression", class(result))
-result}
+    class(result) <- append("Regression", class(result))
+    result
+}
 
+#' Ordered Logistic Regression
+#'
+#' @inheritParams LinearRegression
 #' @export
 OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
 {
     dependent.variable = dependentVariable(formula, data)
-    if(!is.ordered(dependent.variable))
+    if (!is.ordered(dependent.variable))
     {
         warningNotOrdered()
         data[[dependentName(formula)]] = ordered(dependent.variable)
     }
-	if (is.null(weights))
-	{
-        if(is.null(subset) | length(subset) == 1)
+    if (is.null(weights))
+    {
+        if(is.null(subset) || length(subset) == 1)
             result <- MASS::polr(formula, data, Hess = TRUE, ...)
         else
         {
-            data$sb = subset
-            result <- MASS::polr(formula, data, subset = sb, Hess = TRUE, ...)
+            data$sb <- subset
+            result <- MASS::polr(formula, data, subset = data$sb, Hess = TRUE, ...)
         }
-	}
+    }
     else
     {
-       if(is.null(subset) | length(subset) == 1)
+        if(is.null(subset) || length(subset) == 1)
             result <- MASS::polr(formula, data, weights = weights, Hess = TRUE,  ...)
-         else
-         {
-            data$sb = subset
-            result <- MASS::polr(formula, data, subset = sb, weights = weights, Hess = TRUE,  ...)
-         }
+        else
+        {
+            data$sb <- subset
+            result <- MASS::polr(formula, data, subset = data$sb, weights = weights, Hess = TRUE,  ...)
+        }
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    #result$resid <- dependentVariable(formula, data) - result$predicted
-    class(result) = append("Regression", class(result))
-result}
+    # result$resid <- dependentVariable(formula, data) - result$predicted
+    class(result) <- append("Regression", class(result))
+    result
+}
 
 
 #context("Testing weightedcomputations")

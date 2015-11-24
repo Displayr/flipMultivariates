@@ -2,16 +2,16 @@
 % Please edit documentation in R/transformations.R
 \name{FactorToIndicators}
 \alias{FactorToIndicators}
-\title{\code{FactorToIndicators} Converts a factor into an indicator matrix.}
+\title{Converts a factor into an indicator matrix.}
 \usage{
 FactorToIndicators(variable, variable.name = deparse(substitute(variable)))
 }
 \arguments{
-\item{variable}{A variable in a DataSet or data.frame.}
+\item{variable}{A variable in a \code{DataSet} or \code{data.frame}.}
 
 \item{variable.name}{The name of the variable.}
 }
 \description{
-\code{FactorToIndicators} Converts a factor into an indicator matrix.
+Converts a factor into an indicator matrix.
 }
 

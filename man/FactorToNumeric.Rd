@@ -2,16 +2,16 @@
 % Please edit documentation in R/transformations.R
 \name{FactorToNumeric}
 \alias{FactorToNumeric}
-\title{\code{FactorToNumeric} Converts a an ordered factor into a numeric variable}
+\title{Converts a an ordered factor into a numeric variable}
 \usage{
 FactorToNumeric(variable, variable.name = deparse(substitute(variable)))
 }
 \arguments{
-\item{variable}{A variable in a DataSet or data.frame.}
+\item{variable}{A variable in a \code{DataSet} or \code{data.frame}.}
 
 \item{variable.name}{The name of the variable.}
 }
 \description{
-\code{FactorToNumeric} Converts a an ordered factor into a numeric variable
+Converts a an ordered factor into a numeric variable
 }
 

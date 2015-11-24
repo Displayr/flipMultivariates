@@ -2,7 +2,7 @@
 % Please edit documentation in R/regression.R
 \name{LinearRegression}
 \alias{LinearRegression}
-\title{\code{Linear Regression} Linear Regression.}
+\title{Linear Regression.}
 \usage{
 LinearRegression(formula, data, weights = NULL, subset = NULL, ...)
 }
@@ -12,10 +12,10 @@ LinearRegression(formula, data, weights = NULL, subset = NULL, ...)
 \item{object}{An object for which a summary is desired..}
 }
 \description{
-reports the goodness-of-fit of an object.
+Reports the goodness-of-fit of an object.
 }
 \details{
-Uses \code{\link{Zelig:zelimethods}}
+Uses \code{\link{Zelig::zelimethods}}
 which depend on the \code{\link{class}} of the first argument.
 }
 
