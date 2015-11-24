@@ -50,9 +50,10 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
 #' @param custom.color logical; if \code{true}, generates custom tree color, else use colors provided by sankeyTree package.
 #' @param num.color.div positive integer in the range [2,inf]. Controls the color resolution of the tree. A higher value gives a smoother color transition.
 #' @param const.bin.size logical; if \code{true}, each color spans an equal step of y-value or an equal number of points.
+#' @param draw.legend logical; if \code{true}, output the colors as a sorted RBG value list to draw legend
 
 treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE, numeric.distribution = FALSE,
-                            custom.color = TRUE, num.color.div = 101, const.bin.size = TRUE)
+                            custom.color = TRUE, num.color.div = 101, const.bin.size = TRUE, draw.legend = TRUE)
 {
     # Creating the names of a node from the frame.
     frame <- tree$frame
@@ -151,13 +152,13 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
         }
         node.descriptions <- paste0("<br>",node.descriptions)
 
-        if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
-        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
-        divisions <- seq(0, 1, 1/num.color.div)
         node.color <- rep("0", nrow(frame))
-
         if (custom.color)
         {
+            if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
+            if (num.color.div %% 2 == 0) num.color.div = num.color.div + 1
+            hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
+            divisions <- seq(0, 1, 1/num.color.div)
             node.color[1] <- "#ccc"
             for (i in 2:nrow(frame))
             {
@@ -217,12 +218,12 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             }
         }
 
-        if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
-        hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
         node.color <- rep("0", nrow(frame))
-
         if (custom.color)
         {
+            if (num.color.div < 2) stop('number of colors for the tree cannot be < 2')
+            if (num.color.div %% 2 == 0) num.color.div = num.color.div + 1
+            hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
             node.color[1] <- "#ccc"
             for (i in 2:nrow(frame))
             {
@@ -304,15 +305,29 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
     }
     # Creating the recrusive list.
     nodes <- as.numeric(dimnames(frame)[[1]])
-    .constructNodes(1, nodes, frame, tree.hash)
+    tree.list <- .constructNodes(1, nodes, frame, tree.hash)
+    if (custom.color && draw.legend)
+    {
+        if (outcome.is.factor) {
+            tree.list <- c(list(hcl.color), list(paste0(seq(0,100,10), "%")), tree.list)
+        } else {
+            if (const.bin.size){
+                tree.list <- c(list(hcl.color), list(FormatAsReal(seq(ymin, ymax,(ymax - ymin)/10),digits = 1, format = "f")), tree.list)
+            } else {
+                tree.list <- c(list(hcl.color), list(FormatAsReal(quantile(frame$yval, seq(0, 1, 1/10)),digits = 1, format = "f")), tree.list)
+            }
+        }
+        names(tree.list)[1:2] = c("legendColor","legendText")
+    }
+    tree.list
 }
 
 #' @export
 print.CART <- function(CART.object)
 {
     tree.list <- treeFrameToList(CART.object, custom.color = TRUE)
-    plt <- sankeytreeR::sankeytree(tree.list, value = "n",
-                         nodeHeight = 100, tooltip = c("n", "Description"), treeColors = TRUE)
+    plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
+                         tooltip = c("n", "Description"), treeColors = TRUE, legend = TRUE)
     print(plt)
 }
 
