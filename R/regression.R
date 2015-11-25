@@ -9,6 +9,8 @@
 #'
 #' @export
 LinearRegression <- function(formula, data, subset = NULL, weights = NULL, ...) {
+    cl <- match.call()
+
     dependent.name <- dependentName(formula)
     dependent.variable <- data[[dependent.name]]
     if (is.factor(dependent.variable)) {
@@ -48,6 +50,7 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, ...) 
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     result$resid <- dependent.variable - result$predicted
+    result$call <- cl
     class(result) <- append("Regression", class(result))
 
     result
@@ -86,6 +89,8 @@ fitted.Regression <- function(object, ...)
 #' @export
 BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 {
+    cl <- match.call()
+
     data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
     if (is.null(weights))
     {
@@ -112,7 +117,9 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     # result$resid <- dependent.variable - result$predicted
+    result$call <- cl
     class(result) <- append("Regression", class(result))
+
     result
 }
 
@@ -123,6 +130,9 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 # QuasiBinomialRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 # {
 #     stopIfNotCount(formula, data)
+#
+#     cl <- match.call()
+#
 #     if (is.null(weights))
 #     {
 #         if (is.null(subset) || length(subset) == 1)
@@ -146,7 +156,9 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 #     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$call <- cl
 #     class(result) <- append("Regression", class(result))
+#
 #     result
 # }
 
@@ -157,6 +169,9 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 PoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     stopIfNotCount(formula, data)
+
+    cl <- match.call()
+
     if (is.null(weights))
     {
         if (is.null(subset) || length(subset) == 1)
@@ -180,13 +195,17 @@ PoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
+    result$call <- cl
     class(result) <- append("Regression", class(result))
+
     result
 }
 
 # generalizedLinearModel = function(formula, data, subset = NULL, weights = NULL,
 #     family = c(normal, binomial, poisson, quasipoisson)[1], ...)
 # {
+#     cl <- match.call()
+#
 #     if (is.null(weights))
 #     {
 #         if (is.null(subset) || length(subset) == 1)
@@ -222,6 +241,9 @@ PoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 QuasiPoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     stopIfNotCount(formula, data)
+
+    cl <- match.call()
+
     if (is.null(weights))
     {
         if (is.null(subset) || length(subset) == 1)
@@ -246,7 +268,9 @@ QuasiPoissonRegression = function(formula, data, subset = NULL, weights = NULL, 
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
 #     result$resid <- dependentVariable(formula, data) - result$predicted
+    result$call <- cl
     class(result) <- append("Regression", class(result))
+
     result
 }
 
@@ -256,6 +280,8 @@ QuasiPoissonRegression = function(formula, data, subset = NULL, weights = NULL, 
 #' @export
 OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 {
+    cl <- match.call()
+
     dependent.variable = dependentVariable(formula, data)
     if (!is.ordered(dependent.variable))
     {
@@ -284,7 +310,9 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     # result$resid <- dependentVariable(formula, data) - result$predicted
+    result$call <- cl
     class(result) <- append("Regression", class(result))
+
     result
 }
 
