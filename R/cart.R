@@ -16,30 +16,31 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
 {
     if (is.null(weights))
     {
-        if(is.null(subset) | length(subset) == 1)
+        if(is.null(subset) || length(subset) == 1)
         {
             result <- tree::tree(formula, data = data, model = TRUE, ...)
         }
         else
         {
-            data$sb = subset
+            data$sb <- subset
             result <- tree::tree(formula, data = data, subset = data$sb, model = TRUE, ...)
         }
     }
     else
     {
-        if(is.null(subset) | length(subset) == 1)
+        if(is.null(subset) || length(subset) == 1)
             result <- tree::tree(formula, data = data, weights = weights, model = TRUE, ...)
         else
         {
             print("dog")
-            data$sb = subset
+            data$sb <- subset
             result <- tree::tree(formula, data = data, subset = data$sb,
                            weights = weights, model = TRUE, ...)
         }
     }
     result$predicted <- predict(result, newdata = data, type = "tree", na.action = na.exclude)
     class(result) <- append("CART", class(result))
+
     return(result)
 }
 
