@@ -316,23 +316,6 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
     result
 }
 
-
-#context("Testing weightedcomputations")
-
-# test_that("WeightedSVD",
-# {
-#     set.seed(123)
-#     z <- matrix(runif(21), ncol = 3)
-#     zWeight <- c(4,rep(1,6))
-#     z1 <- rbind(z[rep(1:7, zWeight),])
-#     z1
-#     q = function(x) {round(abs(x),5)}
-#
-#     expect_equal(q(svd(z1), q(WeightedSVD(z, zWeight))))
-#     expect_equal(q(svd(z1, nu = 0L)), q(WeightedSVD(z, zWeight, nu = 0L)))
-# })
-#
-
 # a1 <- rnorm(1000)
 # b1 <- c1 <- d1 <- rep(NA,1000)
 # y1 <- a1
