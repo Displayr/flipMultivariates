@@ -5,7 +5,7 @@ Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
 Description: Multivariate models and supporting code.
 Depends:
     R (>= 3.1.1)
-License: What license is it under?
+License: Copyright Numbers International Pty Ltd
 LazyData: true
 Imports:
     sankeytreeR,
