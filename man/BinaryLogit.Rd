@@ -4,7 +4,7 @@
 \alias{BinaryLogit}
 \title{Binary Logistic Regression}
 \usage{
-BinaryLogit(formula, data, weights = NULL, subset = NULL, ...)
+BinaryLogit(formula, data, subset = NULL, weights = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}

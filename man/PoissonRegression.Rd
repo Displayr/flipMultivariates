@@ -4,7 +4,7 @@
 \alias{PoissonRegression}
 \title{Poisson Regression}
 \usage{
-PoissonRegression(formula, data, weights = NULL, subset = NULL, ...)
+PoissonRegression(formula, data, subset = NULL, weights = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}

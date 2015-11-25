@@ -8,23 +8,23 @@
 #' which depend on the \code{\link{class}} of the first argument.
 #'
 #' @export
-LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) {
+LinearRegression <- function(formula, data, subset = NULL, weights = NULL, ...) {
     dependent.name <- dependentName(formula)
     dependent.variable <- data[[dependent.name]]
-    if(is.factor(dependent.variable)) {
+    if (is.factor(dependent.variable)) {
         WarningFactorToNumeric()
         data[[dependent.name]] <- dependent.variable <- unclass(dependent.variable)
     }
     if (is.null(weights))
     {
-        if(is.null(subset) | length(subset) == 1)
+        if (is.null(subset) || length(subset) == 1)
         {
-            result <- lm(formula,  data, ...)
+            result <- lm(formula, data, ...)
         }
         else
         {
             data$sb <- subset
-            result <- lm(formula,  data, subset = sb, ...)
+            result <- lm(formula, data, subset = data$sb, ...)
         }
         #result <- zelig.result$zelig.out$z.out[[1]]
         #zelig.result$zelig.out$z.out <- NULL
@@ -32,7 +32,7 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
     }
     else
     {
-        if(is.null(subset) | length(subset) == 1)
+        if (is.null(subset) || length(subset) == 1)
             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
         else
         {
@@ -40,10 +40,10 @@ LinearRegression <- function(formula, data, weights = NULL, subset = NULL, ...) 
             result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
                                      subset = data$sb, ...)
         }
-#        data$weights = weights
-#         if(is.null(subset) | length(subset) == 1)-
+#        data$weights <- weights
+#         if (is.null(subset) || length(subset) == 1)
 #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-#         elseLinea
+#         else
 #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
@@ -84,14 +84,14 @@ fitted.Regression <- function(object, ...)
 #'
 #' @inheritParams LinearRegression
 #' @export
-BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
+BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 {
     data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
     if (is.null(weights))
     {
         if (is.null(subset) || length(subset) == 1)
         {
-            result <- glm(formula,  data , family = binomial, ...)
+            result <- glm(formula, data, family = binomial, ...)
         }
         else
         {
@@ -120,7 +120,7 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
 # #'
 # #' @inheritParams LinearRegression
 # #' @export
-# QuasiBinomialRegression = function(formula, data, weights = NULL, subset = NULL, ...)
+# QuasiBinomialRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 # {
 #     stopIfNotCount(formula, data)
 #     if (is.null(weights))
@@ -154,7 +154,7 @@ BinaryLogit <- function(formula, data, weights = NULL, subset = NULL, ...)
 #'
 #' @inheritParams LinearRegression
 #' @export
-PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
+PoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     stopIfNotCount(formula, data)
     if (is.null(weights))
@@ -184,7 +184,7 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
     result
 }
 
-# generalizedLinearModel = function(formula, data, weights = NULL, subset = NULL,
+# generalizedLinearModel = function(formula, data, subset = NULL, weights = NULL,
 #     family = c(normal, binomial, poisson, quasipoisson)[1], ...)
 # {
 #     if (is.null(weights))
@@ -219,7 +219,7 @@ PoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
 #'
 #' @inheritParams LinearRegression
 #' @export
-QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, ...)
+QuasiPoissonRegression = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     stopIfNotCount(formula, data)
     if (is.null(weights))
@@ -254,7 +254,7 @@ QuasiPoissonRegression = function(formula, data, weights = NULL, subset = NULL, 
 #'
 #' @inheritParams LinearRegression
 #' @export
-OrderedLogit = function(formula, data, weights = NULL, subset = NULL, ...)
+OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     dependent.variable = dependentVariable(formula, data)
     if (!is.ordered(dependent.variable))

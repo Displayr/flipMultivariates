@@ -4,7 +4,7 @@
 \alias{QuasiPoissonRegression}
 \title{Quasi-Poisson Regression}
 \usage{
-QuasiPoissonRegression(formula, data, weights = NULL, subset = NULL, ...)
+QuasiPoissonRegression(formula, data, subset = NULL, weights = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}

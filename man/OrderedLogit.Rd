@@ -4,7 +4,7 @@
 \alias{OrderedLogit}
 \title{Ordered Logistic Regression}
 \usage{
-OrderedLogit(formula, data, weights = NULL, subset = NULL, ...)
+OrderedLogit(formula, data, subset = NULL, weights = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}

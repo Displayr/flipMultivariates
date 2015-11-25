@@ -4,7 +4,7 @@
 \alias{LinearRegression}
 \title{Linear Regression.}
 \usage{
-LinearRegression(formula, data, weights = NULL, subset = NULL, ...)
+LinearRegression(formula, data, subset = NULL, weights = NULL, ...)
 }
 \arguments{
 \item{...}{Additional arguments affecting the goodness-of-fit displayed.}

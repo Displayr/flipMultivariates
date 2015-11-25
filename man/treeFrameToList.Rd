@@ -5,7 +5,8 @@
 \title{\code{treeFrameToList} Converts a \code{\link{tree}} into a format usable in a sankeytree.}
 \usage{
 treeFrameToList(tree, max.tooltip.length = 150, show.whole.factor = FALSE,
-  numeric.distribution = FALSE, num.color.div = 5, const.bin.size = TRUE)
+  numeric.distribution = FALSE, custom.color = TRUE, num.color.div = 101,
+  const.bin.size = TRUE, draw.legend = TRUE)
 }
 \arguments{
 \item{max.tooltip.length}{The maximum length of the tooltip (determines the scale of the tree).}
@@ -14,9 +15,13 @@ treeFrameToList(tree, max.tooltip.length = 150, show.whole.factor = FALSE,
 
 \item{numeric.distribution}{Outputs additional diagnostics in the tooltip.}
 
-\item{num.color.div}{??.}
+\item{custom.color}{logical; if \code{true}, generates custom tree color, else use colors provided by sankeyTree package.}
 
-\item{const.bin.size}{??.}
+\item{num.color.div}{positive integer in the range [2,inf]. Controls the color resolution of the tree. A higher value gives a smoother color transition.}
+
+\item{const.bin.size}{logical; if \code{true}, each color spans an equal step of y-value or an equal number of points.}
+
+\item{draw.legend}{logical; if \code{true}, output the colors as a sorted RBG value list to draw legend}
 }
 \description{
 \code{treeFrameToList} Converts a \code{\link{tree}} into a format usable in a sankeytree.
