@@ -15,6 +15,10 @@ stopIfNotCount = function(formula, data)
 
 warningPredictorVariableDoesNotExist <- function() {"The specified predictor variable does not exist."}
 
+warningRobustInappropriate <- function() {"Robust standard errors has been selected. This option has been ignored,
+    as due to the use of weights, a survey-weighted model has been estimated, and this method contains a similar
+    type of adjustment already"}
+
 warningNotCountAsNegatives <- function() {warning("This analysis assumes that your Outcome variable is a count variable
                                                   (e.g., number of products purchased per week. Your data is not ")}
 

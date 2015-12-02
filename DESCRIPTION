@@ -14,7 +14,9 @@ Imports:
     colorspace,
     survey,
     rpart,
-    tree
+    tree,
+    car,
+    lmtest
 Suggests:
     testthat,
     effects
