@@ -16,7 +16,9 @@
 #' @details "Imputation" is performed using \code{\link{mice}}. All selected
 #' outcome and predictor variables are included in the imputation. Then,
 #' cases with missing values in the outcome variable are excluded from the
-#' analysis (von Hippel 2007).
+#' analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
+#' synthetic data file is created by sampling with replacement in proportion to the weights,where the
+#' sample size is the sum of the weights.
 #' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
 #' Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
 #' @export
@@ -26,101 +28,88 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
     dependent.name <- dependentName(formula)
     dependent.variable <- data[[dependent.name]]
     row.names <- rownames(data)
-    data <- switch("Error if missing data" = ErrorIfMissingDataFound(data),
-                   "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data)
-                   "Use partial data (pairwise)"= data,
-                   "Imputation" = SingleImputaton(data, dependent.name))
-#'
-#'
-#'
-#' )
     if (is.factor(dependent.variable)) {
         WarningFactorToNumeric()
         data[[dependent.name]] <- dependent.variable <- unclass(dependent.variable)
     }
-    if
-
-
-
-
-
-a1 <- rnorm(1000)
-b1 <- c1 <- d1 <- rep(NA,1000)
-y1 <- a1
-a2 <- rnorm(1000)
-b2 <- rnorm(1000)
-c2 <- rnorm(1000)
-d2 <- rnorm(1000)
-y2 <- (a2 + b2 + c2 + d2)/4
-dat <- data.frame(y = c(y1, y2), a = c(a1, a2), b = c(b1, b2), c = c(c1, c2), d = c(d1, d2))
-psych::setCor(1, 2:5, data = dat)
-
-
-must ban cateogorical variables
-
-z = data.frame(y = runif(100), x1 = runif(100), x2 = runif(100), x3 = runif(100))
-summary(lm(z))
-lm.cov <- psych::setCor(1, 2:4, data = z)
-z = data.frame(y = c(NA,NA,1,2,2,1,1,1), x1 = c(1,2,NA,NA,2,1,1,3), x2 = c(1,2,2,1,NA,NA,1,2))
-z = data.frame(y = c(NA,NA,1,2,2), x1 = c(1,2,NA,NA,2,1), x2 = c(1,2,2,1,NA,NA))
-summary(lm(z))
-
-
-lm.cov <- psych::setCor(1, 2:3, data = z)
-
-coefficents <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
-   dimnames(ans$coefficients) <- list(names(z$coefficients)[Qr$pivot[p1]],
-        c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-
-printCoefmat(coefficents)
-print.summary.lm
-
-
-
-
-    if (is.null(weights))
+    # Missing data management.
+    data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data),
+                   "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
+                   "Use partial data (pairwise)" = data,
+                   "Imputation" = SingleImputaton(data, dependent.name))
+    if (missing == "Use partial data (pairwise)")
     {
-        if (is.null(subset) || length(subset) == 1)
-        {
-            result <- lm(formula, data, ...)
-        }
-        else
-        {
-            data$sb <- subset
-            result <- lm(formula, data, subset = data$sb, ...)
-        }
-        #result <- zelig.result$zelig.out$z.out[[1]]
-        #zelig.result$zelig.out$z.out <- NULL
-        #result$zelig <- zelig.result
+        result <- lm(formula, data, ...)
+        stop("Need to test for factors and decline to process if they exist")
+        variable.names <- names(data)
+        dependent.index <- match(dependent.name, variable.names)
+        independents.index <- (1:ncol(data))[-dependent.index]
+        indices <- c(dependent.index, independent.index)
+        factors <- unlist(lapply(data[,indices]))
+        if (any(factors))
+            stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
+                 Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
+        filtered.data <- ifelse(is.null(subset), data, subset.data.frame(data, subset))
+        weighted.data <- ifelse(is.null(weights), filtered.data,
+                                AdjustDataToReflectWeights(data, weights))
+        if (!is.null(weights))
+            weighted.data <-
+        lm.cov <- psych::setCor(dependent.index, independents.index, data = weighted.data)
+        coefficents <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+        dimnames(ans$coefficients) <- list(variable.name[independent.index],
+            c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+        intercept <- mean(weighted.data[[dependent.name]]) -
+            mean(weighted.data[, independents.index] %*% lm.cov$beta)
+        predicted <- data[, independents.index] %*% lm.cov$beta + intercept
+        coefficents <- coefficients[c(1,1:nrow(coefficients)),]
+        coefficents[1,] <- c(intercept, NA, NA, NA)
+        rownames(coefficents)[1] <- "(Intercept)"
+        result$coefficients <- result
     }
     else
     {
-        if (robust.se)
-            warningRobustInappropriate()
-        if (is.null(subset) || length(subset) == 1)
-            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
+        if (is.null(weights))
+        {
+            if (is.null(subset) || length(subset) == 1)
+            {
+                result <- lm(formula, data, ...)
+            }
+            else
+            {
+                data$sb <- subset
+                result <- lm(formula, data, subset = data$sb, ...)
+            }
+            #result <- zelig.result$zelig.out$z.out[[1]]
+            #zelig.result$zelig.out$z.out <- NULL
+            #result$zelig <- zelig.result
+        }
         else
         {
-            data$sb <- subset
-            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
-                                     subset = data$sb, ...)
+            if (robust.se)
+                warningRobustInappropriate()
+            if (is.null(subset) || length(subset) == 1)
+                result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
+            else
+            {
+                data$sb <- subset
+                result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                                         subset = data$sb, ...)
+            }
+    #        data$weights <- weights
+    #         if (is.null(subset) || length(subset) == 1)
+    #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
+    #         else
+    #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
         }
-#        data$weights <- weights
-#         if (is.null(subset) || length(subset) == 1)
-#             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-#         else
-#             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
     }
-    result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    result$predicted <- ifelse(is.null(predicted), predict(result, newdata = data, na.action = na.exclude), predicted)
     result$resid <- dependent.variable - result$predicted
     result$call <- cl
     result$robust.se <- robust.se
     result$weighted <- !is.null(weights)
-    result
     class(result) <- append("Regression", class(result))
-
-    result$na.action <- ommitedRowNames(data, row.names)
-
+    result$na.action <- ommitedRowNames(data, ifelse(is.null(subset), row.names, subset(row.names, subset)))
+    results
 }
 
 #' @export
@@ -130,6 +119,8 @@ print.Regression <- function(Regression.object, ...)
     print(lmtest::coeftest(Regression.object,
           vcov = car::hccm(Regression.object)))
     Regression.summary <- summary(Regression.object)
+    if (Regression.object$coefficients) # Partial data.
+        Regression.summary$coefficients <- Regression.object$coefficients
     if (Regression.object$robust.se)
         Regression.summary$coefficients <- lmtest::coeftest(Regression.object,
           vcov = car::hccm(Regression.object))
