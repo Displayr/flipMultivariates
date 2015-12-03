@@ -31,3 +31,8 @@ dependentVariable <- function(formula.object, data)
     data[[dependentName(formula.object)]]
 }
 
+dependentVariableFromModel <- function(Regression.object)
+{
+    formula <- as.list(Regression.object$call)$formula
+    Regression.object$model[[dependentName(formula)]]
+}
