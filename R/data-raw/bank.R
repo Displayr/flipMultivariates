@@ -5,20 +5,27 @@ set.seed(54543)
 bank[runif(nrow(bank)) < 0.1, 2] <- NA #Adding missing values to the dependent variable
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
+missing = "Error if missing data"
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
 
 
-round(cor(SingleImputaton(bank, "Overall")),2)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE)
 
-round(cor(bank, use = "pairwise.complete.obs"),2)
+missing <- "Exclude cases with missing data"
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
-dim(bank)
+missing <- "Imputation"
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
-names(bank)
-library(mice)
-set.seed(12321)
-bank.imputed <- SingleImputaton(bank, "Overall")
-round(cor(bank.imputed),2)
-
-row.names <- rownames(bank)
-nrow(bank)
-nrow(bank.imputed)
+missing <- "Use partial data (pairwise)"
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
+LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)

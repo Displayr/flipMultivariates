@@ -16,23 +16,31 @@ isCount = function(x) {
     if(!is.numeric(x))
         return(FALSE)
     u = unique(x)
-    if (min(u) < 0)
+    if (min(u, na.rm = TRUE) < 0)
         return(FALSE)
-    sum(as.integer(u) != u) == 0}
+    sum(as.integer(u) != u, na.rm = TRUE) == 0}
 
-dependentName <- function(formula.object)
+outcomeName <- function(formula.object)
 {
     all.vars(formula.object)[1]
 }
 
 
-dependentVariable <- function(formula.object, data)
+outcomeVariable <- function(formula.object, data)
 {
-    data[[dependentName(formula.object)]]
+    data[[outcomeName(formula.object)]]
 }
 
-dependentVariableFromModel <- function(Regression.object)
+outcomeVariableFromModel <- function(Regression.object)
 {
+#     print(Regression.object)
+#     print(Regression.object$call)
     formula <- as.list(Regression.object$call)$formula
-    Regression.object$model[[dependentName(formula)]]
+#     print(formula)
+#     print(outcomeName(formula))
+    Regression.object$model[[outcomeName(formula)]]
 }
+
+hasSubset <- function(subset) {!is.null(subset) & length(subset) != 1}
+
+

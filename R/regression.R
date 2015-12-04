@@ -25,128 +25,159 @@
 LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missing = "Exclude cases with missing data", robust.se = FALSE, ...) {
     cl <- match.call()
 
-    dependent.name <- dependentName(formula)
-    dependent.variable <- data[[dependent.name]]
+    outcome.name <- outcomeName(formula)
+    outcome.variable <- data[[outcome.name]]
     row.names <- rownames(data)
-    if (is.factor(dependent.variable)) {
+    if (is.factor(outcome.variable)) {
         WarningFactorToNumeric()
-        data[[dependent.name]] <- dependent.variable <- unclass(dependent.variable)
+        data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
     }
-    # Missing data management.
-    data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data),
-                   "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
-                   "Use partial data (pairwise)" = data,
-                   "Imputation" = SingleImputaton(data, dependent.name))
     if (missing == "Use partial data (pairwise)")
     {
         result <- lm(formula, data, ...)
-        stop("Need to test for factors and decline to process if they exist")
         variable.names <- names(data)
-        dependent.index <- match(dependent.name, variable.names)
-        independents.index <- (1:ncol(data))[-dependent.index]
-        indices <- c(dependent.index, independent.index)
+        outcome.index <- match(outcome.name, variable.names)
+        predictors.index <- (1:ncol(data))[-outcome.index]
+        indices <- c(outcome.index, predictor.index)
         factors <- unlist(lapply(data[,indices]))
         if (any(factors))
             stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
                  Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-        filtered.data <- ifelse(is.null(subset), data, subset.data.frame(data, subset))
-        weighted.data <- ifelse(is.null(weights), filtered.data,
-                                AdjustDataToReflectWeights(data, weights))
-        if (!is.null(weights))
-            weighted.data <-
-        lm.cov <- psych::setCor(dependent.index, independents.index, data = weighted.data)
+        subset.data <- ifelse(is.null(subset), data, subset.data.frame(data, subset))
+        estimation.data <- ifelse(is.null(weights), filtered.data,
+                                AdjustDataToReflectWeights(filtered.data, weights))
+        lm.cov <- psych::setCor(outcome.index, predictors.index, data = estimation.data)
         coefficents <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
-        dimnames(ans$coefficients) <- list(variable.name[independent.index],
+        dimnames(ans$coefficients) <- list(variable.name[predictor.index],
             c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-        intercept <- mean(weighted.data[[dependent.name]]) -
-            mean(weighted.data[, independents.index] %*% lm.cov$beta)
-        predicted <- data[, independents.index] %*% lm.cov$beta + intercept
+        intercept <- mean(weighted.data[[outcome.name]]) -
+            mean(weighted.data[, predictors.index] %*% lm.cov$beta)
+        result$predicted <- data[, predictors.index] %*% lm.cov$beta + intercept
         coefficents <- coefficients[c(1,1:nrow(coefficients)),]
-        coefficents[1,] <- c(intercept, NA, NA, NA)
+        #coefficents[1,] <- c(intercept, NA, NA, NA)
         rownames(coefficents)[1] <- "(Intercept)"
-        result$coefficients <- result
+        result$coef.matrix <- result
+        rng <- range(rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
+        if (rng[1] == rng[2])
+            result$sample.size <- paste0("n = ", rng[1],
+                " cases used in estimation, a total sample size of ", sum(subset), "\n")
+        else
+            result$sample.size <- paste0("Pairwise correlations have been used to estimate this regression.\n",
+                                         "sample sizes for the correlations range from ", rng[1], "to", rng[2])
+        if (!is.null(weights))
+            result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
     }
     else
     {
+        print(dim(data))
+        subset.data <- ifThen(hasSubset(subset),
+            ifThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
+            data)
+        print(dim(subset.data))
+        estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
+                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
+                       "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
+                       "Imputation" = SingleImputaton(subset.data, outcome.name))
+        print(dim(subset.data))
         if (is.null(weights))
         {
-            if (is.null(subset) || length(subset) == 1)
-            {
-                result <- lm(formula, data, ...)
-            }
-            else
-            {
-                data$sb <- subset
-                result <- lm(formula, data, subset = data$sb, ...)
-            }
+            print("dog")
+#             if (is.null(subset) || length(subset) == 1)
+#             {
+                result <- lm(formula, estimation.data, ...)
+#             }
+print(summary(lm(ltotexp ~ suppins + phylim + actlim + totchr + age + female + income, data = subset.data))      )
+#             else
+#             {
+#                 data$sb <- subset
+#                 result <- lm(formula, estimation.data, subset = data$sb, ...)
+#             }
             #result <- zelig.result$zelig.out$z.out[[1]]
             #zelig.result$zelig.out$z.out <- NULL
             #result$zelig <- zelig.result
+            estimation.subset <- row.names %in% rownames(estimation.data)
+            if (robust.se)
+                result$robust.coefficients <- lmtest::coeftest(result,
+                    vcov = car::hccm(result))
         }
         else
         {
+            estimation.subset <- row.names %in% rownames(estimation.data)
+            estimation.weights <- weights[row.names %in% rownames(estimation.data)]
             if (robust.se)
                 warningRobustInappropriate()
-            if (is.null(subset) || length(subset) == 1)
-                result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), ...)
-            else
-            {
-                data$sb <- subset
-                result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
-                                         subset = data$sb, ...)
-            }
+            # if (is.null(subset) || length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights), ...)
+            # else
+#             {
+#                 data$sb <- subset
+#                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights),
+#                                          subset = data$sb, ...)
+#             }
     #        data$weights <- weights
     #         if (is.null(subset) || length(subset) == 1)
     #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
     #         else
     #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
         }
+        result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
+        result$sample.size <- paste0("n = ", sum(estimation.subset),
+            " cases used in estimation, of a total sample size of ",ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")
+        if (!is.null(weights))
+            result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
+        result$sample.size <- paste0(result$sample.size,
+            switch(missing, "Error if missing data" = "",
+                   "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
+                   "Imputation" = "Missing values of predictor variables have been imputed.\n"))
     }
-    result$predicted <- ifelse(is.null(predicted), predict(result, newdata = data, na.action = na.exclude), predicted)
-    result$resid <- dependent.variable - result$predicted
+    if (hasSubset(subset))
+        result$na.action <- c(result$na.action, row.names(!subset))
+    result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
+    result$resid <- outcome.variable - result$predicted
     result$call <- cl
     result$robust.se <- robust.se
     result$weighted <- !is.null(weights)
     class(result) <- append("Regression", class(result))
-    result$na.action <- ommitedRowNames(data, ifelse(is.null(subset), row.names, subset(row.names, subset)))
-    results
+    return(result)
 }
 
 #' @export
 print.Regression <- function(Regression.object, ...)
 {
-    print(Regression.object$robust.se)
-    print(lmtest::coeftest(Regression.object,
-          vcov = car::hccm(Regression.object)))
     Regression.summary <- summary(Regression.object)
-    if (Regression.object$coefficients) # Partial data.
-        Regression.summary$coefficients <- Regression.object$coefficients
     if (Regression.object$robust.se)
-        Regression.summary$coefficients <- lmtest::coeftest(Regression.object,
-          vcov = car::hccm(Regression.object))
+        Regression.summary$coefficients <- Regression.object$robust.coefficients
     else
     {   #Testing to see if the variance is non-constant.
         if (!Regression.object$weighted)
         {
 
-            breusch.pagan <- car::ncvTest(Regression.object)
-            if (breusch.pagan$p <= 0.05)
+            bp.test <- breusch.pagan(Regression.object, Regression.summary)
+            if (bp.test$p <= 0.05)
             {
                 warning(paste0("A Breusch Pagan Test for non-constant variance has been failed (p = ",
-                    FormatAsPValue(breusch.pagan$p), "). Consider using Robust Standard Errors."))
-                dependent.variable <- dependentVariableFromModel(Regression.object)
+                    FormatAsPValue(bp.test$p), "). Consider using Robust Standard Errors."))
+                outcome.variable <- outcomeVariableFromModel(Regression.object)
             }
         }
     }
-    if (length(unique(dependent.variable)) == 2)
+    # Inserting the coefficients from the
+    if (!is.null(Regression.object$coef.matrix)) # Partial data.
+        Regression.summary$coefficients <- Regression.object$coef.matrix
+    outcome.variable <- outcomeVariableFromModel(Regression.object)
+    if (length(unique(outcome.variable)) == 2)
         warning(paste0("The outcome variable contains only two unique values. A BinaryLogit may be
                        more appropriate."))
     else
     {
-        if (isCount(dependent.variable))
-            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative intergers). A count data model may be more appropriate (e.g., Poisson Regression)."))
+        if (isCount(outcome.variable))
+            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A count data model may be more appropriate (e.g., Poisson Regression)."))
     }
     print(Regression.summary, ...)
+    cat(Regression.object$sample.size)
+    if (Regression.object$robust.se)
+        cat("Heteroscedastic-robust standard errors.")
+
 }
 
 
@@ -162,6 +193,14 @@ fitted.Regression <- function(object, ...)
     object$predicted
 }
 
+#' @export
+fitted.values.Regression <- function(object, ...)
+{
+    object$predicted
+}
+
+
+
 #'  \code{BinaryLogit} Binary Logit Regression.
 #'
 #' @inheritParams LinearRegression
@@ -170,7 +209,7 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
 {
     cl <- match.call()
 
-    data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
+    data <- CreatingBinaryoutcomeVariableIfNecessary(formula, data)
     if (is.null(weights))
     {
         if (is.null(subset) || length(subset) == 1)
@@ -195,7 +234,7 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
         }
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    # result$resid <- dependent.variable - result$predicted
+    # result$resid <- outcome.variable - result$predicted
     result$call <- cl
     class(result) <- append("Regression", class(result))
     result
@@ -235,7 +274,7 @@ PoissonRegression <- function(formula, data, subset = NULL, weights = NULL, ...)
         }
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-#     result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$resid <- outcomeVariable(formula, data) - result$predicted
     result$call <- cl
     class(result) <- append("Regression", class(result))
 
@@ -277,7 +316,7 @@ QuasiPoissonRegression = function(formula, data, subset = NULL, weights = NULL, 
         }
     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-#     result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$resid <- outcomeVariable(formula, data) - result$predicted
     result$call <- cl
     class(result) <- append("Regression", class(result))
 
@@ -293,11 +332,11 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 {
     cl <- match.call()
 
-    dependent.variable = dependentVariable(formula, data)
-    if (!is.ordered(dependent.variable))
+    outcome.variable = outcomeVariable(formula, data)
+    if (!is.ordered(outcome.variable))
     {
         warningNotOrdered()
-        data[[dependentName(formula)]] = ordered(dependent.variable)
+        data[[outcomeName(formula)]] = ordered(outcome.variable)
     }
     if (is.null(weights))
     {
@@ -320,7 +359,7 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
         }
     }
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-    # result$resid <- dependentVariable(formula, data) - result$predicted
+    # result$resid <- outcomeVariable(formula, data) - result$predicted
     result$call <- cl
     class(result) <- append("Regression", class(result))
 
@@ -360,7 +399,7 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 #         }
 #     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-#     result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$resid <- outcomeVariable(formula, data) - result$predicted
 #     result$call <- cl
 #     class(result) <- append("Regression", class(result))
 #
@@ -401,7 +440,7 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 #         }
 #     }
 #     result$predicted <- predict(result, newdata = data, na.action = na.exclude)
-#     result$resid <- dependentVariable(formula, data) - result$predicted
+#     result$resid <- outcomeVariable(formula, data) - result$predicted
 #     class(result) <- append("Regression", class(result))
 #     result
 # }

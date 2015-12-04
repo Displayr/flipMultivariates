@@ -5,7 +5,7 @@
 \title{\code{LinearRegression}Linear Regression.}
 \usage{
 LinearRegression(formula, data, subset = NULL, weights = NULL,
-  robust.se = FALSE, ...)
+  missing = "Exclude cases with missing data", robust.se = FALSE, ...)
 }
 \arguments{
 \item{formula}{An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of model specification are given under ‘Details’.}
@@ -16,6 +16,10 @@ LinearRegression(formula, data, subset = NULL, weights = NULL,
 
 \item{weights}{An optional vector of sampling weights.}
 
+\item{missing}{How missing data is to be treated in the regression. Options are:
+\code{"Error if missing data"}, \code{"Exclude cases with missing data"},
+\code{"Use partial data (pairwise)"},and \code{"Imputation"}.}
+
 \item{robust.se}{Computes standard errors that are robust to violations of the assumption of constant variance, using the HC3 modification of White's estimator.}
 
 \item{...}{Additional argments to be past to  \code{\link{lm}} or, if the data
@@ -23,5 +27,17 @@ is weighted,  \code{\link{survey::svyglm}}.}
 }
 \description{
 Linear regression: ordinary least squares or least squares with survey weights.
+}
+\details{
+"Imputation" is performed using \code{\link{mice}}. All selected
+outcome and predictor variables are included in the imputation. Then,
+cases with missing values in the outcome variable are excluded from the
+analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
+synthetic data file is created by sampling with replacement in proportion to the weights,where the
+sample size is the sum of the weights.
+}
+\references{
+von Hippel, Paul T. 2007. "Regression With Missing Y's: An
+Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
 }
 
