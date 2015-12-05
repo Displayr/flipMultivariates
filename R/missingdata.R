@@ -9,13 +9,14 @@
 #'# df <- data.frame(x = c(NA, 1), y = 1:2)
 #'# ExcludeCasesWithAnyMissingData(df)
 #' @export
-SingleImputaton <- function(data, outcome.name = NULL, ...)
+SingleImputation <- function(data, outcome.name = NULL, ...)
 {
-    library(mice)
-    set.seed(12321)
-    imputed.data<- invisible(complete(mice(data, m = 1), 1))
+    library()
+    set.seed(12321) # Ensures that users do not have diferent outcomes each time.
+    imputed.data<- mice::complete(mice(data, m = 1, printFlat = FALSE), 1)
     if (!is.null(outcome.name))
         imputed.data[!is.na(data[[outcome.name]]),] # Excluding observations with missing values.
+    return(imputed.data)
 }
 
 

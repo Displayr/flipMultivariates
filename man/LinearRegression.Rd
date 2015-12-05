@@ -20,7 +20,9 @@ LinearRegression(formula, data, subset = NULL, weights = NULL,
 \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
 \code{"Use partial data (pairwise)"},and \code{"Imputation"}.}
 
-\item{robust.se}{Computes standard errors that are robust to violations of the assumption of constant variance, using the HC3 modification of White's estimator.}
+\item{robust.se}{Computes standard errors that are robust to violations
+of the assumption of constant variance, using the HC1 (degrees of freedom)
+modification of White's (1980) estimator (Long and Ervin, 2000).}
 
 \item{...}{Additional argments to be past to  \code{\link{lm}} or, if the data
 is weighted,  \code{\link{survey::svyglm}}.}
@@ -30,7 +32,8 @@ Linear regression: ordinary least squares or least squares with survey weights.
 }
 \details{
 "Imputation" is performed using \code{\link{mice}}. All selected
-outcome and predictor variables are included in the imputation. Then,
+outcome and predictor variables are included in the imputation, including any data excluded
+via \code{subset}. Then,
 cases with missing values in the outcome variable are excluded from the
 analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
 synthetic data file is created by sampling with replacement in proportion to the weights,where the
@@ -39,5 +42,9 @@ sample size is the sum of the weights.
 \references{
 von Hippel, Paul T. 2007. "Regression With Missing Y's: An
 Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
+White, H. (1980), A heteroskedastic-consistent covariance matrix estimator and a direct
+test of heteroskedasticity. Econometrica, 48, 817-838.
+Long, J. S. and Ervin, L. H. (2000). Using heteroscedasticity consistent standard errors
+in the linear regression model. The American Statistician, 54( 3): 217– 224.
 }
 

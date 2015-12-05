@@ -8,19 +8,26 @@
 #' @param missing How missing data is to be treated in the regression. Options are:
 #' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
 #' \code{"Use partial data (pairwise)"},and \code{"Imputation"}.
-
-#' @param robust.se Computes standard errors that are robust to violations of the assumption of constant variance, using the HC3 modification of White's estimator.
+#' @param robust.se Computes standard errors that are robust to violations
+#' of the assumption of constant variance, using the HC1 (degrees of freedom)
+#' modification of White's (1980) estimator (Long and Ervin, 2000).
 #' @param ... Additional argments to be past to  \code{\link{lm}} or, if the data
 #' is weighted,  \code{\link{survey::svyglm}}.
 #'
-#' @details "Imputation" is performed using \code{\link{mice}}. All selected
-#' outcome and predictor variables are included in the imputation. Then,
+#' @details "Imputation" is performed using predictive mean matching with the \code{\link{mice}} package. All selected
+#' outcome and predictor variables are included in the imputation, including any data excluded
+#' via \code{subset}. Then,
 #' cases with missing values in the outcome variable are excluded from the
 #' analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
 #' synthetic data file is created by sampling with replacement in proportion to the weights,where the
 #' sample size is the sum of the weights.
 #' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
 #' Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
+#' White, H. (1980), A heteroskedastic-consistent covariance matrix estimator and a direct
+#' test of heteroskedasticity. Econometrica, 48, 817-838.
+#' Long, J. S. and Ervin, L. H. (2000). Using heteroscedasticity consistent standard errors
+#' in the linear regression model. The American Statistician, 54( 3): 217– 224.
+
 #' @export
 LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missing = "Exclude cases with missing data", robust.se = FALSE, ...) {
     cl <- match.call()
@@ -38,7 +45,7 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
         variable.names <- names(data)
         outcome.index <- match(outcome.name, variable.names)
         predictors.index <- (1:ncol(data))[-outcome.index]
-        indices <- c(outcome.index, predictor.index)
+        indices <- c(outcome.index, predictors.index)
         factors <- unlist(lapply(data[,indices]))
         if (any(factors))
             stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
@@ -69,24 +76,20 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
     }
     else
     {
-        print(dim(data))
         subset.data <- ifThen(hasSubset(subset),
             ifThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
             data)
-        print(dim(subset.data))
+        subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
         estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
-                       "Imputation" = SingleImputaton(subset.data, outcome.name))
-        print(dim(subset.data))
+                       "Imputation" = SingleImputation(subset.data, outcome.name))
         if (is.null(weights))
         {
-            print("dog")
 #             if (is.null(subset) || length(subset) == 1)
 #             {
                 result <- lm(formula, estimation.data, ...)
 #             }
-print(summary(lm(ltotexp ~ suppins + phylim + actlim + totchr + age + female + income, data = subset.data))      )
 #             else
 #             {
 #                 data$sb <- subset
@@ -97,8 +100,11 @@ print(summary(lm(ltotexp ~ suppins + phylim + actlim + totchr + age + female + i
             #result$zelig <- zelig.result
             estimation.subset <- row.names %in% rownames(estimation.data)
             if (robust.se)
+            {
                 result$robust.coefficients <- lmtest::coeftest(result,
-                    vcov = car::hccm(result))
+                    vcov = car::hccm(result, type = "hc1"))
+                colnames(result$robust.coefficients)[2] <- "Robust SE"
+            }
         }
         else
         {

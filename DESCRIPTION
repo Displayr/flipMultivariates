@@ -3,21 +3,22 @@ Title: Multivariate models
 Version: 0.1
 Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
 Description: Multivariate models and supporting code.
-Depends: 
+Depends:
     R (>= 3.1.1)
 License: MIT + file LICENSE
 LazyData: true
-Imports: 
+Imports:
     sankeytreeR,
     MASS,
     hash,
+    mice,
     colorspace,
     survey,
     rpart,
     tree,
     car,
     lmtest
-Suggests: 
+Suggests:
     testthat,
     effects,
     knitr,
