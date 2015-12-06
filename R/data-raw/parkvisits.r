@@ -10,11 +10,10 @@ This example is based on data and methods  from Cameron, A Colin and Pravin K. T
 
 
 missing <- "Use partial data (pairwise)"
-reg.lm <- LinearRegression(trips ~ quality + price + income, recreational.demand, missing = missing)
-reg.lm
+LinearRegression(trips ~ quality + price + income, data = recreational.demand, missing = missing)
+LinearRegression(trips ~ quality + price + income, data = recreational.demand, missing = missing, robust.se = TRUE)
 
-reg.lm <- LinearRegression(trips ~ quality + price + income, recreational.demand)
-reg.lm
+LinearRegression(trips ~ quality + price + income, data = recreational.demand)
 
 
 predict(reg.lm)

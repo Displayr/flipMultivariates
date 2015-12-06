@@ -29,9 +29,11 @@
 #' in the linear regression model. The American Statistician, 54( 3): 217– 224.
 
 #' @export
-LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missing = "Exclude cases with missing data", robust.se = FALSE, ...) {
+LinearRegression <- function(formula, data, subset = NULL,
+                             weights = NULL,
+                             missing = "Exclude cases with missing data",
+                             robust.se = FALSE, ...) {
     cl <- match.call()
-
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     row.names <- rownames(data)
@@ -41,6 +43,8 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
     }
     if (missing == "Use partial data (pairwise)")
     {
+        if (robust.se)
+            stop(paste0("Robust standard errors cannot be computed with 'missing' set to ", missing, "."))
         result <- lm(formula, data, ...)
         variable.names <- names(data)
         formula.names <- all.vars(formula)
@@ -53,16 +57,23 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
             stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
                  Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
         subset.data <- ifThen(is.null(subset), data, subset(data, subset))
+        # Taking the print chart statement out of setCor.
+        .pairwise.regression <- psych::setCor
+        n <- length(body(.pairwise.regression))
+        while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
+            n <- n - 1
+        body(.pairwise.regression)[n] <- NULL
         estimation.data <- ifThen(is.null(weights), subset.data,
                                 AdjustDataToReflectWeights(subset.data, weights))
-        result$lm.cov <- lm.cov <- capture.output(psych::setCor(outcome.index, predictors.index,
-            data = estimation.data, std = FALSE), , file='NUL')
+        result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
+            data = estimation.data, std = FALSE)
         partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
         dimnames(partial.coefs) <- list(variable.names[predictors.index],
             c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
         beta <- as.matrix(lm.cov$beta)
         fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
         intercept <- mean(estimation.data[[outcome.name]]) - mean(fitted)
+        fitted <- as.matrix(data[, predictors.index]) %*% beta
         result$predicted <- fitted + intercept
         partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
         partial.coefs[1,] <- c(intercept, NA, NA, NA)
@@ -71,7 +82,7 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
         rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
         if (rng[1] == rng[2])
             result$sample.size <- paste0("n = ", rng[1],
-                " cases used in estimation\n")
+                " cases used in estimation.\n")
         else
             result$sample.size <- paste0("Pairwise correlations have been used to estimate this regression.\n",
                                          "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
@@ -133,8 +144,8 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
         missing.data <- all(estimation.subset, TRUE)
         result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
-        result$sample.size <- paste0(ifelse(!missing.data, ".\n",
-            ", of a total sample size of ",ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n"))
+        result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
+            ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
         if(missing.data)
@@ -162,7 +173,7 @@ print.Regression <- function(Regression.object, ...)
         Regression.summary$coefficients <- Regression.object$robust.coefficients
     else
     {   #Testing to see if the variance is non-constant.
-        if (!Regression.object$weighted & is.null(Regression.object$partial.coefs))
+        if (!Regression.object$weighted)# & is.null(Regression.object$partial.coefs))
         {
             bp.test <- breusch.pagan(Regression.object, Regression.summary)
             if (bp.test$p <= 0.05)
@@ -187,7 +198,7 @@ print.Regression <- function(Regression.object, ...)
     }
     print(Regression.summary, ...)
     if (!is.null(Regression.object$lm.cov))
-        cat(paste0("Partial-data R-square ", FormatAsReal(Regression.object$lm.cov$R2), "\n"))
+        cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))
     cat(Regression.object$sample.size)
     if (Regression.object$robust.se)
         cat("Heteroscedastic-robust standard errors.")
