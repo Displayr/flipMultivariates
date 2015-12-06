@@ -17,7 +17,8 @@ Imports:
     rpart,
     tree,
     car,
-    lmtest
+    lmtest,
+    RcmdrMisc
 Suggests:
     testthat,
     effects,

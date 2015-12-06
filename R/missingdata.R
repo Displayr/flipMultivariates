@@ -11,9 +11,10 @@
 #' @export
 SingleImputation <- function(data, outcome.name = NULL, ...)
 {
-    library()
+    requireNamespace("mice")
+    require("mice")
     set.seed(12321) # Ensures that users do not have diferent outcomes each time.
-    imputed.data<- mice::complete(mice(data, m = 1, printFlat = FALSE), 1)
+    imputed.data<- complete(mice(data, m = 1, printFlat = FALSE), 1)
     if (!is.null(outcome.name))
         imputed.data[!is.na(data[[outcome.name]]),] # Excluding observations with missing values.
     return(imputed.data)

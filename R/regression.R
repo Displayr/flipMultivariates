@@ -43,34 +43,38 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
     {
         result <- lm(formula, data, ...)
         variable.names <- names(data)
+        formula.names <- all.vars(formula)
+        indices <- match(formula.names, variable.names)
         outcome.index <- match(outcome.name, variable.names)
-        predictors.index <- (1:ncol(data))[-outcome.index]
+        predictors.index <- indices[-match(outcome.name, formula.names)]
         indices <- c(outcome.index, predictors.index)
-        factors <- unlist(lapply(data[,indices]))
+        factors <- unlist(lapply(data[,indices], is.factor))
         if (any(factors))
             stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
                  Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-        subset.data <- ifelse(is.null(subset), data, subset.data.frame(data, subset))
-        estimation.data <- ifelse(is.null(weights), filtered.data,
-                                AdjustDataToReflectWeights(filtered.data, weights))
-        lm.cov <- psych::setCor(outcome.index, predictors.index, data = estimation.data)
-        coefficents <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
-        dimnames(ans$coefficients) <- list(variable.name[predictor.index],
+        subset.data <- ifThen(is.null(subset), data, subset(data, subset))
+        estimation.data <- ifThen(is.null(weights), subset.data,
+                                AdjustDataToReflectWeights(subset.data, weights))
+        result$lm.cov <- lm.cov <- capture.output(psych::setCor(outcome.index, predictors.index,
+            data = estimation.data, std = FALSE), , file='NUL')
+        partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+        dimnames(partial.coefs) <- list(variable.names[predictors.index],
             c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-        intercept <- mean(weighted.data[[outcome.name]]) -
-            mean(weighted.data[, predictors.index] %*% lm.cov$beta)
-        result$predicted <- data[, predictors.index] %*% lm.cov$beta + intercept
-        coefficents <- coefficients[c(1,1:nrow(coefficients)),]
-        #coefficents[1,] <- c(intercept, NA, NA, NA)
-        rownames(coefficents)[1] <- "(Intercept)"
-        result$coef.matrix <- result
-        rng <- range(rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
+        beta <- as.matrix(lm.cov$beta)
+        fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
+        intercept <- mean(estimation.data[[outcome.name]]) - mean(fitted)
+        result$predicted <- fitted + intercept
+        partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
+        partial.coefs[1,] <- c(intercept, NA, NA, NA)
+        rownames(partial.coefs)[1] <- "(Intercept)"
+        result$partial.coefs <- partial.coefs
+        rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
         if (rng[1] == rng[2])
             result$sample.size <- paste0("n = ", rng[1],
-                " cases used in estimation, a total sample size of ", sum(subset), "\n")
+                " cases used in estimation\n")
         else
             result$sample.size <- paste0("Pairwise correlations have been used to estimate this regression.\n",
-                                         "sample sizes for the correlations range from ", rng[1], "to", rng[2])
+                                         "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
     }
@@ -126,13 +130,16 @@ LinearRegression <- function(formula, data, subset = NULL, weights = NULL, missi
     #         else
     #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
         }
+        missing.data <- all(estimation.subset, TRUE)
         result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
-        result$sample.size <- paste0("n = ", sum(estimation.subset),
-            " cases used in estimation, of a total sample size of ",ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")
+        result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
+        result$sample.size <- paste0(ifelse(!missing.data, ".\n",
+            ", of a total sample size of ",ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n"))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
-        result$sample.size <- paste0(result$sample.size,
-            switch(missing, "Error if missing data" = "",
+        if(missing.data)
+            result$sample.size <- paste0(result$sample.size,
+                switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation" = "Missing values of predictor variables have been imputed.\n"))
     }
@@ -155,9 +162,8 @@ print.Regression <- function(Regression.object, ...)
         Regression.summary$coefficients <- Regression.object$robust.coefficients
     else
     {   #Testing to see if the variance is non-constant.
-        if (!Regression.object$weighted)
+        if (!Regression.object$weighted & is.null(Regression.object$partial.coefs))
         {
-
             bp.test <- breusch.pagan(Regression.object, Regression.summary)
             if (bp.test$p <= 0.05)
             {
@@ -167,9 +173,9 @@ print.Regression <- function(Regression.object, ...)
             }
         }
     }
-    # Inserting the coefficients from the
-    if (!is.null(Regression.object$coef.matrix)) # Partial data.
-        Regression.summary$coefficients <- Regression.object$coef.matrix
+    # Inserting the coefficients from the partial data.
+    if (!is.null(Regression.object$partial.coefs)) # Partial data.
+        Regression.summary$coefficients <- Regression.object$partial.coefs
     outcome.variable <- outcomeVariableFromModel(Regression.object)
     if (length(unique(outcome.variable)) == 2)
         warning(paste0("The outcome variable contains only two unique values. A BinaryLogit may be
@@ -180,6 +186,8 @@ print.Regression <- function(Regression.object, ...)
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A count data model may be more appropriate (e.g., Poisson Regression)."))
     }
     print(Regression.summary, ...)
+    if (!is.null(Regression.object$lm.cov))
+        cat(paste0("Partial-data R-square ", FormatAsReal(Regression.object$lm.cov$R2), "\n"))
     cat(Regression.object$sample.size)
     if (Regression.object$robust.se)
         cat("Heteroscedastic-robust standard errors.")

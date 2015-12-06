@@ -9,6 +9,10 @@ This example is based on data and methods  from Cameron, A Colin and Pravin K. T
 
 
 
+missing <- "Use partial data (pairwise)"
+reg.lm <- LinearRegression(trips ~ quality + price + income, recreational.demand, missing = missing)
+reg.lm
+
 reg.lm <- LinearRegression(trips ~ quality + price + income, recreational.demand)
 reg.lm
 
