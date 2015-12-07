@@ -1,4 +1,4 @@
-context("Linear regression")
+# context("Linear regression")
 
 # test_that("allEffects works on Regression object",
 # {

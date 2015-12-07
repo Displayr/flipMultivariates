@@ -72,7 +72,7 @@ LinearRegression <- function(formula, data, subset = NULL,
             c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
         beta <- as.matrix(lm.cov$beta)
         fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
-        intercept <- mean(estimation.data[[outcome.name]]) - mean(fitted)
+        intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
         fitted <- as.matrix(data[, predictors.index]) %*% beta
         result$predicted <- fitted + intercept
         partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
@@ -88,6 +88,7 @@ LinearRegression <- function(formula, data, subset = NULL,
                                          "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
+        estimation.subset <- row.names %in% rownames(estimation.data)
     }
     else
     {
@@ -141,7 +142,7 @@ LinearRegression <- function(formula, data, subset = NULL,
     #         else
     #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
         }
-        missing.data <- all(estimation.subset, TRUE)
+        missing.data <- ifelse(hasSubset(subset), sum(subset), length(outcome.variable)) > sum(estimation.subset)
         result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
@@ -154,6 +155,7 @@ LinearRegression <- function(formula, data, subset = NULL,
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation" = "Missing values of predictor variables have been imputed.\n"))
     }
+    result$subset <- estimation.subset
     if (hasSubset(subset))
         result$na.action <- c(result$na.action, row.names(!subset))
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
@@ -173,16 +175,20 @@ print.Regression <- function(Regression.object, ...)
         Regression.summary$coefficients <- Regression.object$robust.coefficients
     else
     {   #Testing to see if the variance is non-constant.
-        if (!Regression.object$weighted)# & is.null(Regression.object$partial.coefs))
+#         if (!Regression.object$weighted)# & is.null(Regression.object$partial.coefs))
+#         {
+        bp.test <- breusch.pagan(Regression.object, Regression.summary)
+        if (bp.test$p <= 0.05)
         {
-            bp.test <- breusch.pagan(Regression.object, Regression.summary)
-            if (bp.test$p <= 0.05)
-            {
-                warning(paste0("A Breusch Pagan Test for non-constant variance has been failed (p = ",
-                    FormatAsPValue(bp.test$p), "). Consider using Robust Standard Errors."))
-                outcome.variable <- outcomeVariableFromModel(Regression.object)
-            }
+            suggest <- ifelse(Regression.object$weighted,
+            " This test can be misleading with weighted data (i.e., the failure of the test may not be problematic).",
+            ifelse(is.null(Regression.object$partial.coefs), " Or, consider using Robust Standard Errors.", ""))
+            warning(paste0("A Breusch Pagan Test for non-constant variance has been failed (p = ",
+                FormatAsPValue(bp.test$p), "). A plot of the residuals versus the fitted values of the outcome variable may be useful (Insert > Advanced > Regression > Plots > Residuals vs Fitted). A transformation of the outcome or predictor variables may solve this problem.",
+                suggest, "\n"))
+            outcome.variable <- outcomeVariableFromModel(Regression.object)
         }
+        # }
     }
     # Inserting the coefficients from the partial data.
     if (!is.null(Regression.object$partial.coefs)) # Partial data.
@@ -194,7 +200,7 @@ print.Regression <- function(Regression.object, ...)
     else
     {
         if (isCount(outcome.variable))
-            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A count data model may be more appropriate (e.g., Poisson Regression)."))
+            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variabe model may be more appropriate (e.g., Poisson Regression, Ordered Logit)."))
     }
     print(Regression.summary, ...)
     if (!is.null(Regression.object$lm.cov))

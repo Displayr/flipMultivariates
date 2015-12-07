@@ -36,9 +36,7 @@ outcomeVariableFromModel <- function(Regression.object)
 #     print(Regression.object)
 #     print(Regression.object$call)
     formula <- as.list(Regression.object$call)$formula
-#     print(formula)
-#     print(outcomeName(formula))
-    Regression.object$model[[outcomeName(formula)]]
+    Regression.object$model[, outcomeName(formula)]
 }
 
 hasSubset <- function(subset) {!is.null(subset) & length(subset) != 1}

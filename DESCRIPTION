@@ -1,13 +1,14 @@
 Package: flipMultivariates
 Title: Multivariate models
 Version: 0.1
-Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
+Date: 2015-11-07
+Author: Numbers International Pty Ltd
+Maintainer: Tim Bock <tim.bock@numbers.net.au>
 Description: Multivariate models and supporting code.
 Depends:
     R (>= 3.1.1)
 License: MIT + file LICENSE
-LazyData: true
-Imports:
+imports:
     sankeytreeR,
     MASS,
     hash,
@@ -18,11 +19,8 @@ Imports:
     tree,
     car,
     lmtest,
-    RcmdrMisc
-Suggests:
-    testthat,
+    RcmdrMisc,
     effects,
-    knitr,
-    rmarkdown
-RoxygenNote: 5.0.1
-VignetteBuilder: knitr
+    testthat
+#suggests:testthat
+
