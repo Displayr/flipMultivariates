@@ -4,7 +4,7 @@
 \alias{SingleImputation}
 \title{\code{SingleImputation}}
 \usage{
-SingleImputation(data, outcome.name = NULL, ...)
+SingleImputation(formula, data, outcome.name = NULL, ...)
 }
 \arguments{
 \item{data}{A \code{\link{data.frame}}.}

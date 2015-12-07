@@ -31,7 +31,8 @@ is weighted,  \code{\link{survey::svyglm}}.}
 Linear regression: ordinary least squares or least squares with survey weights.
 }
 \details{
-"Imputation" is performed using predictive mean matching with the \code{\link{mice}} package. All selected
+"Imputation" is performed using multivariate imputation by chained equations
+(predictive mean matching) with the \code{\link{mice}} package. All selected
 outcome and predictor variables are included in the imputation, including any data excluded
 via \code{subset}. Then,
 cases with missing values in the outcome variable are excluded from the

@@ -14,7 +14,8 @@
 #' @param ... Additional argments to be past to  \code{\link{lm}} or, if the data
 #' is weighted,  \code{\link{survey::svyglm}}.
 #'
-#' @details "Imputation" is performed using predictive mean matching with the \code{\link{mice}} package. All selected
+#' @details "Imputation" is performed using multivariate imputation by chained equations
+#' (predictive mean matching) with the \code{\link{mice}} package. All selected
 #' outcome and predictor variables are included in the imputation, including any data excluded
 #' via \code{subset}. Then,
 #' cases with missing values in the outcome variable are excluded from the
@@ -45,50 +46,8 @@ LinearRegression <- function(formula, data, subset = NULL,
     {
         if (robust.se)
             stop(paste0("Robust standard errors cannot be computed with 'missing' set to ", missing, "."))
-        result <- lm(formula, data, ...)
-        variable.names <- names(data)
-        formula.names <- all.vars(formula)
-        indices <- match(formula.names, variable.names)
-        outcome.index <- match(outcome.name, variable.names)
-        predictors.index <- indices[-match(outcome.name, formula.names)]
-        indices <- c(outcome.index, predictors.index)
-        factors <- unlist(lapply(data[,indices], is.factor))
-        if (any(factors))
-            stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
-                 Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-        subset.data <- ifThen(is.null(subset), data, subset(data, subset))
-        # Taking the print chart statement out of setCor.
-        .pairwise.regression <- psych::setCor
-        n <- length(body(.pairwise.regression))
-        while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
-            n <- n - 1
-        body(.pairwise.regression)[n] <- NULL
-        estimation.data <- ifThen(is.null(weights), subset.data,
-                                AdjustDataToReflectWeights(subset.data, weights))
-        result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
-            data = estimation.data, std = FALSE)
-        partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
-        dimnames(partial.coefs) <- list(variable.names[predictors.index],
-            c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-        beta <- as.matrix(lm.cov$beta)
-        fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
-        intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
-        fitted <- as.matrix(data[, predictors.index]) %*% beta
-        result$predicted <- fitted + intercept
-        partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
-        partial.coefs[1,] <- c(intercept, NA, NA, NA)
-        rownames(partial.coefs)[1] <- "(Intercept)"
-        result$partial.coefs <- partial.coefs
-        rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
-        if (rng[1] == rng[2])
-            result$sample.size <- paste0("n = ", rng[1],
-                " cases used in estimation.\n")
-        else
-            result$sample.size <- paste0("Pairwise correlations have been used to estimate this regression.\n",
-                                         "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
-        if (!is.null(weights))
-            result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
-        estimation.subset <- row.names %in% rownames(estimation.data)
+        result <- linearRegressionFromCorrelations(formula, data, subset,
+                             weights, outcome.variable, outcome.name, ...)
     }
     else
     {
@@ -99,7 +58,7 @@ LinearRegression <- function(formula, data, subset = NULL,
         estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
-                       "Imputation" = SingleImputation(subset.data, outcome.name))
+                       "Imputation" = SingleImputation(formula, subset.data, outcome.name))
         if (is.null(weights))
         {
 #             if (is.null(subset) || length(subset) == 1)
@@ -149,13 +108,13 @@ LinearRegression <- function(formula, data, subset = NULL,
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
-        if(missing.data)
+        if(missing.data || missing == "Imputation")
             result$sample.size <- paste0(result$sample.size,
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation" = "Missing values of predictor variables have been imputed.\n"))
+        result$subset <- estimation.subset
     }
-    result$subset <- estimation.subset
     if (hasSubset(subset))
         result$na.action <- c(result$na.action, row.names(!subset))
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
@@ -200,7 +159,7 @@ print.Regression <- function(Regression.object, ...)
     else
     {
         if (isCount(outcome.variable))
-            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variabe model may be more appropriate (e.g., Poisson Regression, Ordered Logit)."))
+            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable model may be more appropriate (e.g., Poisson Regression, Ordered Logit)."))
     }
     print(Regression.summary, ...)
     if (!is.null(Regression.object$lm.cov))
@@ -478,4 +437,55 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
 
 
 
+linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
+                             weights = NULL, outcome.variable, outcome.name, ...)
 
+
+{
+    result <- lm(formula, data, ...)
+    variable.names <- names(data)
+    formula.names <- all.vars(formula)
+    indices <- match(formula.names, variable.names)
+    outcome.index <- match(outcome.name, variable.names)
+    predictors.index <- indices[-match(outcome.name, formula.names)]
+    indices <- c(outcome.index, predictors.index)
+    factors <- unlist(lapply(data[,indices], is.factor))
+    if (any(factors))
+        stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
+             Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
+    subset.data <- ifThen(is.null(subset), data, subset(data, subset))
+    # Taking the print chart statement out of setCor.
+    .pairwise.regression <- psych::setCor
+    n <- length(body(.pairwise.regression))
+    while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
+        n <- n - 1
+    body(.pairwise.regression)[n] <- NULL
+    estimation.data <- ifThen(is.null(weights), subset.data,
+                            AdjustDataToReflectWeights(subset.data, weights))
+    result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
+        data = estimation.data, std = FALSE)
+    partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+    dimnames(partial.coefs) <- list(variable.names[predictors.index],
+        c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+    beta <- as.matrix(lm.cov$beta)
+    fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
+    intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
+    fitted <- as.matrix(data[, predictors.index]) %*% beta
+    result$predicted <- fitted + intercept
+    partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
+    partial.coefs[1,] <- c(intercept, NA, NA, NA)
+    rownames(partial.coefs)[1] <- "(Intercept)"
+    result$partial.coefs <- partial.coefs
+    rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
+    if (rng[1] == rng[2])
+        result$sample.size <- paste0("n = ", rng[1],
+            " cases used in estimation.\n")
+    else
+        result$sample.size <- paste0("Pairwise correlations have been used to estimate this regression.\n",
+                                     "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
+    if (!is.null(weights))
+        result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
+    estimation.subset <- rownames(data) %in% rownames(estimation.data)
+    result$subset <- estimation.subset
+    result
+}
