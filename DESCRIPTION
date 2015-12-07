@@ -20,7 +20,5 @@ imports:
     car,
     lmtest,
     RcmdrMisc,
-    effects,
-    testthat
-#suggests:testthat
+    effects
 
