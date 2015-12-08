@@ -12,13 +12,14 @@ breusch.pagan <- function(Regression.object, Regression.summary, var.formula)
 ##    sumry <- summary(Regression.object)
     residuals <- residuals(Regression.object, type = "pearson")
     S.sq <- df.residual(Regression.object) * (Regression.summary$sigma)^2/sum(!is.na(residuals))
-    .U <- (residuals^2)/S.sq
+    U <- (residuals^2)/S.sq
 #     if (missing(var.formula)) {
     fitted.values <- fitted.values(Regression.object)
     #print(Regression.object)
-    outcome <- outcomeVariableFromModel(Regression.object)
+    #residuals <- residuals(Regression.object)#outcome <- outcomeVariableFromModel(Regression.object)
+
     # stop("dog")
-        mod <- lm(outcome ~ fitted.values, subset = Regression.object$subset)
+        mod <- lm(U ~ fitted.values, subset = Regression.object$subset)
         varnames <- "fitted.values"
         var.formula <- ~fitted.values
         df <- 1

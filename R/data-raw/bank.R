@@ -7,6 +7,7 @@ devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
 
 # Model type
+data(bank)
 LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank)
 
 
