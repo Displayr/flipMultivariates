@@ -8,10 +8,13 @@ devtools::use_data(park.visits, internal = FALSE, overwrite = TRUE)
 This example is based on data and methods  from Cameron, A Colin and Pravin K. Trivedi (1998), "Regression analsyes of count data",chapter 6.
 
 
+data(park.visits)
+Regression(trips ~ quality + price + income, data = park.visits)
+Regression(trips ~ quality + price + income, data = park.visits, robust.se = TRUE)
 
-missing <- "Use partial data (pairwise)"
-LinearRegression(trips ~ quality + price + income, data = recreational.demand, missing = missing)
-LinearRegression(trips ~ quality + price + income, data = recreational.demand, missing = missing, robust.se = TRUE)
+Regression(trips ~ quality + price + income, data = park.visits, method = "Poisson")
+Regression(trips ~ quality + price + income, data = park.visits, method = "Quasi-Poisson", robust.SE = TRUE)
+
 
 LinearRegression(trips ~ quality + price + income, data = recreational.demand)
 

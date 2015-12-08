@@ -11,9 +11,12 @@ PoissonRegression(formula, data, subset = NULL, weights = NULL, ...)
 
 \item{data}{A \code{\link{data.frame}}.}
 
-\item{subset}{An optional vector specifying a subset of observations to be used in the fitting process.}
+\item{subset}{An optional vector specifying a subset of observations to be used in the fitting process, or,
+the name of a variable in \code{data}. It may not be an expression.
+\code{subset} may not}
 
-\item{weights}{An optional vector of sampling weights.}
+\item{weights}{An optional vector of sampling weights, or, the name or,
+the name of a variable in \code{data}. It may not be an expression.}
 
 \item{...}{Additional argments to be past to  \code{\link{lm}} or, if the data
 is weighted,  \code{\link{survey::svyglm}}.}
