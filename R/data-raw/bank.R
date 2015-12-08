@@ -3,12 +3,16 @@ bank <- read.spss("C:/q/Install/Examples/Satisfaction with missing data.sav",
                   to.data.frame = TRUE)
 set.seed(54543)
 bank[runif(nrow(bank)) < 0.1, 2] <- NA #Adding missing values to the dependent variable
+bank$weight <- NA
+for (i in unique(bank$ID))
+    bank$weight[bank$ID == i] <- ifelse(runif(1)<.05, NA, max(1, min(rnorm(5,2),10)))
+print(summary(bank$weight))
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
 
 # Model type
 data(bank)
-LinearRegression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank)
+z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank)
 
 
 
