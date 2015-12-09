@@ -13,7 +13,7 @@ devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 # Model type
 data(bank)
 zz <- NULL
-Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank)
+Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation")
 
 
 zdata <- bank#data.frame(Overall = Overall, Fees = Fees)
