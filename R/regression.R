@@ -169,7 +169,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
-    rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
+    pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
+    rng <- range(lower(pairwise.n))
     if (rng[1] == rng[2])
         result$sample.size <- paste0("n = ", rng[1],
             " cases used in estimation.\n")
