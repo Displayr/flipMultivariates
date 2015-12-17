@@ -1,18 +1,31 @@
 library(foreign)
-bank <- read.spss("C:/q/Install/Examples/Satisfaction with missing data.sav",
+bank <- read.spss("C:/q/Install/Examples/Satisfaction.sav",
                   to.data.frame = TRUE)
 set.seed(54543)
-bank[runif(nrow(bank)) < 0.1, 2] <- NA #Adding missing values to the dependent variable
+bank[matrix(runif(prod(dim(bank))), nrow = nrow(bank)) < 0.05] <- NA # Adding missing data 5%.
+bank[runif(nrow(bank)) < 0.1, "outcome"] <- NA #Adding missing values to the dependent variable 20%
+bank[runif(nrow(bank)) < 0.5, "branch"] <- NA #Adding missing values to branch the dependent variable 20%
 bank$weight <- NA
 for (i in unique(bank$ID))
     bank$weight[bank$ID == i] <- ifelse(runif(1)<.05, NA, max(1, min(rnorm(5,2),10)))
-print(summary(bank$weight))
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
+MissingValuesByVariable <- function(data)
+{
+    n <- nrow(data)
+    missing <- apply(is.na(data), 2, sum)
+    result <- data.frame("Missing" = missing,
+        proportion = FormatAsPercent(missing / n))
+    names(result)[2] <- paste0("Percent (of ", n, ")")
+    result}
 
-# Model type
+MissingValuesByVariable(bank)
+
+tapply(z, function(x) {x$Missing})
+
+    # Model type
 data(bank)
-z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank)
+z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank, weight = wgt)
 
 
 
