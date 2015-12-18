@@ -347,9 +347,156 @@ print.CART <- function(cart.object, ...)
 #  #ibrary(flipMultivariates)
 #  z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
 #  z
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Workspace loaded from ~/GitHub/flipMultivariates/.RData]
+
+
+Restarting R session...
+
+> library(flipMultivariates)
+
+Restarting R session...
+
+> library(flipMultivariates)
+
+Restarting R session...
+
+> library(flipMultivariates)
+> set.seed(132)
+>  data(cpus, package="MASS")
+>  cpuss <- cpus
+>  cpuss$weights = runif(nrow(cpus))
+>  cpuss$subset = runif(nrow(cpus)) > 0.5
+>  library(devtools)
+> # install_github("NumbersInternational/sankeytree")
+>  install_github("xtmwang/sankeytree")
+Downloading GitHub repo xtmwang/sankeytree@master
+Installing sankeytreeR
+"C:/PROGRA~1/R/R-32~1.2/bin/x64/R" --no-site-file --no-environ --no-save --no-restore CMD INSTALL  \
+  "C:/Users/tim.NUMDOM2/AppData/Local/Temp/RtmpYLqO5R/devtools28185c456c8f/xtmwang-sankeytree-8bfff04"  \
+  --library="C:/Users/tim.NUMDOM2/Documents/R/win-library/3.2" --install-tests
+
+* installing *source* package 'sankeytreeR' ...
+** R
+** inst
+** tests
+** preparing package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+*** arch - i386
+*** arch - x64
+* DONE (sankeytreeR)
+> # install_github("NumbersInternational/flipMultivariates")
+>  library(sankeytreeR)
+>  #ibrary(flipMultivariates)
+>  z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
+>  z
+> z
+> print(z)
+> install.packages("babynames")
+Installing package into ‘C:/Users/tim.NUMDOM2/Documents/R/win-library/3.2’
+(as ‘lib’ is unspecified)
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.2/babynames_0.1.zip'
+Content type 'application/zip' length 8980195 bytes (8.6 MB)
+downloaded 8.6 MB
+
+package ‘babynames’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\tim.NUMDOM2\AppData\Local\Temp\RtmpYLqO5R\downloaded_packages
+> install.packages("jsonlite")
+Error in install.packages : Updating loaded packages
+>
+> devtools::install_github("hrbrmstr/streamgraph")
+Downloading GitHub repo hrbrmstr/streamgraph@master
+
+Restarting R session...
+
+>
+>
+>
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library(babynames)
+Warning message:
+package ‘babynames’ was built under R version 3.2.3
+> library(streamgraph)
+>
+> babynames %>%
++   filter(grepl("^Kr", name)) %>%
++   group_by(year, name) %>%
++   tally(wt=n) %>%
++   streamgraph("name", "n", "year")
+Error in loadNamespace(name) : there is no package called ‘jsonlite’
+>
+> library(plotly)
+Error in library(plotly) : there is no package called ‘plotly’
+> install.packages("plotly")
+Installing package into ‘C:/Users/tim.NUMDOM2/Documents/R/win-library/3.2’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘jsonlite’, ‘viridis’
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.2/jsonlite_0.9.19.zip'
+Content type 'application/zip' length 1008851 bytes (985 KB)
+downloaded 985 KB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.2/viridis_0.3.1.zip'
+Content type 'application/zip' length 1787823 bytes (1.7 MB)
+downloaded 1.7 MB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.2/plotly_2.0.3.zip'
+Content type 'application/zip' length 985205 bytes (962 KB)
+downloaded 962 KB
+
+package ‘jsonlite’ successfully unpacked and MD5 sums checked
+package ‘viridis’ successfully unpacked and MD5 sums checked
+package ‘plotly’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\tim.NUMDOM2\AppData\Local\Temp\RtmpO4AZp9\downloaded_packages
+> ibrary(plotly)
+Error: could not find function "ibrary"
+> set.seed(100)
+> d <- diamonds[sample(nrow(diamonds), 1000), ]
+Error: object 'diamonds' not found
+> plot_ly(d, x = carat, y = price, text = paste("Clarity: ", clarity),
++         mode = "markers", color = carat, size = carat)
+Error: could not find function "plot_ly"
+>
 # # # cpuss$weights
 # #
 #
 # #z <- tree::tree(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
 #plot(z)
 #text(z)
+
+#z <- CART(factor(perf > 100) ~ syct+mmin+mmax+cach+chmin+chmax,
+#          data = cpuss, weights = weights, subset = subset)
+
