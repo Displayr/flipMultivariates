@@ -20,5 +20,6 @@ imports:
     car,
     lmtest,
     RcmdrMisc,
-    effects
+    effects,
+    flipPlots
 
