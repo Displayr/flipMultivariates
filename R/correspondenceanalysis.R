@@ -31,5 +31,3 @@ CorrespondenceAnalysis = function(x,
           tooltip_text = createCaTooltips(x, x.ca$rownames, x.ca$colnames)
     )
 }
-
-`Correspondence analysis` = CorrespondenceAnalysis(QInputs(tableToAnalyse))
