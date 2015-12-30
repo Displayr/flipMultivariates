@@ -60,7 +60,7 @@ print.CorrespondenceAnalysis <- function(CorrespondenceAnalysis.object)
     normed <- CANormalization(CorrespondenceAnalysis.object, CorrespondenceAnalysis.object$normalization)
     singular.values <- round(CorrespondenceAnalysis.object$sv^2, 6)
     variance.explained <- paste(as.character(round(100 * prop.table(singular.values), 1)), "%", sep = "")[1:2]
-    column.labels <- paste("Dimension", 1:2, variance.explained)
+    column.labels <- paste("Dimension", 1:2, paste0("(", variance.explained, ")"))
     row.coordinates <- normed$row.coordinates
     column.coordinates <- normed$column.coordinates
     coords <- rbind(row.coordinates, column.coordinates)
