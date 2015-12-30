@@ -32,7 +32,6 @@
 #' test of heteroskedasticity. Econometrica, 48, 817-838.
 #' Long, J. S. and Ervin, L. H. (2000). Using heteroscedasticity consistent standard errors
 #' in the linear regression model. The American Statistician, 54( 3): 217– 224.
-
 #' @export
 Regression <- function(formula, data, subset = NULL,
                              weights = NULL,
@@ -59,8 +58,8 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        subset.data <- ifThen(hasSubset(subset),
-            ifThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
+        subset.data <- IfThen(hasSubset(subset),
+            IfThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
             data)
         subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
         estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
@@ -146,14 +145,14 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     if (any(factors))
         stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
              Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-    subset.data <- ifThen(is.null(subset), data, subset(data, subset))
+    subset.data <- IfThen(is.null(subset), data, subset(data, subset))
     # Taking the print chart statement out of setCor.
     .pairwise.regression <- psych::setCor
     n <- length(body(.pairwise.regression))
     while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
         n <- n - 1
     body(.pairwise.regression)[n] <- NULL
-    estimation.data <- ifThen(is.null(weights), subset.data,
+    estimation.data <- IfThen(is.null(weights), subset.data,
                             AdjustDataToReflectWeights(subset.data, weights))
     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
         data = estimation.data, std = FALSE)
@@ -242,8 +241,8 @@ LinearRegression <- function(formula, data, subset = NULL,
     }
     else
     {
-        subset.data <- ifThen(hasSubset(subset),
-            ifThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
+        subset.data <- IfThen(hasSubset(subset),
+            IfThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
             data)
         subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
         estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),

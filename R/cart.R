@@ -6,13 +6,19 @@
 #' no interaction terms. Both \code{.} and \code{-} are allowed: regression trees can have
 #' offset terms
 #' @param data A data frame in which to preferentially interpret formula, weights and subset
+#' @param subset An optional vector specifying a subset of observations to be used in the fitting process, or,
+#' the name of a variable in \code{data}. It may not be an expression.
+#' \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or,
+#' the name of a variable in \code{data}. It may not be an expression.
+#' @param output How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.
 #' @param ... Additional arguments that are passed to  \code{\link{tree}}
 #' and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev
 #'
 #' @details Creates a \code{\link{tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
-CART <- function(formula, data, weights = NULL, subset = NULL, ...)
+CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot", ...)
 {
     if (is.null(weights))
     {
@@ -40,7 +46,7 @@ CART <- function(formula, data, weights = NULL, subset = NULL, ...)
     }
     result$predicted <- predict(result, newdata = data, type = "tree", na.action = na.exclude)
     class(result) <- append("CART", class(result))
-
+    result$output <- output
     return(result)
 }
 
@@ -324,32 +330,21 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 }
 
 #' @export
-print.CART <- function(cart.object, ...)
+print.CART <- function(cart.object)
 {
-    tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
-
-    plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
-        tooltip = c("n", "Description"), treeColors = TRUE, colorLegend = TRUE, categoryLegend = TRUE)
-    plt
+    if (cart.object$output == "Sankey Plot")
+    {
+        tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
+        plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
+            tooltip = c("n", "Description"), treeColors = TRUE, colorLegend = TRUE, categoryLegend = TRUE)
+    }
+    else if (cart.object$output == "Tree")
+    {
+        plt <- plot(cart.object)
+        plt <- text(cart.object)
+    }
+    else if (cart.object$output == "Text")
+        return(tree:::print.tree(cart.object))
+    print(plt)
 }
 
-#
-#  set.seed(132)
-#  data(cpus, package="MASS")
-#  cpuss <- cpus
-#  cpuss$weights = runif(nrow(cpus))
-#  cpuss$subset = runif(nrow(cpus)) > 0.5
-#  library(devtools)
-# # install_github("NumbersInternational/sankeytree")
-#  install_github("xtmwang/sankeytree")
-# # install_github("NumbersInternational/flipMultivariates")
-#  library(sankeytreeR)
-#  #ibrary(flipMultivariates)
-#  z <- CART(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
-#  z
-# # # cpuss$weights
-# #
-#
-# #z <- tree::tree(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpuss, weights = weights, subset = subset)
-#plot(z)
-#text(z)

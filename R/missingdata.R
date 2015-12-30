@@ -51,7 +51,7 @@ ExcludeCasesWithAnyMissingData <- function(data)
 ErrorIfMissingDataFound <- function(data)
 {
     #tt <- try(suppressWarnings(na.fail(data)))
-    ifThen(any(is.na(data)), missingDataFail(), data)
+    IfThen(any(is.na(data)), missingDataFail(), data)
 }
 
 
