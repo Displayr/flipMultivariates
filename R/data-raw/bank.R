@@ -27,6 +27,14 @@ tapply(z, function(x) {x$Missing})
 data(bank)
 z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank, weight = wgt)
 
+zz <- NULL
+Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation")
+
+
+zdata <- bank#data.frame(Overall = Overall, Fees = Fees)
+
+Regression(Overall ~ Fees, data)
+
 
 
 

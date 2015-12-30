@@ -324,12 +324,13 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 }
 
 #' @export
-print.CART <- function(x, ...)
+print.CART <- function(cart.object, ...)
 {
-    tree.list <- treeFrameToList(x, custom.color = TRUE)
+    tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
+
     plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
-        tooltip = c("n", "Description"), treeColors = TRUE, legend = TRUE)
-    print(plt)
+        tooltip = c("n", "Description"), treeColors = TRUE, colorLegend = TRUE, categoryLegend = TRUE)
+    plt
 }
 
 #

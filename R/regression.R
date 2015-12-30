@@ -117,12 +117,13 @@ Regression <- function(formula, data, subset = NULL,
     if (hasSubset(subset))
         result$na.action <- c(result$na.action, row.names(!subset))
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
-    result$resid <- outcome.variable - result$predicted
     result$call <- cl
     result$robust.se <- robust.se
-    result$weighted <- !is.null(weights)
+    result$weights <- weights
     class(result) <- append("Regression", class(result))
     result$type = type
+    result$summary  <- summary(result)
+    result$residuals <- outcome.variable - result$predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
 
@@ -168,7 +169,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
-    rng <- range(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]])
+    pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
+    rng <- range(lower(pairwise.n))
     if (rng[1] == rng[2])
         result$sample.size <- paste0("n = ", rng[1],
             " cases used in estimation.\n")
@@ -307,7 +309,8 @@ LinearRegression <- function(formula, data, subset = NULL,
     if (hasSubset(subset))
         result$na.action <- c(result$na.action, row.names(!subset))
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
-    result$resid <- outcome.variable - result$predicted
+    result$residuals <- outcome.variable - result$predicted
+    print(result$residuals)
     result$call <- cl
     result$robust.se <- robust.se
     result$weighted <- !is.null(weights)
@@ -318,7 +321,8 @@ LinearRegression <- function(formula, data, subset = NULL,
 #' @export
 print.Regression <- function(Regression.object, ...)
 {
-    Regression.summary <- summary(Regression.object)
+    Regression.summary <- Regression.object$summary
+
     if (Regression.object$robust.se)
         Regression.summary$coefficients <- Regression.object$robust.coefficients
     else

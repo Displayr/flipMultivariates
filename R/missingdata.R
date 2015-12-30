@@ -14,8 +14,9 @@ SingleImputation <- function(formula, data, outcome.name = NULL, ...)
     if(!any(is.na(data)))
         warning("Imputation has been selected, but the data has no missing values, so nothing has been imputed.")
     requireNamespace("mice")
+    library(mice)
     set.seed(12321) # Ensures that users do not have diferent outcomes each time.
-    imputed.data<- complete(mice(data, seed = 12321, m = 1, printFlag = FALSE), 1)
+    imputed.data<- mice::complete(mice::mice(data, seed = 12321, m = 1, printFlag = FALSE), 1)
     if (!is.null(outcome.name))
     {
         valid.dependent <- !is.na(data[, outcome.name])
