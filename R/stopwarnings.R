@@ -2,7 +2,7 @@
 
 stopIfNotCount = function(formula, data)
 {
-    dependent.name <- dependentName(formula)
+    dependent.name <- outcomeName(formula)
     dependent.variable <- data[[dependent.name]]
     if (!allIntegers(dependent.variable))
         stop(paste("This analysis assumes that the Outcome variable contains only integers (i.e., whole numbers).

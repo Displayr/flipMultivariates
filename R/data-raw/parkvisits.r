@@ -26,8 +26,23 @@ reg.lm
 
 
 
-reg.p <- PoissonRegression(trips ~ quality + price + income, recreational.demand)
+reg.p <- PoissonRegression(trips ~ quality + price + income, park.visits)
 reg.pois
+
+
+data(park.visits)
+CART(trips ~ quality + price + income, park.visits)
+CART(trips ~ quality + price + income, park.visits, output = "Tree")
+CART(trips ~ quality + price + income, park.visits, output = "Text")
+
+
+data(cpus, package="MASS")
+cpuss <- cpus
+QPopulationWeight = runif(nrow(cpus))
+cpuss$weights = QPopulationWeight
+QFilter = runif(nrow(cpus)) > 0.5
+cpuss$mmax <- factor(round(cpus$mmax / 10000) + 1, labels= c("Near 0", "10,000", "20,000", "30,000", "Sixty Thousands"))
+
 
 
 # car::ncvTest(reg.lm)
