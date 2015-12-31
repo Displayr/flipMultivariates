@@ -21,7 +21,7 @@
 #' @details "Imputation" is performed using multivariate imputation by chained equations
 #' (predictive mean matching) with the \code{\link{mice}} package. All selected
 #' outcome and predictor variables are included in the imputation, including any data excluded
-#' via \code{subset}. Then,
+#' via \code{subset} and due to having invalid weights. Then,
 #' cases with missing values in the outcome variable are excluded from the
 #' analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
 #' synthetic data file is created by sampling with replacement in proportion to the weights,where the
@@ -44,6 +44,7 @@ Regression <- function(formula, data, subset = NULL,
         subset[is.na(subset)] <- FALSE
     if (!is.null(weights))
         weights[is.na(weights)] <- 0
+    cleaned.weights <- weights
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     row.names <- rownames(data)
@@ -62,15 +63,47 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        subset.data <- flipU::IfThen(hasSubset(subset),
-            flipU::IfThen(is.null(weights), subset(data, subset), subset(data , subset & weights > 0)),
-            flipU::IfThen(is.null(weights), data, subset(data, weights > 0)))
-        subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
-        estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
-                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
+        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data),
+                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
-                       "Imputation" = SingleImputation(formula, subset.data, outcome.name))
-        estimation.subset <- row.names %in% rownames(estimation.data)
+                       "Imputation" = SingleImputation(formula, data, outcome.name))
+        #print(summary(data.post.missing.value.treatment))
+        #stop("dog")
+        post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
+        #print(summary(estimation.subset))
+        estimation.subset <- flipU::IfThen(hasSubset(subset), subset[post.missing.data.estimation.subset],
+                                           rep(TRUE, nrow(post.missing.data.estimation.subset)))
+        if (!is.null(weights))
+        {
+            weights <- weights[post.missing.data.estimation.subset]
+            estimation.subset <- estimation.subset & weights > 0
+        }
+        #print(summary(weights))
+        estimation.data <- data.post.missing.value.treatment[estimation.subset, all.vars(formula)] #Removing variables not used in the formula.
+#print(dim(estimation.data))
+        #         estimation.data <-
+#
+#             estimation.subset
+#
+#         post.missing.value.treatment.sample <- row.names %in% rownames(data.post.missing.value.treatment)
+#
+#
+#
+#             subset.data <- subset(data, subset[row.names %in% rownames(post.missing.value.treatment.sample)])
+#         post.subset.sample <- row.names %in% rownames(subset.data)
+#         if (!is.null(weights))
+#             weights <- weights[post.missing.value.treatment.subset]
+#
+#
+#             subset <- subset[post.missing.value.treatment.subset]
+#
+#
+#
+#         subset.data <- flipU::IfThen(hasSubset(subset),
+#             flipU::IfThen(is.null(weights), subset(data, subset), subset(data , subset & weights > 0)),
+#             flipU::IfThen(is.null(weights), data, subset(data, weights > 0)))
+#         estimation.data
+#         estimation.subset <- row.names %in% rownames(estimation.data)
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -93,18 +126,26 @@ Regression <- function(formula, data, subset = NULL,
         }
         else
         {
-            estimation.weights <- weights[estimation.subset]
             if (robust.se)
                 warningRobustInappropriate()
             if (type == "Linear")
-                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights))
+                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights))
             else
             {
                 family <- switch(type, "Poisson" = poisson(), "Quasi-Poisson" = quasipoisson())
-                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights), family = family)
+                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = family)
             }
         }
-        missing.data <- ifelse(hasSubset(subset), sum(subset) < length(subset), length(outcome.variable)) > sum(estimation.subset)
+print(summary(result))
+print(result$fitted.values)
+print(length(result$fitted.values))
+print(dim(estimation.data))
+print(summary(estimation.data))
+print(length(weights))
+print(summary(weights))
+stop("dog")
+        missing.data <- any(!post.missing.data.estimation.subset)
+        stop("above is wrong")
         result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
@@ -127,7 +168,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$summary  <- summary(result)
-    result$weights <- weights
+    result$weights <- cleaned.weights
     result$residuals <- outcome.variable - result$predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }

@@ -17,6 +17,8 @@ BreuschPagan <- function(Regression.object)#, var.formula)
 #    else update(Regression.object, formula(Regression.object))#, na.action = "na.exclude")
 ##    sumry <- summary(Regression.object)
     squared.residuals <- Regression.object$residuals[Regression.object$subset]^2
+    print(length(squared.residuals))
+    #print(squared.residuals)
     #sum.squared.residuals <- sum(residuals^2)
  #   dispersion <- sum.squared.residuals / df.residual(Regression.object)
 #    sigma <- sqrt(dispersion)
@@ -49,6 +51,7 @@ BreuschPagan <- function(Regression.object)#, var.formula)
     U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
 #     if (missing(var.formula)) {
     fitted.values <- Regression.object$fitted.values
+    print(length(Regression.object$fitted.values))
 #    print("length(U)")
 #    print(length(U))
 #    print(length(fitted.values))
@@ -76,7 +79,7 @@ BreuschPagan <- function(Regression.object)#, var.formula)
     Chisq <- RegSS/2
     result <- list(#formula = var.formula, formula.name = "Variance",
         ChiSquare = Chisq, Df = 1, p = pchisq(Chisq, 1, lower.tail = FALSE),
-        test = "Non-constant Variance Score Test")
+        test = "Breusch-Pagan test of Non-constant Variance")
     class(result) <- "chisqTest"
  #   print(result)
     result
