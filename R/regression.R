@@ -40,6 +40,10 @@ Regression <- function(formula, data, subset = NULL,
                              robust.se = FALSE, ...)
 {
     cl <- match.call()
+    if (!is.null(subset))
+        subset[is.na(subset)] <- FALSE
+    if (!is.null(weights))
+        weights[is.na(weights)] <- 0
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     row.names <- rownames(data)
@@ -58,14 +62,15 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        subset.data <- IfThen(hasSubset(subset),
-            IfThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
-            data)
+        subset.data <- flipU::IfThen(hasSubset(subset),
+            flipU::IfThen(is.null(weights), subset(data, subset), subset(data , subset & weights > 0)),
+            flipU::IfThen(is.null(weights), data, subset(data, weights > 0)))
         subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
         estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
                        "Imputation" = SingleImputation(formula, subset.data, outcome.name))
+        estimation.subset <- row.names %in% rownames(estimation.data)
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -75,12 +80,10 @@ Regression <- function(formula, data, subset = NULL,
                         "Poisson" = poisson,
                         "Quasi-Poisson" = quasipoisson))
             else if (type == "Ordered")
-                result <- MASS::polr(formula, estimation.data,
-                    Hess = TRUE, ...)
+                result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
             else
                 stop("Unknown regression 'type'.")
 
-            estimation.subset <- row.names %in% rownames(estimation.data)
             if (robust.se)
             {
                 result$robust.coefficients <- lmtest::coeftest(result,
@@ -90,23 +93,25 @@ Regression <- function(formula, data, subset = NULL,
         }
         else
         {
-            estimation.subset <- row.names %in% rownames(estimation.data)
-            estimation.weights <- weights[row.names %in% rownames(estimation.data)]
+            estimation.weights <- weights[estimation.subset]
             if (robust.se)
                 warningRobustInappropriate()
-            result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights),
-                                     family = switch(type, "Linear" = NULL,
-                                                     "Poisson" = poisson(),
-                                                     "Quasi-Poisson" = quasipoisson()))
+            if (type == "Linear")
+                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights))
+            else
+            {
+                family <- switch(type, "Poisson" = poisson(), "Quasi-Poisson" = quasipoisson())
+                result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights), family = family)
+            }
         }
-        missing.data <- ifelse(hasSubset(subset), sum(subset), length(outcome.variable)) > sum(estimation.subset)
+        missing.data <- ifelse(hasSubset(subset), sum(subset) < length(subset), length(outcome.variable)) > sum(estimation.subset)
         result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
-        if(missing.data || missing == "Imputation")
+        if(missing.data | missing == "Imputation")
             result$sample.size <- paste0(result$sample.size,
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
@@ -122,6 +127,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$summary  <- summary(result)
+    result$weights <- weights
     result$residuals <- outcome.variable - result$predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
@@ -145,14 +151,14 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     if (any(factors))
         stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
              Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-    subset.data <- IfThen(is.null(subset), data, subset(data, subset))
+    subset.data <- flipU::IfThen(is.null(subset), data, subset(data, subset))
     # Taking the print chart statement out of setCor.
     .pairwise.regression <- psych::setCor
     n <- length(body(.pairwise.regression))
     while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
         n <- n - 1
     body(.pairwise.regression)[n] <- NULL
-    estimation.data <- IfThen(is.null(weights), subset.data,
+    estimation.data <- flipU::IfThen(is.null(weights), subset.data,
                             AdjustDataToReflectWeights(subset.data, weights))
     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
         data = estimation.data, std = FALSE)
@@ -184,139 +190,6 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
 }
 
 
-#'  \code{LinearRegression}Linear Regression.
-#'
-#' Linear regression: ordinary least squares or least squares with survey weights.
-#' @param formula An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of model specification are given under ‘Details’.
-#' @param data A \code{\link{data.frame}}.
-#' @param subset An optional vector specifying a subset of observations to be used in the fitting process, or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' \code{subset} may not
-#' @param weights An optional vector of sampling weights, or, the name or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' @param missing How missing data is to be treated in the regression. Options are:
-#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' \code{"Use partial data (pairwise)"},and \code{"Imputation"}.
-#' @param robust.se Computes standard errors that are robust to violations
-#' of the assumption of constant variance, using the HC1 (degrees of freedom)
-#' modification of White's (1980) estimator (Long and Ervin, 2000).
-#' @param ... Additional argments to be past to  \code{\link{lm}} or, if the data
-#' is weighted,  \code{\link{survey::svyglm}}.
-#'
-#' @details "Imputation" is performed using multivariate imputation by chained equations
-#' (predictive mean matching) with the \code{\link{mice}} package. All selected
-#' outcome and predictor variables are included in the imputation, including any data excluded
-#' via \code{subset}. Then,
-#' cases with missing values in the outcome variable are excluded from the
-#' analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
-#' synthetic data file is created by sampling with replacement in proportion to the weights,where the
-#' sample size is the sum of the weights.
-#' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
-#' Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
-#' White, H. (1980), A heteroskedastic-consistent covariance matrix estimator and a direct
-#' test of heteroskedasticity. Econometrica, 48, 817-838.
-#' Long, J. S. and Ervin, L. H. (2000). Using heteroscedasticity consistent standard errors
-#' in the linear regression model. The American Statistician, 54( 3): 217– 224.
-
-#' @export
-LinearRegression <- function(formula, data, subset = NULL,
-                             weights = NULL,
-                             missing = "Exclude cases with missing data",
-                             robust.se = FALSE, ...)
-{
-    cl <- match.call()
-    outcome.name <- outcomeName(formula)
-    outcome.variable <- data[[outcome.name]]
-    row.names <- rownames(data)
-    if (is.factor(outcome.variable)) {
-        WarningFactorToNumeric()
-        data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
-    }
-    if (missing == "Use partial data (pairwise)")
-    {
-        if (robust.se)
-            stop(paste0("Robust standard errors cannot be computed with 'missing' set to ", missing, "."))
-        result <- linearRegressionFromCorrelations(formula, data, subset,
-                             weights, outcome.variable, outcome.name, ...)
-    }
-    else
-    {
-        subset.data <- IfThen(hasSubset(subset),
-            IfThen(is.null(weights), subset(data, subset),subset(data, subset & !is.na(weights))),
-            data)
-        subset.data <- subset.data[, all.vars(formula)] #Removing variables not used in the formula.
-        estimation.data <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(subset.data),
-                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(subset.data),
-                       "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
-                       "Imputation" = SingleImputation(formula, subset.data, outcome.name))
-        if (is.null(weights))
-        {
-#             if (is.null(subset) || length(subset) == 1)
-#             {
-                result <- lm(formula, estimation.data, ...)
-#             }
-#             else
-#             {
-#                 data$sb <- subset
-#                 result <- lm(formula, estimation.data, subset = data$sb, ...)
-#             }
-            #result <- zelig.result$zelig.out$z.out[[1]]
-            #zelig.result$zelig.out$z.out <- NULL
-            #result$zelig <- zelig.result
-            estimation.subset <- row.names %in% rownames(estimation.data)
-            if (robust.se)
-            {
-                result$robust.coefficients <- lmtest::coeftest(result,
-                    vcov = car::hccm(result, type = "hc1"))
-                colnames(result$robust.coefficients)[2] <- "Robust SE"
-            }
-        }
-        else
-        {
-            estimation.subset <- row.names %in% rownames(estimation.data)
-            estimation.weights <- weights[row.names %in% rownames(estimation.data)]
-            if (robust.se)
-                warningRobustInappropriate()
-            # if (is.null(subset) || length(subset) == 1)
-            result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, estimation.weights), ...)
-            # else
-#             {
-#                 data$sb <- subset
-#                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights),
-#                                          subset = data$sb, ...)
-#             }
-    #        data$weights <- weights
-    #         if (is.null(subset) || length(subset) == 1)
-    #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, ...)
-    #         else
-    #             zelig.result <- Zelig::zelig(formula,  data = data , model = "normal.survey", weights = ~weights, subset = subset, ...)
-        }
-        missing.data <- ifelse(hasSubset(subset), sum(subset), length(outcome.variable)) > sum(estimation.subset)
-        result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
-        result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
-        result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
-            ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
-        if (!is.null(weights))
-            result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
-        if(missing.data || missing == "Imputation")
-            result$sample.size <- paste0(result$sample.size,
-                switch(missing, "Error if missing data" = "",
-                   "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
-                   "Imputation" = "Missing values of predictor variables have been imputed.\n"))
-        result$subset <- estimation.subset
-    }
-    if (hasSubset(subset))
-        result$na.action <- c(result$na.action, row.names(!subset))
-    result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
-    result$residuals <- outcome.variable - result$predicted
-    print(result$residuals)
-    result$call <- cl
-    result$robust.se <- robust.se
-    result$weighted <- !is.null(weights)
-    class(result) <- append("Regression", class(result))
-    return(result)
-}
-
 #' @export
 print.Regression <- function(Regression.object, ...)
 {
@@ -330,7 +203,7 @@ print.Regression <- function(Regression.object, ...)
 #         {
         if (Regression.object$type == "Linear")
         {
-            bp.test <- breusch.pagan(Regression.object, Regression.summary)
+            bp.test <- BreuschPagan(Regression.object)
             if (bp.test$p <= 0.05)
             {
                 suggest <- ifelse(Regression.object$weighted,

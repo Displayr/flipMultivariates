@@ -51,7 +51,7 @@ ExcludeCasesWithAnyMissingData <- function(data)
 ErrorIfMissingDataFound <- function(data)
 {
     #tt <- try(suppressWarnings(na.fail(data)))
-    IfThen(any(is.na(data)), missingDataFail(), data)
+    flipU::IfThen(any(is.na(data)), missingDataFail(), data)
 }
 
 
@@ -69,4 +69,18 @@ missingDataFail <- function()
 {
     stop("The data contains missing values. Change the 'missing' option to run the analysis.")
 }
+
+
+#' \code{MissingValuesByVariable}
+#' @description Computes the number of missing values by variable.
+#' @param data A \code{\link{data.frame}}.
+#' @export
+MissingValuesByVariable <- function(data)
+{
+    n <- nrow(data)
+    missing <- apply(is.na(data), 2, sum)
+    result <- data.frame("Missing" = missing,
+        proportion = FormatAsPercent(missing / n))
+    names(result)[2] <- paste0("Percent (of ", n, ")")
+    result}
 
