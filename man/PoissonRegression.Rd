@@ -6,21 +6,6 @@
 \usage{
 PoissonRegression(formula, data, subset = NULL, weights = NULL, ...)
 }
-\arguments{
-\item{formula}{An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of model specification are given under ‘Details’.}
-
-\item{data}{A \code{\link{data.frame}}.}
-
-\item{subset}{An optional vector specifying a subset of observations to be used in the fitting process, or,
-the name of a variable in \code{data}. It may not be an expression.
-\code{subset} may not}
-
-\item{weights}{An optional vector of sampling weights, or, the name or,
-the name of a variable in \code{data}. It may not be an expression.}
-
-\item{...}{Additional argments to be past to  \code{\link{lm}} or, if the data
-is weighted,  \code{\link{survey::svyglm}}.}
-}
 \description{
 Poisson Regression
 }

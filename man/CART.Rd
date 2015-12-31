@@ -4,7 +4,8 @@
 \alias{CART}
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
-CART(formula, data, weights = NULL, subset = NULL, ...)
+CART(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot",
+  ...)
 }
 \arguments{
 \item{formula}{A formula expression. The left-hand-side (response) should
@@ -15,6 +16,15 @@ no interaction terms. Both \code{.} and \code{-} are allowed: regression trees c
 offset terms}
 
 \item{data}{A data frame in which to preferentially interpret formula, weights and subset}
+
+\item{weights}{An optional vector of sampling weights, or, the name or,
+the name of a variable in \code{data}. It may not be an expression.}
+
+\item{subset}{An optional vector specifying a subset of observations to be used in the fitting process, or,
+the name of a variable in \code{data}. It may not be an expression.
+\code{subset} may not}
+
+\item{output}{How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.}
 
 \item{...}{Additional arguments that are passed to  \code{\link{tree}}
 and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev}
