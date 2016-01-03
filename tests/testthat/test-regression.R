@@ -13,7 +13,7 @@ test_that("allEffects works on Regression object",
 zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
 data(bank)
 
-test_that("Tests of homogenous variance works",
+test_that("Tests of homogenous variance (Breush-Pagen test)",
 {
     # Unfilitered
     z = BreuschPagan(Regression(zformula, data = bank))
@@ -33,6 +33,14 @@ test_that("Tests of homogenous variance works",
     z = BreuschPagan(Regression(zformula, data = bank, subset = bank$ID > 100,  weights = bank$ID))
     z1 = car::ncvTest(lm(zformula, data = bank, subset = ID > 100,  weights = ID))
     expect_false(round(z$p - z1$p,5) == 0)
+
+    # Weighted and filtered with various missing value settings
+    expect_that(Regression(zformula, missing = "Exclude cases with missing data", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Error if missing data", data = bank, subset = bank$ID > 100,  weights = bank$ID), throws_error())
+    z <- bank[complete.cases(bank),]
+    expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Imputation", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error())
 })
 
 
