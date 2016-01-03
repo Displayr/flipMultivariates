@@ -1,5 +1,14 @@
 # Properties of data.
 
+printDetails <- function(x)
+{
+    cat(paste0(deparse(substitute(x)), " n:", length(x), " valid:", sum(!is.na(x)), " missing:",sum(is.na(x)), "\n"))
+    print(summary(x))
+    cat("\n")
+
+}
+
+
 allIntegers <- function(x)
 {
     all(x%%1==0)

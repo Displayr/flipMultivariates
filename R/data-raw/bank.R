@@ -11,27 +11,18 @@ for (i in unique(bank$ID))
 bank$weight <- bank$weight / mean(bank$weight, na.rm = TRUE)
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
-summary(bank)
-
-    # Model type
+# Model type
 data(bank)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, type = "Linear", data = bank, weight = bank$weight)
 
+Regression(Overall ~ Fees, data = bank, missing = "Imputation")
+Regression(Overall ~ Fees, data = bank)
 zz <- NULL
-z = Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation")
+Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation")
 
 
 zdata <- bank#data.frame(Overall = Overall, Fees = Fees)
-
-Regression(Overall ~ Fees, data)
-
-
-
-
-# Examples
-data(bank)
-missing = "Error if missing data"
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+Regression(Overall ~ Fees, zdata)
 
 Regression(log(Overall) ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
@@ -40,13 +31,19 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE)
 
+
+
+# Examples
+data(bank)
+missing = "Error if missing data"
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+
 # Breusch-Pagan tests
-missing <- "Exclude cases with missing data"
-z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
 list("our test" = BreuschPagan(z), "comparison" = car::ncvTest(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)))
-z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100)
 list("our test" = BreuschPagan(z), "comparison" = car::ncvTest(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = ID > 100)))
-z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID)
 list("our test" = BreuschPagan(z), "comparison (different because we ignore the weight)" = car::ncvTest(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = ID)))
 z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 list("our test" = BreuschPagan(z), "comparison (different because we ignore the weight)" = car::ncvTest(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = ID, subset = ID > 100)))

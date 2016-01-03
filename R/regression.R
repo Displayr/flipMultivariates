@@ -71,12 +71,14 @@ Regression <- function(formula, data, subset = NULL,
         #stop("dog")
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
         #print(summary(estimation.subset))
-        estimation.subset <- flipU::IfThen(hasSubset(subset), subset[post.missing.data.estimation.subset],
-                                           rep(TRUE, nrow(post.missing.data.estimation.subset)))
+        estimation.subset <- flipU::IfThen(hasSubset(subset),
+            subset[post.missing.data.estimation.subset],
+            rep(TRUE, nrow(data.post.missing.value.treatment)))
         if (!is.null(weights))
         {
             weights <- weights[post.missing.data.estimation.subset]
             estimation.subset <- estimation.subset & weights > 0
+            weights <- weights[estimation.subset]
         }
         #print(summary(weights))
         estimation.data <- data.post.missing.value.treatment[estimation.subset, all.vars(formula)] #Removing variables not used in the formula.
@@ -126,6 +128,9 @@ Regression <- function(formula, data, subset = NULL,
         }
         else
         {
+            print(dim(estimation.data))
+            print(length(weights))
+            print(sum(weights > 0))
             if (robust.se)
                 warningRobustInappropriate()
             if (type == "Linear")
@@ -136,17 +141,17 @@ Regression <- function(formula, data, subset = NULL,
                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = family)
             }
         }
-print(summary(result))
-print(result$fitted.values)
-print(length(result$fitted.values))
-print(dim(estimation.data))
-print(summary(estimation.data))
-print(length(weights))
-print(summary(weights))
-stop("dog")
+# print(summary(result))
+# print(result$fitted.values)
+# print(length(result$fitted.values))
+# print(dim(estimation.data))
+# print(summary(estimation.data))
+# print(length(weights))
+# print(summary(weights))
         missing.data <- any(!post.missing.data.estimation.subset)
-        stop("above is wrong")
-        result$predicted <- predict.lm(result, newdata = data, na.action = na.pass)
+        if (missing == "Imputation")
+            data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
+        result$flip.predicted <- result$flip.fitted.values <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
@@ -157,19 +162,23 @@ stop("dog")
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation" = "Missing values of predictor variables have been imputed.\n"))
-        result$subset <- estimation.subset
+        result$flip.subset <- row.names %in% rownames(estimation.data)
+
     }
-    if (hasSubset(subset))
-        result$na.action <- c(result$na.action, row.names(!subset))
+    #if (hasSubset(subset))
+    #    result$na.action <- c(result$na.action, row.names(!subset))
+    result$summary  <- summary(result)
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
     result$call <- cl
     result$robust.se <- robust.se
-    result$weights <- weights
     class(result) <- append("Regression", class(result))
     result$type = type
-    result$summary  <- summary(result)
-    result$weights <- cleaned.weights
-    result$residuals <- outcome.variable - result$predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
+    result$flip.weights <- cleaned.weights
+    print(mean(outcome.variable[result$flip.subset]))
+    print(mean(result$flip.predicted[result$flip.subset]))
+    print(mean((outcome.variable - result$flip.predicted)[result$flip.subset]))
+    result$flip.residuals <- outcome.variable - result$flip.predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
+    print(mean(result$flip.residuals[result$flip.subset]))
     return(result)
 }
 
@@ -282,22 +291,33 @@ print.Regression <- function(Regression.object, ...)
 #' @export
 predict.Regression <- function(object, ...)
 {
-    object$predicted
+    object$flip.predicted
 }
 
 #' @export
 fitted.Regression <- function(object, ...)
 {
-    object$predicted
+    object$flip.predicted
 }
 
 #' @export
 fitted.values.Regression <- function(object, ...)
 {
-    object$predicted
+    object$flip.predicted
 }
 
 
+#' @export
+resid.Regression <- function(object, ...)
+{
+    object$flip.residuals
+}
+
+#' @export
+residuals.Regression <- function(object, ...)
+{
+    object$flip.residuals
+}
 
 #'  \code{BinaryLogit} Binary Logit Regression.
 #'
