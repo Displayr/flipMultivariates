@@ -38,6 +38,11 @@ zw <- bank$ID
 zs <- bank$ID > 100
 summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = zw, subset = zs))
 
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
+flipMultivariates:::breusch.pagan(z)
+flipMultivariates:::BreuschPagan(z)
+car:::ncvTest(z)
+summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
 
 missing <- "Imputation"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)

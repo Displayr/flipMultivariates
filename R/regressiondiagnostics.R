@@ -20,12 +20,9 @@ BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
             test = "Breusch-Pagan test of Non-constant Variance"))
     }
     residuals <- residuals(Regression.object)[subset]
-    printDetails(residuals)
     squared.residuals <- residuals^2
     U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
-    printDetails(U)
     fitted.values <- fitted.values(Regression.object)[subset]
-    printDetails(fitted.values)
     mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
     SS <- anova(mod)$"Sum Sq"
     RegSS <- sum(SS) - SS[length(SS)]
@@ -36,3 +33,52 @@ BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
     class(result) <- "chisqTest"
     result
 }
+#
+# breusch.pagan <- function(Regression.object)
+# {   #Modified from car::ncvTest, to addess different size of input data.
+# #    data <- getCall(Regression.object)$data
+# #    if (!is.null(data)) {
+#     # print("cat")
+#     Regression.summary = summary.lm(Regression.object)
+#         data <- Regression.object$model
+#         if (hasSubset(Regression.object$subset))
+#             data <- subset(data, Regression.object$subset)
+#         #update(Regression.object, formula(Regression.object))#, na.action = "na.exclude",            data = data)
+#     #}
+# #    else update(Regression.object, formula(Regression.object))#, na.action = "na.exclude")
+# ##    sumry <- summary(Regression.object)
+#     residuals <- residuals(Regression.object, type = "pearson")
+#     printDetails(residuals)
+#     S.sq <- df.residual(Regression.object) * (Regression.summary$sigma)^2/sum(!is.na(residuals))
+#     printDetails(S.sq)
+#     U <- (residuals^2)/S.sq
+# #     if (missing(var.formula)) {
+#     fitted.values <- fitted.values(Regression.object)
+#     #print(Regression.object)
+#     #residuals <- residuals(Regression.object)#outcome <- outcomeVariableFromModel(Regression.object)
+#
+#     # stop("dog")
+#         mod <- lm(U ~ fitted.values, subset = Regression.object$subset)
+#         varnames <- "fitted.values"
+#         var.formula <- ~fitted.values
+#         df <- 1
+# #     }
+# #     else {
+# #         form <- as.formula(paste(".U ~ ", as.character(var.formula)[[2]],
+# #             sep = ""))
+# #         mod <- if (!is.null(data)) {
+# #             data$.U <- .U
+# #             lm(form, data = data)
+# #         }
+# #         else lm(form)
+# #         df <- sum(!is.na(coefficients(mod))) - 1
+# #     }
+#     SS <- anova(mod)$"Sum Sq"
+#     RegSS <- sum(SS) - SS[length(SS)]
+#     Chisq <- RegSS/2
+#     result <- list(formula = var.formula, formula.name = "Variance",
+#         ChiSquare = Chisq, Df = df, p = pchisq(Chisq, df, lower.tail = FALSE),
+#         test = "Non-constant Variance Score Test")
+#     class(result) <- "chisqTest"
+#     result
+# }

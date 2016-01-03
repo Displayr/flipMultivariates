@@ -63,8 +63,11 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data),
-                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
+        regression.variable.names <- all.vars(formula)
+        if (missing != "Imputation")
+            regression.data <- data[ ,regression.variable.names]
+        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
+                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
                        "Imputation" = SingleImputation(formula, data, outcome.name))
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
@@ -77,7 +80,9 @@ Regression <- function(formula, data, subset = NULL,
             estimation.subset <- estimation.subset & weights > 0
             weights <- weights[estimation.subset]
         }
-        estimation.data <- data.post.missing.value.treatment[estimation.subset, all.vars(formula)] #Removing variables not used in the formula.
+        estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
+        if (missing != "Imputation")
+            estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -135,9 +140,6 @@ Regression <- function(formula, data, subset = NULL,
     result$type = type
     result$flip.weights <- cleaned.weights
     result$flip.residuals <- outcome.variable - result$flip.fitted.values #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
-    printDetails(outcome.variable[result$flip.subset])
-    printDetails(result$flip.fitted.values[result$flip.subset])
-    printDetails(result$flip.residuals[result$flip.subset])
     return(result)
 }
 
