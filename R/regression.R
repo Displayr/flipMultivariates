@@ -113,7 +113,7 @@ Regression <- function(formula, data, subset = NULL,
         missing.data <- any(!post.missing.data.estimation.subset)
         if (missing == "Imputation")
             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
-        result$flip.fitted.values <- predict.lm(result, newdata = data, na.action = na.pass)
+        result$flip.predicted <- result$flip.fitted.values <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
@@ -134,12 +134,10 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- cleaned.weights
-    result$flip.residuals <- outcome.variable - result$flip.fitted.values #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
-    printDetails(outcome.variable[result$flip.subset])
-    printDetails(result$flip.fitted.values[result$flip.subset])
-    printDetails(result$flip.residuals[result$flip.subset])
+    result$flip.residuals <- outcome.variable - result$flip.predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
+
 
 
 
@@ -177,14 +175,13 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
     intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
     fitted <- as.matrix(data[, predictors.index]) %*% beta
-    result$flip.fitted.values <- fitted + intercept
+    result$predicted <- fitted + intercept
     partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
-    print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
     pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
-    rng <- range(lower.tri(pairwise.n))
+    rng <- range(lower(pairwise.n))
     if (rng[1] == rng[2])
         result$sample.size <- paste0("n = ", rng[1],
             " cases used in estimation.\n")
@@ -193,9 +190,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
                                      "Sample sizes for the correlations range from ", rng[1], " to ", rng[2], ".")
     if (!is.null(weights))
         result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
-    result$flip.subset <- !is.na(data[outcome.index]) & !is.na(fitted) & (rownames(data) %in% rownames(estimation.data))
-    print(sum(result$flip.subset))
-    print(summary(result$flip.fitted.values[result$flip.subset]))
+    estimation.subset <- rownames(data) %in% rownames(estimation.data)
+    result$subset <- estimation.subset
     result
 }
 
@@ -251,19 +247,19 @@ print.Regression <- function(Regression.object, ...)
 #' @export
 predict.Regression <- function(object, ...)
 {
-    object$flip.fitted.values
+    object$flip.predicted
 }
 
 #' @export
 fitted.Regression <- function(object, ...)
 {
-    object$flip.fitted.values
+    object$flip.predicted
 }
 
 #' @export
 fitted.values.Regression <- function(object, ...)
 {
-    object$flip.fitted.values
+    object$flip.predicted
 }
 
 
