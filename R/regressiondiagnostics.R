@@ -9,13 +9,13 @@ BreuschPagan <- function(Regression.object)#, var.formula)
 {   #Modified from car::ncvTest, to addess different size of input data.
     subset <- Regression.object$flip.subset
     residuals <- residuals(Regression.object)[subset]
-    printDetails(residuals)
+    # printDetails(residuals)
     squared.residuals <- residuals^2
     U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
-    printDetails(U)
+    # printDetails(U)
     fitted.values <- fitted.values(Regression.object)[subset]
-    printDetails(fitted.values)
-        mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
+    # printDetails(fitted.values)
+    mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
     SS <- anova(mod)$"Sum Sq"
     RegSS <- sum(SS) - SS[length(SS)]
     Chisq <- RegSS/2

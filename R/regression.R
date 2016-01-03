@@ -67,10 +67,7 @@ Regression <- function(formula, data, subset = NULL,
                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
                        "Imputation" = SingleImputation(formula, data, outcome.name))
-        #print(summary(data.post.missing.value.treatment))
-        #stop("dog")
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
-        #print(summary(estimation.subset))
         estimation.subset <- flipU::IfThen(hasSubset(subset),
             subset[post.missing.data.estimation.subset],
             rep(TRUE, nrow(data.post.missing.value.treatment)))
@@ -80,32 +77,7 @@ Regression <- function(formula, data, subset = NULL,
             estimation.subset <- estimation.subset & weights > 0
             weights <- weights[estimation.subset]
         }
-        #print(summary(weights))
         estimation.data <- data.post.missing.value.treatment[estimation.subset, all.vars(formula)] #Removing variables not used in the formula.
-#print(dim(estimation.data))
-        #         estimation.data <-
-#
-#             estimation.subset
-#
-#         post.missing.value.treatment.sample <- row.names %in% rownames(data.post.missing.value.treatment)
-#
-#
-#
-#             subset.data <- subset(data, subset[row.names %in% rownames(post.missing.value.treatment.sample)])
-#         post.subset.sample <- row.names %in% rownames(subset.data)
-#         if (!is.null(weights))
-#             weights <- weights[post.missing.value.treatment.subset]
-#
-#
-#             subset <- subset[post.missing.value.treatment.subset]
-#
-#
-#
-#         subset.data <- flipU::IfThen(hasSubset(subset),
-#             flipU::IfThen(is.null(weights), subset(data, subset), subset(data , subset & weights > 0)),
-#             flipU::IfThen(is.null(weights), data, subset(data, weights > 0)))
-#         estimation.data
-#         estimation.subset <- row.names %in% rownames(estimation.data)
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -128,9 +100,6 @@ Regression <- function(formula, data, subset = NULL,
         }
         else
         {
-            print(dim(estimation.data))
-            print(length(weights))
-            print(sum(weights > 0))
             if (robust.se)
                 warningRobustInappropriate()
             if (type == "Linear")
@@ -141,13 +110,6 @@ Regression <- function(formula, data, subset = NULL,
                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = family)
             }
         }
-# print(summary(result))
-# print(result$fitted.values)
-# print(length(result$fitted.values))
-# print(dim(estimation.data))
-# print(summary(estimation.data))
-# print(length(weights))
-# print(summary(weights))
         missing.data <- any(!post.missing.data.estimation.subset)
         if (missing == "Imputation")
             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
@@ -165,8 +127,6 @@ Regression <- function(formula, data, subset = NULL,
         result$flip.subset <- row.names %in% rownames(estimation.data)
 
     }
-    #if (hasSubset(subset))
-    #    result$na.action <- c(result$na.action, row.names(!subset))
     result$summary  <- summary(result)
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
     result$call <- cl
@@ -174,11 +134,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- cleaned.weights
-    print(mean(outcome.variable[result$flip.subset]))
-    print(mean(result$flip.predicted[result$flip.subset]))
-    print(mean((outcome.variable - result$flip.predicted)[result$flip.subset]))
     result$flip.residuals <- outcome.variable - result$flip.predicted #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
-    print(mean(result$flip.residuals[result$flip.subset]))
     return(result)
 }
 
@@ -307,11 +263,11 @@ fitted.values.Regression <- function(object, ...)
 }
 
 
-#' @export
-resid.Regression <- function(object, ...)
-{
-    object$flip.residuals
-}
+# #' @export
+# resid.Regression <- function(object, ...)
+# {
+#     object$flip.residuals
+# }
 
 #' @export
 residuals.Regression <- function(object, ...)
