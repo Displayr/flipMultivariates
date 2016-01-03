@@ -40,7 +40,7 @@ test_that("Tests of homogenous variance (Breush-Pagen test)",
     z <- bank[complete.cases(bank),]
     expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
     expect_that(Regression(zformula, missing = "Imputation", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error())
+    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
 })
 
 
@@ -56,13 +56,13 @@ missing <- "Exclude cases with missing data"
 test_that(missing,
 {
     z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.2802536,4))
+    expect_equal(round(z,4), round(0.27732,4))
     z <- as.numeric(Regression(zformula, data = bank, subset = bank$ID > 100, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.265103,4))
+    expect_equal(round(z,4), round(0.25451,4))
     z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.2702182,4))
+    expect_equal(round(z,4), round(0.2611546, 4))
     z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)$coef[3])
-    expect_equal(round(z,4),round(0.2636018,4))
+    expect_equal(round(z,4),round(0.2539403,4))
 })
 
 

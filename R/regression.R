@@ -162,6 +162,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
         stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
              Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
     subset.data <- flipU::IfThen(is.null(subset), data, subset(data, subset))
+    weights <- flipU::IfThen(is.null(subset), weights, subset(weights, subset))
     # Taking the print chart statement out of setCor.
     .pairwise.regression <- psych::setCor
     n <- length(body(.pairwise.regression))
@@ -184,7 +185,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
-    print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
+    # print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
     pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
     rng <- range(lower.tri(pairwise.n))
     if (rng[1] == rng[2])
@@ -196,8 +197,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     if (!is.null(weights))
         result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
     result$flip.subset <- !is.na(data[outcome.index]) & !is.na(fitted) & (rownames(data) %in% rownames(estimation.data))
-    print(sum(result$flip.subset))
-    print(summary(result$flip.fitted.values[result$flip.subset]))
+#     print(sum(result$flip.subset))
+#     print(summary(result$flip.fitted.values[result$flip.subset]))
     result
 }
 
