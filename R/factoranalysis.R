@@ -545,8 +545,19 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
     return(as.data.frame(new.data))
 }
 
-
+#' \code{BartlettTestOfSphericity}
+#' @description Conduct the Bartlett Test of Sphericity for a set of data, which
+#' tests that the correlation matrix of the data is not the identity matrix.
+#' @param data A data frame containing the data to test.
+#' @inheritParams FactorAnalysis
+#' @return A list containing the Chi-Square value, degrees of freedom (\code{df}), and p-value for the test.
+#' @details This function wraps \link{\code{psych::cortest.bartlett}}. In particular, it extends the existing
+#' funcitonality to weighted data, and it computes the test using a more conservative value of the sample size
+#' when there is missing data. The value for the sample size that is used is the size of the smallest pairwise
+#' -complete set of cases amond all pairs of variables. This is consistent with SPSS.
+#'
 #' @export
+# For the sample size, use the min sample size of the correlation matrix
 BartlettTestOfSphericity <- function(data, 
                          weights = NULL, 
                          subset = NULL,
@@ -560,7 +571,13 @@ BartlettTestOfSphericity <- function(data,
 
     # If using a weight, supply the Effective Sample Size, which is the sum of the weights, otherwise
     # supply the actual sample size of the prepared data.
-    if (!is.null(weights))
+    # When missing is set to "Use partial data" then the sample size can vary between cells in
+    # correlation matrix. In this case, use the smallest sample size, or effective sameple size.
+    if (missing == "Use partial data")
+    {
+        sample.size.matrix <- sampleSizeMatrix(data, weights)
+        sample.size <- min(sample.size.matrix)
+    } else if (!is.null(weights))
     {
         sample.size <- sum(prepared.data$weights)
     } else {
@@ -593,4 +610,33 @@ scaleDataUsingWeights <- function(data, weights)
         data[,j] <- (data[,j] - weighted.stats$weighted.mean) / weighted.stats$weighted.sd
     }
     return(data)
+}
+
+
+# Calculate the (effective) sample size for each pair of variables in data
+sampleSizeMatrix <- function(data, weights) 
+{
+    if (is.null(weights))
+    {
+        weights <- rep(1, nrow(data))
+    }
+    numvars <- ncol(data)
+    sample.size.matrix <- matrix(NA, nrow = numvars, ncol = numvars)
+    for (row in 1L:numvars)
+    {
+        for (col in 1L:numvars)
+        {
+            if (row == col) {
+                sample.size.matrix[row, row] <- sum(weights[!is.na(data[, row])])
+            }
+            else
+            {
+                indicator <- !is.na(data[, row] * data[, col])
+                sample.size <- sum(weights[indicator])
+                sample.size.matrix[row, col] <- sample.size
+                sample.size.matrix[col, row] <- sample.size
+            } 
+        }
+    }
+    return(sample.size.matrix)
 }

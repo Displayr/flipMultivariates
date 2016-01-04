@@ -131,6 +131,9 @@ test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors 
 # Replicate SPSS Bartlet test results
 ###
 
+testthat::expect_equal(BartlettTestOfSphericity(test.data.1, missing = "Use partial data")$chisq, 2254.76019036933)
+testthat::expect_equal(BartlettTestOfSphericity(test.data.2, missing = "Exclude cases with missing data")$chisq, 3059.91481376238)
+
 
 # Comparisons with results from Applied Multivariate Statistics for the Social Sciences
 
