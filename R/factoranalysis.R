@@ -35,7 +35,6 @@ imputeForFactorAnalysis <- function(data)
 
 weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
 {
-
     weightedPartialCovariance <- function(numeric1, numeric2, input.weight, correlation = FALSE)
     {
         Sumxy <- 0.0
@@ -94,7 +93,6 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
     return(output.matrix)
 }
 
-
     
 
 #' \code{FactorAnalysis} 
@@ -112,8 +110,23 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
 #' @param type A string specifying the type of analysis to do. Valid options are \code{"PCA"}, 
 #'             \code{"Unweighted least squares"}, \code{"Generalized least squares"}, and 
 #'             \code{"Maximum likelihood"}.
-#' @param rotation A string specifying the type of rotation to be used. Valid options are
-#' 
+#' @param rotation A string specifying the type of rotation to be used. Valid options are  \code{"none"}, 
+#'                 \code{"varimax"}, \code{"quartimax"}, \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"}, 
+#'                 \code{"geominT"}, \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"}, 
+#'                 \code{"bentlerQ"}, \code{"geominQ"}, \code{"biquartimin"}, and \code{"cluster"}. More
+#'                 details are found in package \code{psych}.
+#' @param sort.coefficients.by.size A logical value determining whether loadings should be sorted when printed.
+#' @param min.display.loading.value Loadings smaller than this value will not be displayed when printed.
+#' @param print.type A string specifying the type of printing that should be done. Valid options are
+#'                   \code{"table"} to display a loading table, \code{"scree"} to display a Scree Plot, and
+#'                   \code{"scatter"} to display a plot of the first two dimensions of the final loadings.
+#'                   The latter two options make use of HTML widgets.
+#' @param plot.labels A logical value which determines whether or not the scatter plot will show the labels
+#'                    of the input data, or just integers specifying the column number of each variable.
+#'
+#' @details This function is a wrapper for the functions \code{\link{fa}} and \code{link{principal}} from 
+#'          package \code{psych}. It adds options for handling of missing data, weighting, filtering, and
+#'          printing.
 #'
 #' @export
 FactorAnalysis <- function(data, 
@@ -126,11 +139,10 @@ FactorAnalysis <- function(data,
                            n.factors = 1, #Need a new option to allow the user to do this with eigenvalues
                            sort.coefficients.by.size = FALSE,
                            suppress.small.coefficients = FALSE,
-                           min.display.loading.value = 0.1)
+                           min.display.loading.value = 0.1,
+                           print.type = "table",
+                           plot.labels = TRUE)
 {
-
-
-    # TODO: Method to allow number of factors to be determined by eigenvalues
 
     # Generate the data that will be input to the correlation/covariance
     # matrix by filtering and imputing if specified.
@@ -150,7 +162,8 @@ FactorAnalysis <- function(data,
                                                    pairwise = missing == "Use partial data", 
                                                    use.correlation = use.correlation)
 
-
+    row.names(input.matrix) <- colnames(data)
+    colnames(input.matrix) <- colnames(data)
 
     # Work out which rotation to use
     # Convert from the strings that are to be used in the menus, which begin with upppercase letters
@@ -170,10 +183,11 @@ FactorAnalysis <- function(data,
     else 
     {
         # Map SPSS options to psych options
-        method <- switch(type,
-                         "Unweighted least squares" = "pa",
-                         "Generalized least squares" = "gls", 
-                         "Maximum likelihood" = "ml")
+        method <- type
+        # method <- switch(type,
+        #                  "Unweighted least squares" = "pa",
+        #                  "Generalized least squares" = "gls", 
+        #                  "Maximum likelihood" = "ml")
 
         if (is.null(method))
         {
@@ -201,6 +215,8 @@ FactorAnalysis <- function(data,
     results$original.weights <- weights
     results$data.used <- prepared.data
     results$use.correlation <- use.correlation
+    results$print.type <- print.type
+    results$plot.labels <- plot.labels
     if (use.correlation)
     {
         results$correlation.matrix <- input.matrix
@@ -279,19 +295,26 @@ print.flipFactorAnalysis <- function(x, ...)
     # Make a nice print function which allows us to easily compare results with SPSS
     # Figure out how SPSS sorts it's component matrix
 
-    if (x$suppress.small.coefficients)
+    if (x$print.type == "table")
     {
-        min.display.loading.value <- x$min.display.loading.value
-    }
-    else
-    {
-        min.display.loading.value <- 0
-    }
+        if (x$suppress.small.coefficients)
+        {
+            min.display.loading.value <- x$min.display.loading.value
+        }
+        else
+        {
+            min.display.loading.value <- 0
+        }
 
-    print(x$loadings, 
-          digits = 3, 
-          cutoff = min.display.loading.value,
-          sort = x$sort.coefficients.by.size)
+        print(x$loadings, 
+              digits = 3, 
+              cutoff = min.display.loading.value,
+              sort = x$sort.coefficients.by.size)
+    } else if (print.type == "scree") {
+        print(ScreePlot(x))
+    } else {
+        print(ComponentPlot(x))
+    }
 }
 
 # A better version of print.loadings from package stats.
@@ -375,14 +398,15 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
     Eigenvalue <- input.values
 
     #my.plot <- metricsgraphics::mjs_plot(df, x = eig.num, y = eig.vals) %>% mjs_line() %>% mjs_point() %>% mjs_labs(x = "Component Number", y="Eigenvalue")
-    my.plot <- plot_ly(x = `Component Number`, 
+    my.plot <- plotly::plot_ly(x = `Component Number`, 
                        y = Eigenvalue, 
                        #line = list(shape = "linear"),
                        mode = "lines+markers"
                        # marker = list(line = list(shape = "linear"), symbol = "100", color = "rgb(16, 32, 77)")
-                       ) %>% 
-               layout(title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
+                       ) #%>% 
+               #layout(title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
                #add_trace(name = "spline", line = list(shape = "spline"))
+    plotly::layout(plot = my.plot, title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
     return(my.plot)
 
 }
@@ -395,7 +419,7 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
 #' @param x An object of class \code{flipFactorAnalysis}.
 #'
 #' @export
-ComponentPlot <- function(x)
+ComponentPlot <- function(x, show.labels = TRUE)
 {
     if (is.null(x$loadings))
     {
@@ -409,8 +433,17 @@ ComponentPlot <- function(x)
 
     ### Wait for update to flipPlots
 
-    flipPlots::LabeledScatterPlot(x$loadings[, 1:2], row.labels = rownames(x$loadings), main = "Component Plot")
+    labels <- as.character(1:nrow(x$loadings))
+    if (show.labels)
+    {
+        if (is.null(row.names(x$loadings)))
+        {
+            warning("The loadings do not contain labels.")
+        }
+        labels <- row.names(loadings)
+    }
 
+    flipPlots::LabeledScatterPlot(x$loadings[, 1:2], row.labels = labels, main = "Component Plot")
 }
 
 
@@ -510,7 +543,7 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
     if (!is.null(factor.analysis.object$original.weights))
     {
         scaled.data <- scaleDataUsingWeights(data = subset.data, weights = subset.weights) 
-    }else
+    } else
     {
         scaled.data <- scale(subset.data)
     }
@@ -521,7 +554,7 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
     if (factor.analysis.object$use.correlation)
     {
         input.matrix <- factor.analysis.object$correlation.matrix
-    }else
+    } else
     {
         input.matrix <- factor.analysis.object$covariance.matrix
     }
@@ -585,8 +618,15 @@ BartlettTestOfSphericity <- function(data,
     }
 
     test.results <- psych::cortest.bartlett(correlation.matrix, n = sample.size)
+    class(test.results) <- "flipBartlett"
 
     return(test.results)
+}
+
+print.flipBartlett <- function(x, ...)
+{
+    v <- unlist(x)
+    print(v)
 }
 
 

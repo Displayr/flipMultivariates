@@ -11,7 +11,7 @@ test.weight <- pcaPhoneTestData$weight
 test.calibrated.weight <- pcaPhoneTestData$q.calibrated.weight
 
 # Note that comparisons with SPSS using weighted data will differ when these functions are used in
-# DisplayR because there we supply QCalibratedWeight.
+# DisplayR because there we always supply QCalibratedWeight.
 
 
 ####
@@ -125,6 +125,10 @@ test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors 
 ###
 # Replicate SPSS Rotations by comparing rotated loadings
 ###
+
+
+###
+# Replicate SPSS goodness of fit values for FA
 
 
 ###
