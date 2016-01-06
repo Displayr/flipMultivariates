@@ -12,7 +12,7 @@ bank$weight <- bank$weight / mean(bank$weight, na.rm = TRUE)
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
 # type type
-
+data(bank)
 Regression(Overall ~ Fees, data = bank, missing = "Imputation")
 Regression(Overall ~ Fees, data = bank)
 zz <- NULL

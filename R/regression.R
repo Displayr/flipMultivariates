@@ -84,11 +84,11 @@ Regression <- function(formula, data, subset = NULL,
         }
         estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
         missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
-        if (missing.data.proportion < 0.30)
+        if (missing.data.proportion > 0.20)
             warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
                           "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
                           "or, set 'Missing Data' to another option."))
-        if (missing != "Imputation")S
+        if (missing != "Imputation")
             estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
