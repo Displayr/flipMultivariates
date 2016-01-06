@@ -3,7 +3,7 @@
 #' @param list.of.variables A variable in a DataSet or data.frame.
 #' @param coerce.to.numeric Makes factors and ordered factors numeric.
 #' @export
-DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(x))) {
+creatingBinaryoutcomeVariableIfNecessary <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(variable))) {
     if (!is.factor(variable))
         variable <- factor(variable)
     if (nlevels(variable) == 1)

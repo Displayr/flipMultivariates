@@ -11,7 +11,7 @@ for (i in unique(bank$ID))
 bank$weight <- bank$weight / mean(bank$weight, na.rm = TRUE)
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
-# Model type
+# type type
 
 Regression(Overall ~ Fees, data = bank, missing = "Imputation")
 Regression(Overall ~ Fees, data = bank)
@@ -50,3 +50,25 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
+
+
+missing <- "Imputation"
+type = "Poisson"
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+
+missing <- "Imputation"
+type = "Quasi-Poisson"
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+
+missing <- "Imputation"
+type = "Binary Logit"
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)

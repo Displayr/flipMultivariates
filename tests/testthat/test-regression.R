@@ -40,7 +40,7 @@ test_that("Tests of homogenous variance (Breush-Pagen test)",
     z <- bank[complete.cases(bank),]
     expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
     expect_that(Regression(zformula, missing = "Imputation", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error())
+    expect_that(Regression(zformula, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
 })
 
 
