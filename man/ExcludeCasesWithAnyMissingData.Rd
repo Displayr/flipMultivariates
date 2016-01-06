@@ -7,14 +7,13 @@
 ExcludeCasesWithAnyMissingData(data)
 }
 \arguments{
-\item{data}{A \code{\link{data.frame}}.
-#}
+\item{data}{A \code{\link{data.frame}}.}
 }
 \description{
 This is a wrapper for \code{\link{na.omit}}
 }
 \examples{
-# df <- data.frame(x = c(NA, 1), y = 1:2)
-# ExcludeCasesWithAnyMissingData(df)
+df <- data.frame(x = c(NA, 1), y = 1:2)
+ExcludeCasesWithAnyMissingData(df)
 }
 

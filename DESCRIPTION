@@ -21,5 +21,6 @@ imports:
     lmtest,
     RcmdrMisc,
     effects,
+    flipU,
     flipPlots,
-    flipU
+    plotly

@@ -65,8 +65,11 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data),
-                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data),
+        regression.variable.names <- all.vars(formula)
+        if (missing != "Imputation")
+            regression.data <- data[ ,regression.variable.names]
+        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
+                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
                        "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
                        "Imputation" = SingleImputation(formula, data, outcome.name))
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
@@ -79,7 +82,9 @@ Regression <- function(formula, data, subset = NULL,
             estimation.subset <- estimation.subset & weights > 0
             weights <- weights[estimation.subset]
         }
-        estimation.data <- data.post.missing.value.treatment[estimation.subset, all.vars(formula)] #Removing variables not used in the formula.
+        estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
+        if (missing != "Imputation")
+            estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -140,9 +145,6 @@ Regression <- function(formula, data, subset = NULL,
     result$type = type
     result$flip.weights <- cleaned.weights
     result$flip.residuals <- outcome.variable - result$flip.fitted.values #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
-    printDetails(outcome.variable[result$flip.subset])
-    printDetails(result$flip.fitted.values[result$flip.subset])
-    printDetails(result$flip.residuals[result$flip.subset])
     return(result)
 }
 
@@ -165,6 +167,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
         stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
              Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
     subset.data <- flipU::IfThen(is.null(subset), data, subset(data, subset))
+    weights <- flipU::IfThen(is.null(subset), weights, subset(weights, subset))
     # Taking the print chart statement out of setCor.
     .pairwise.regression <- psych::setCor
     n <- length(body(.pairwise.regression))
@@ -187,7 +190,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
-    print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
+    # print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
     pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
     rng <- range(lower.tri(pairwise.n))
     if (rng[1] == rng[2])
@@ -199,8 +202,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     if (!is.null(weights))
         result$sample.size <- paste0(result$sample.size, "Data has been resampled with probabilities proportional to the weights.\n")
     result$flip.subset <- !is.na(data[outcome.index]) & !is.na(fitted) & (rownames(data) %in% rownames(estimation.data))
-    print(sum(result$flip.subset))
-    print(summary(result$flip.fitted.values[result$flip.subset]))
+#     print(sum(result$flip.subset))
+#     print(summary(result$flip.fitted.values[result$flip.subset]))
     result
 }
 

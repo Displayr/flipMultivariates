@@ -38,6 +38,17 @@ zw <- bank$ID
 zs <- bank$ID > 100
 summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = zw, subset = zs))
 
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
+flipMultivariates:::breusch.pagan(z)
+flipMultivariates:::BreuschPagan(z)
+car:::ncvTest(z)
+summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
+
+missing <- "Exclude cases with missing data"
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
 missing <- "Imputation"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)

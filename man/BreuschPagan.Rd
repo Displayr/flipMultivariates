@@ -4,7 +4,7 @@
 \alias{BreuschPagan}
 \title{\code{BreuschPagan}Breusch-Pagan test for non-constant variance.}
 \usage{
-BreuschPagan(Regression.object)
+BreuschPagan(Regression.object, show.warnings = TRUE)
 }
 \arguments{
 \item{Regression.object}{An object of class \code{\link{Regression}}.}
