@@ -78,3 +78,33 @@ test_that(missing,
     z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)$coef[3])
     expect_equal(round(z,4),round(0.3358332,4))
 })
+
+missing <- "Use partial data (pairwise)"
+test_that(missing,
+{
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
+    expect_equal(round(z,4), round(0.2773201,4))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)$coef[3])
+    expect_equal(round(z,4), round(0.2545135,4))
+})
+
+missing <- "Use partial data (pairwise)"
+test_that(paste(missing, " with integer weights"),
+{
+    wgt <- ceiling(bank$ID/100)
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = wgt, weights = wgt, missing = missing)$coef[3])
+    expect_equal(round(z,4), round(0.2611546,4))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = bank$ID > 300, missing = missing)$coef[3])
+    expect_equal(round(z,4),round(0.2539403,4))
+})
+
+
+missing <- "Use partial data (pairwise)"
+test_that(paste(missing, " with numeric weights"),
+{
+    wgt <- bank$ID/100
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID / 100, missing = missing)$coef[3])
+    expect_equal(round(z,4), round(0.2611546,4))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID / 100, subset = bank$ID > 100, missing = missing)$coef[3])
+    expect_equal(round(z,4),round(0.2539403,4))
+})

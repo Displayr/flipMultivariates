@@ -61,3 +61,100 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
+
+
+
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+zbank <- subset(bank, bank$ID > 100 & !is.na(bank$ID))
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zbank, missing = missing)
+summary(zbank)
+
+print(dim(zbank))
+cv <- cov(zbank, use = "pairwise.complete.obs")
+psych::setCor(2, 3:8, zbank, std = FALSE)
+
+psych::setCor(2, 3:8, cv, std = FALSE, square = TRUE)
+
+
+psych::setCor(2, 3:8, zbank, std = TRUE)$beta
+
+
+psych::setCor(2, 3:8, cv, std = TRUE, square = TRUE)$beta
+
+
+psych::setCor(2, 3:8, zbank, std = FALSE)
+
+
+
+    .pairwise.regression <- psych::setCor
+    n <- length(body(.pairwise.regression))
+    while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
+        n <- n - 1
+    body(.pairwise.regression)[n] <- NULL
+    .pairwise.regression(2, 3:8, zbank)
+
+    print(sum(bank,na.rm = TRUE))
+
+zzbank = AdjustDataToReflectWeights(zbank, weights)
+psych::setCor(2, 3:8, zzbank)
+
+zzzbank = bank[complete.cases(bank), ]
+psych::setCor(2, 3:8, zzzbank)$beta
+
+
+
+psych::setCor(2, 3:8, zzzbank, STD = TRUE)$beta
+
+unscaled.data <- zzzbank
+scaled.data <- as.data.frame(scale(zzzbank))
+sds.independent = apply(unscaled.data[,3:8], 2, sd, na.rm = TRUE)# / sd(zzzbank[,2], na.rm = TRUE)
+sds.independent
+sd.dependent <- sd(unscaled.data[,2], na.rm = TRUE)
+sd.dependent
+
+
+
+lm.unscaled <-summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = unscaled.data))$coef[-1,1]
+lm.unscaled
+lm.scaled <-summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = scaled.data))$coef[-1,1]
+lm.scaled
+
+lm.unscaled * (sds.independent / sd.dependent)
+
+lm.unscaled
+lm.unscaled / (sds.independent / sd.dependent)
+
+lm.scaled / (sds.independent / sd.dependent)
+lm.unscaled
+
+psych::setCor(2, 3:8, zzzbank, std = FALSE)$beta
+psych::setCor(2, 3:8, zzzbank, std = TRUE)$beta / (sds.independent / sd.dependent)
+
+
+
+summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = as.data.frame(scale(zzzbank))))$coef
+psych::setCor(2, 3:8, zzzbank, std = TRUE)$beta
+
+covm <- cov(bank)
+
+
+psych::setCor(2, 3:8, bank, std = TRUE)$beta
+
+
+bank.filtered <- subset(bank, bank$ID > 100)
+library(psych)
+psych::setCor(2, 3:8, bank.filtered)$beta
+
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+
+
+), predictors.index,
+        data = estimation.data, std = FALSE)
+    partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+    dimnames(partial.coefs) <- list(variable.names[predictors.index],
+        c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+    beta <- as.matrix(lm.cov$beta)
+    fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
+    intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
+    fitted <- as.matrix(data[, predictors.index]) %*% beta
+    result$flip.fitted.values <- fitted + intercept

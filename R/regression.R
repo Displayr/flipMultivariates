@@ -81,7 +81,12 @@ Regression <- function(formula, data, subset = NULL,
             weights <- weights[estimation.subset]
         }
         estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
-        if (missing != "Imputation")
+        missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
+        if (missing.data.proportion < 0.30)
+            warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
+                          "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
+                          "or, set 'Missing Data' to another option."))
+        if (missing != "Imputation")S
             estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
@@ -134,7 +139,7 @@ Regression <- function(formula, data, subset = NULL,
     }
     result$summary  <- summary(result)
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
-    result$call <- cl
+    result$summary <- result$call <- cl
     result$robust.se <- robust.se
     class(result) <- append("Regression", class(result))
     result$type = type
@@ -171,9 +176,16 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     body(.pairwise.regression)[n] <- NULL
     estimation.data <- flipU::IfThen(is.null(weights), subset.data,
                             AdjustDataToReflectWeights(subset.data, weights))
-    result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
-        data = estimation.data, std = FALSE)
-    partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+#     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
+#         data = estimation.data, std = FALSE)
+     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
+         data = estimation.data, std = TRUE)
+    scaled.beta <- as.matrix(lm.cov$beta)
+    sds.independent = apply(estimation.data[, predictors.index], 2, sd, na.rm = TRUE)
+    sd.dependent <- sd(unscaled.data[, outcome.index], na.rm = TRUE)
+    beta <- scaled.beta / (sds.independent / sd.dependent)
+    se <- lm.cov$se / (sds.independent / sd.dependent)
+    partial.coefs <- cbind(beta, se, lm.cov$t, lm.cov$Probability)
     dimnames(partial.coefs) <- list(variable.names[predictors.index],
         c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
     beta <- as.matrix(lm.cov$beta)
@@ -186,8 +198,8 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
     # print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
-    pairwise.n <- RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs")[[1]][[2]]
-    rng <- range(lower.tri(pairwise.n))
+    pairwise.n <- crossprod(!is.na(estimation.data))
+    rng <- range(pairwise.n[lower.tri(pairwise.n)])
     if (rng[1] == rng[2])
         result$sample.size <- paste0("n = ", rng[1],
             " cases used in estimation.\n")
