@@ -4,7 +4,7 @@
 \alias{ComponentPlot}
 \title{\code{ComponentPlot}}
 \usage{
-ComponentPlot(x)
+ComponentPlot(x, show.labels = TRUE)
 }
 \arguments{
 \item{x}{An object of class \code{flipFactorAnalysis}.}

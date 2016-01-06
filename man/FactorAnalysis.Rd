@@ -8,7 +8,8 @@ FactorAnalysis(data, weights = NULL, subset = NULL,
   missing = "Exclude cases with missing data", use.correlation = TRUE,
   type = "PCA", rotation = "none", n.factors = 1,
   sort.coefficients.by.size = FALSE, suppress.small.coefficients = FALSE,
-  min.display.loading.value = 0.1)
+  min.display.loading.value = 0.1, print.type = "table",
+  plot.labels = TRUE)
 }
 \arguments{
 \item{data}{A data framer with numeric columns which contains the data to be analyzed.}
@@ -28,9 +29,30 @@ or the covariance matrix (\code{FALSE}).}
 \code{"Unweighted least squares"}, \code{"Generalized least squares"}, and
 \code{"Maximum likelihood"}.}
 
-\item{rotation}{A string specifying the type of rotation to be used. Valid options are}
+\item{rotation}{A string specifying the type of rotation to be used. Valid options are  \code{"none"},
+\code{"varimax"}, \code{"quartimax"}, \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"},
+\code{"geominT"}, \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"},
+\code{"bentlerQ"}, \code{"geominQ"}, \code{"biquartimin"}, and \code{"cluster"}. More
+details are found in package \code{psych}.}
+
+\item{sort.coefficients.by.size}{A logical value determining whether loadings should be sorted when printed.}
+
+\item{min.display.loading.value}{Loadings smaller than this value will not be displayed when printed.}
+
+\item{print.type}{A string specifying the type of printing that should be done. Valid options are
+\code{"table"} to display a loading table, \code{"scree"} to display a Scree Plot, and
+\code{"scatter"} to display a plot of the first two dimensions of the final loadings.
+The latter two options make use of HTML widgets.}
+
+\item{plot.labels}{A logical value which determines whether or not the scatter plot will show the labels
+                   of the input data, or just integers specifying the column number of each variable.}
 }
 \description{
 Calculate a Factor Analysis or Principal Component Analysis
+}
+\details{
+This function is a wrapper for the functions \code{\link{fa}} and \code{link{principal}} from
+         package \code{psych}. It adds options for handling of missing data, weighting, filtering, and
+         printing.
 }
 
