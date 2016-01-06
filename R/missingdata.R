@@ -29,9 +29,9 @@ SingleImputation <- function(formula, data, outcome.name = NULL, ...)
 #' \code{ExcludeCasesWithAnyMissingData}
 #' @description This is a wrapper for \code{\link{na.omit}}
 #' @param data A \code{\link{data.frame}}.
-#'# @examples
-#'# df <- data.frame(x = c(NA, 1), y = 1:2)
-#'# ExcludeCasesWithAnyMissingData(df)
+#' @examples
+#' df <- data.frame(x = c(NA, 1), y = 1:2)
+#' ExcludeCasesWithAnyMissingData(df)
 #' @export
 ExcludeCasesWithAnyMissingData <- function(data)
 {
@@ -39,6 +39,24 @@ ExcludeCasesWithAnyMissingData <- function(data)
     if(nrow(result) == 0)
         noData()
     result
+}
+
+#' \code{ExcludeCasesWithCompletelyMissingData}
+#' @description Create a copy of a data frame where any cases which have only missing values
+#' are removed.
+#' @param data A \code{\link{data.frame}}.
+#' @examples
+#' my.df <- data.frame("A" = c(1, 2, 3, 4, NA), "B" = c(NA, 1, 2, 3, NA), "C" = c(NA, NA, 1, 2, NA))
+#' ExcludeCasesWithCompletelyMissingData(my.df)
+#' @export
+ExcludeCasesWithCompletelyMissingData <- function(data)
+{
+    result <- data[rowSums(is.na(data)) < ncol(data), ]
+    if (nrow(result) == 0)
+    {
+        noData()
+    }
+    return(result)
 }
 
 #' \code{ErrorIfMissingDataFound}
