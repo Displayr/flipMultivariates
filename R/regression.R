@@ -144,7 +144,7 @@ Regression <- function(formula, data, subset = NULL,
     }
     result$summary  <- summary(result)
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
-    result$summary <- result$call <- cl
+    result$summary$call <- result$call <- cl
     result$robust.se <- robust.se
     class(result) <- append("Regression", class(result))
     result$type = type
