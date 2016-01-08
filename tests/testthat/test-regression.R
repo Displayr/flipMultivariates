@@ -57,7 +57,7 @@ test_that(missing,
 {
     z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.27732,4))
-    z <- as.numeric(Regression(zformula, data = bank, subset = bank$ID > 100, missing = missing)$coef[3])
+    z <- as.numeric(mi$coef[3])
     expect_equal(round(z,4), round(0.25451,4))
     z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.2611546, 4))
