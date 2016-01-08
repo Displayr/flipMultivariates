@@ -23,4 +23,5 @@ imports:
     effects,
     flipU,
     flipPlots,
-    plotly
+    plotly,
+    flipU

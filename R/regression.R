@@ -143,6 +143,9 @@ Regression <- function(formula, data, subset = NULL,
 
     }
     result$summary  <- summary(result)
+    # Inserting the coefficients from the partial data.
+    if (!is.null(result$partial.coefs)) # Partial data.
+        result$summary$coefficients <- result$partial.coefs
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
     result$summary$call <- result$call <- cl
     result$robust.se <- robust.se
@@ -187,7 +190,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
          data = estimation.data, std = TRUE)
     scaled.beta <- as.matrix(lm.cov$beta)
     sds.independent = apply(estimation.data[, predictors.index], 2, sd, na.rm = TRUE)
-    sd.dependent <- sd(unscaled.data[, outcome.index], na.rm = TRUE)
+    sd.dependent <- sd(estimation.data[, outcome.index], na.rm = TRUE)
     beta <- scaled.beta / (sds.independent / sd.dependent)
     se <- lm.cov$se / (sds.independent / sd.dependent)
     partial.coefs <- cbind(beta, se, lm.cov$t, lm.cov$Probability)
@@ -202,6 +205,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
     result$partial.coefs <- partial.coefs
+    result$coef <- partial.coefs[, 1]
     # print(RcmdrMisc::rcorr.adjust(estimation.data, use = "pairwise.complete.obs"))
     pairwise.n <- crossprod(!is.na(estimation.data))
     rng <- range(pairwise.n[lower.tri(pairwise.n)])
@@ -246,9 +250,6 @@ print.Regression <- function(Regression.object, ...)
             }
          }
     }
-    # Inserting the coefficients from the partial data.
-    if (!is.null(Regression.object$partial.coefs)) # Partial data.
-        Regression.summary$coefficients <- Regression.object$partial.coefs
     outcome.variable <- outcomeVariableFromModel(Regression.object)
     if (length(unique(outcome.variable)) == 2)
         warning(paste0("The outcome variable contains only two unique values. A BinaryLogit may be
