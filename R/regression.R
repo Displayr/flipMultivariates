@@ -259,7 +259,7 @@ print.Regression <- function(Regression.object, ...)
     else
     {
         if (Regression.object$type == "Linear" & isCount(outcome.variable))
-            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable model may be more appropriate (e.g., Poisson Regression, Ordered Logit)."))
+            warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
     print(Regression.summary, ...)
     if (!is.null(Regression.object$lm.cov))
