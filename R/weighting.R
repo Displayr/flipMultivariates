@@ -21,6 +21,7 @@ weightedSurveyDesign <- function(data, weights)
 #' of the rounded sum and 1.
 #'
 #' @export
+
 AdjustDataToReflectWeights <- function(data, weights, seed = 123)
 {   # Inspired by Zelig, 13-11-15.
     set.seed(seed)

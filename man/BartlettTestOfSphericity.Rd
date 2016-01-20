@@ -16,7 +16,7 @@ BartlettTestOfSphericity(data, weights = NULL, subset = NULL,
 
 \item{missing}{A string specifiying what to do when the \code{data} contains missing values.
 The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
-with missing data"}, \code{"Use partial data"}, and \code{"Imputation"}.}
+with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.}
 }
 \value{
 A list containing the Chi-Square value, degrees of freedom (\code{df}), and p-value for the test.

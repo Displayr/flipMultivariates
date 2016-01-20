@@ -13,10 +13,10 @@ devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
 # type type
 data(bank)
-Regression(Overall ~ Fees, data = bank, missing = "Imputation")
+Regression(Overall ~ Fees, data = bank, missing = "Imputation (replace missing values with estimates"))
 Regression(Overall ~ Fees, data = bank)
 zz <- NULL
-Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation")
+Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation (replace missing values with estimates"))
 
 
 zdata <- bank#data.frame(Overall = Overall, Fees = Fees)
@@ -50,13 +50,13 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
-missing <- "Imputation"
+missing <- "Imputation (replace missing values with estimates)"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
-missing <- "Use partial data (pairwise)"
+missing <- "Use partial data (pairwise correlations)"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
@@ -158,21 +158,21 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
     fitted <- as.matrix(data[, predictors.index]) %*% beta
     result$flip.fitted.values <- fitted + intercept
 
-missing <- "Imputation"
+missing <- "Imputation (replace missing values with estimates)"
 type = "Poisson"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
 
-missing <- "Imputation"
+missing <- "Imputation (replace missing values with estimates)"
 type = "Quasi-Poisson"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
 
-missing <- "Imputation"
+missing <- "Imputation (replace missing values with estimates)"
 type = "Binary Logit"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)

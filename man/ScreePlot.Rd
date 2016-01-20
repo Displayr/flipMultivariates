@@ -19,7 +19,7 @@ be supplied as to how to compute the covariance or correlation matrix.}
 
 \item{missing}{A string specifiying what to do when the \code{data} contains missing values.
 The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
-with missing data"}, \code{"Use partial data"}, and \code{"Imputation"}.}
+with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.}
 
 \item{use.correlation}{A logical value specifying whether to use the correlation matrix (\code{TRUE}),
 or the covariance matrix (\code{FALSE}).}

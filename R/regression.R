@@ -9,7 +9,7 @@
 #' the name of a variable in \code{data}. It may not be an expression.
 #' @param missing How missing data is to be treated in the regression. Options are:
 #' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' \code{"Use partial data (pairwise)"},and \code{"Imputation"}.
+#' \code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.
 #' @param robust.se Computes standard errors that are robust to violations
 #' of the assumption of constant variance, using the HC1 (degrees of freedom)
 #' modification of White's (1980) estimator (Long and Ervin, 2000).
@@ -18,12 +18,12 @@
 #' @param ... Additional argments to be past to  \code{\link{lm}} or, if the data
 #' is weighted,  \code{\link{survey::svyglm}}.
 #'
-#' @details "Imputation" is performed using multivariate imputation by chained equations
+#' @details "Imputation (replace missing values with estimates)" is performed using multivariate imputation by chained equations
 #' (predictive mean matching) with the \code{\link{mice}} package. All selected
 #' outcome and predictor variables are included in the imputation, including any data excluded
 #' via \code{subset} and due to having invalid weights. Then,
 #' cases with missing values in the outcome variable are excluded from the
-#' analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
+#' analysis (von Hippel 2007). Where "Use partial data (pairwise correlations)" is used, if the data is weighted, a
 #' synthetic data file is created by sampling with replacement in proportion to the weights,where the
 #' sample size is the sum of the weights.
 #' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
@@ -54,7 +54,7 @@ Regression <- function(formula, data, subset = NULL,
         WarningFactorToNumeric()
         data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
     }
-    if (missing == "Use partial data (pairwise)")
+    if (missing == "Use partial data (pairwise correlations)")
     {
         if (type != "Linear")
             stop(paste0("'Use partial data (pairwise)' can only be used with 'type' of 'Linear'."))
@@ -66,12 +66,12 @@ Regression <- function(formula, data, subset = NULL,
     else
     {
         regression.variable.names <- all.vars(formula)
-        if (missing != "Imputation")
+        if (missing != "Imputation (replace missing values with estimates)")
             regression.data <- data[ ,regression.variable.names]
         data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
-                       "Use partial data (pairwise)" = stop("Error: partial data should have already been processed."),
-                       "Imputation" = SingleImputation(formula, data, outcome.name))
+                       "Use partial data (pairwise correlations)" = stop("Error: partial data should have already been processed."),
+                       "Imputation (replace missing values with estimates)" = SingleImputation(formula, data, outcome.name))
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
         estimation.subset <- flipU::IfThen(hasSubset(subset),
             subset[post.missing.data.estimation.subset],
@@ -88,7 +88,7 @@ Regression <- function(formula, data, subset = NULL,
             warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
                           "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
                           "or, set 'Missing Data' to another option."))
-        if (missing != "Imputation")
+        if (missing != "Imputation (replace missing values with estimates)")
             estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
@@ -126,7 +126,7 @@ Regression <- function(formula, data, subset = NULL,
             }
         }
         missing.data <- any(!post.missing.data.estimation.subset)
-        if (missing == "Imputation")
+        if (missing == "Imputation (replace missing values with estimates)")
             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
         result$flip.fitted.values <- predict.lm(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
@@ -134,11 +134,11 @@ Regression <- function(formula, data, subset = NULL,
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
-        if(missing.data | missing == "Imputation")
+        if(missing.data | missing == "Imputation (replace missing values with estimates)")
             result$sample.size <- paste0(result$sample.size,
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
-                   "Imputation" = "Missing values of predictor variables have been imputed.\n"))
+                   "Imputation (replace missing values with estimates)" = "Missing values of predictor variables have been imputed.\n"))
         result$flip.subset <- row.names %in% rownames(estimation.data)
 
     }
@@ -156,6 +156,8 @@ Regression <- function(formula, data, subset = NULL,
     return(result)
 }
 
+match.arg(c("Imputation (replace missing values with estimates"), c("Error if missing data", "Exclude cases with missing data", "Use partial data (pairwise correlations)", "Imputation (replace missing values with estimates)"),
+          several.ok = TRUE)
 
 
 linearRegressionFromCorrelations <- function(formula, data, subset = NULL,

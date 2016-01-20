@@ -70,7 +70,7 @@ testthat::expect_equal(
     FactorAnalysis(data = test.data.1,
                    use.correlation = TRUE,
                    n.factors = 7,
-                   missing = "Use partial data")$loadings[4,3],
+                   missing = "Use partial data (pairwise correlations)")$loadings[4,3],
     0.191794614246439
 )
 
@@ -135,7 +135,7 @@ test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors 
 # Replicate SPSS Bartlet test results
 ###
 
-testthat::expect_equal(BartlettTestOfSphericity(test.data.1, missing = "Use partial data")$chisq, 2254.76019036933)
+testthat::expect_equal(BartlettTestOfSphericity(test.data.1, missing = "Use partial data (pairwise correlations)")$chisq, 2254.76019036933)
 testthat::expect_equal(BartlettTestOfSphericity(test.data.2, missing = "Exclude cases with missing data")$chisq, 3059.91481376238)
 
 

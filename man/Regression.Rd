@@ -22,7 +22,7 @@ the name of a variable in \code{data}. It may not be an expression.}
 
 \item{missing}{How missing data is to be treated in the regression. Options are:
 \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-\code{"Use partial data (pairwise)"},and \code{"Imputation"}.}
+\code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.}
 
 \item{type}{Defaults to \code{"linear"}. Other types are: \code{"Poisson"},
 \code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"}, and \code{"Ordered Logit"}}
@@ -38,12 +38,12 @@ is weighted,  \code{\link{survey::svyglm}}.}
 \code{Regression}Generalized Regression.
 }
 \details{
-"Imputation" is performed using multivariate imputation by chained equations
+"Imputation (replace missing values with estimates)" is performed using multivariate imputation by chained equations
 (predictive mean matching) with the \code{\link{mice}} package. All selected
 outcome and predictor variables are included in the imputation, including any data excluded
 via \code{subset} and due to having invalid weights. Then,
 cases with missing values in the outcome variable are excluded from the
-analysis (von Hippel 2007). Where "Use partial data (pairwise)" is used, if the data is weighted, a
+analysis (von Hippel 2007). Where "Use partial data (pairwise correlations)" is used, if the data is weighted, a
 synthetic data file is created by sampling with replacement in proportion to the weights,where the
 sample size is the sum of the weights.
 }

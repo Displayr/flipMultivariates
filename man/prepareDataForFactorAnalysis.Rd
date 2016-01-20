@@ -15,7 +15,7 @@ prepareDataForFactorAnalysis(data, weights, subset, missing)
 
 \item{missing}{A string specifiying what to do when the \code{data} contains missing values.
 The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
-with missing data"}, \code{"Use partial data"}, and \code{"Imputation"}.}
+with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.}
 }
 \value{
 A list containing \code{subset.data}, which is a data frame which has had subset applied

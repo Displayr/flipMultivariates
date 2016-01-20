@@ -4,7 +4,7 @@
 
 # #' Q23 and Weights from Phone.sav
 # #'
-# #' 25 variables from a 5-point scale. Extra missing data has been added at random. 
+# #' 25 variables from a 5-point scale. Extra missing data has been added at random.
 # #' This makes up about 20% of the values. This is to test PCA and Factor analysis.
 # #'
 # #' @format A list containing:
@@ -83,9 +83,9 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
     {
         for (col in row:num.cols)
         {
-            output.matrix[row, col] <- weightedPartialCovariance(numeric1 = data[, row], 
-                                                                 numeric2 = data[, col], 
-                                                                 input.weight = weight, 
+            output.matrix[row, col] <- weightedPartialCovariance(numeric1 = data[, row],
+                                                                 numeric2 = data[, col],
+                                                                 input.weight = weight,
                                                                  correlation = correlation)
             output.matrix[col, row] <- output.matrix[row, col]
         }
@@ -93,26 +93,26 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
     return(output.matrix)
 }
 
-    
 
-#' \code{FactorAnalysis} 
+
+#' \code{FactorAnalysis}
 #'
 #' @description Calculate a Factor Analysis or Principal Component Analysis
 #'
 #' @param data A data framer with numeric columns which contains the data to be analyzed.
 #' @param weights A numeric vector containing the weight for each case in data.
 #' @param subset A logical vector which describes the subset of \code{data} to be analyzed.
-#' @param missing A string specifiying what to do when the \code{data} contains missing values. 
-#'                The valid options are \code{"Error if missing data found"}, \code{"Exclude cases 
-#'                with missing data"}, \code{"Use partial data"}, and \code{"Imputation"}.
+#' @param missing A string specifiying what to do when the \code{data} contains missing values.
+#'                The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
+#'                with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.
 #' @param use.correlation A logical value specifying whether to use the correlation matrix (\code{TRUE}),
 #'                        or the covariance matrix (\code{FALSE}).
-#' @param type A string specifying the type of analysis to do. Valid options are \code{"PCA"}, 
-#'             \code{"Unweighted least squares"}, \code{"Generalized least squares"}, and 
+#' @param type A string specifying the type of analysis to do. Valid options are \code{"PCA"},
+#'             \code{"Unweighted least squares"}, \code{"Generalized least squares"}, and
 #'             \code{"Maximum likelihood"}.
-#' @param rotation A string specifying the type of rotation to be used. Valid options are  \code{"none"}, 
-#'                 \code{"varimax"}, \code{"quartimax"}, \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"}, 
-#'                 \code{"geominT"}, \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"}, 
+#' @param rotation A string specifying the type of rotation to be used. Valid options are  \code{"none"},
+#'                 \code{"varimax"}, \code{"quartimax"}, \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"},
+#'                 \code{"geominT"}, \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"},
 #'                 \code{"bentlerQ"}, \code{"geominQ"}, \code{"biquartimin"}, and \code{"cluster"}. More
 #'                 details are found in package \code{psych}.
 #' @param sort.coefficients.by.size A logical value determining whether loadings should be sorted when printed.
@@ -124,18 +124,18 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
 #' @param plot.labels A logical value which determines whether or not the scatter plot will show the labels
 #'                    of the input data, or just integers specifying the column number of each variable.
 #'
-#' @details This function is a wrapper for the functions \code{\link{fa}} and \code{link{principal}} from 
+#' @details This function is a wrapper for the functions \code{\link{fa}} and \code{link{principal}} from
 #'          package \code{psych}. It adds options for handling of missing data, weighting, filtering, and
 #'          printing.
 #'
 #' @export
-FactorAnalysis <- function(data, 
-                           weights = NULL, 
-                           subset = NULL, 
+FactorAnalysis <- function(data,
+                           weights = NULL,
+                           subset = NULL,
                            missing = "Exclude cases with missing data",
-                           use.correlation = TRUE, 
-                           type = "PCA", 
-                           rotation = "none", 
+                           use.correlation = TRUE,
+                           type = "PCA",
+                           rotation = "none",
                            n.factors = 1, #Need a new option to allow the user to do this with eigenvalues
                            sort.coefficients.by.size = FALSE,
                            suppress.small.coefficients = FALSE,
@@ -156,10 +156,10 @@ FactorAnalysis <- function(data,
     } else {
         n.obs <- nrow(prepared.data$subset.data)
     }
-    
+
     input.matrix <- CovarianceAndCorrelationMatrix(data = prepared.data$subset.data,
-                                                   weights = prepared.data$subset.weights, 
-                                                   pairwise = missing == "Use partial data", 
+                                                   weights = prepared.data$subset.weights,
+                                                   pairwise = missing == "Use partial data (pairwise correlations)",
                                                    use.correlation = use.correlation)
 
     row.names(input.matrix) <- colnames(data)
@@ -167,40 +167,40 @@ FactorAnalysis <- function(data,
 
     # Work out which rotation to use
     # Convert from the strings that are to be used in the menus, which begin with upppercase letters
-    substr(rotation, 1, 1) <- tolower(substr(rotation, 1, 1))   
+    substr(rotation, 1, 1) <- tolower(substr(rotation, 1, 1))
 
     # Call the appropriate method from psych
 
-    if (type == "PCA") 
+    if (type == "PCA")
     {
-        results <- psych::principal(input.matrix, 
-                                      nfactors = n.factors, 
+        results <- psych::principal(input.matrix,
+                                      nfactors = n.factors,
                                       rotate = rotation,
                                       covar = !use.correlation,
                                       scores = TRUE)
-        
-    } 
-    else 
+
+    }
+    else
     {
         # Map SPSS options to psych options
         method <- type
         # method <- switch(type,
         #                  "Unweighted least squares" = "pa",
-        #                  "Generalized least squares" = "gls", 
+        #                  "Generalized least squares" = "gls",
         #                  "Maximum likelihood" = "ml")
 
         if (is.null(method))
         {
-            stop(paste0("Do not recognize factor analysis type: ", type))    
+            stop(paste0("Do not recognize factor analysis type: ", type))
         }
 
-        results <- psych::fa(input.matrix, 
+        results <- psych::fa(input.matrix,
                                nfactors = n.factors,
                                rotate = rotation,
                                covar = !use.correlation,
                                fm = method,
                                scores = TRUE)
-        
+
     }
 
 
@@ -244,7 +244,7 @@ FactorAnalysis <- function(data,
 #' @param pairwise A logical value. If \code{TRUE} the correlations or covariances will be computed
 #'                 using the complete data for each pair of variables from \code{data}. If
 #'                 \code{FALSE} then cases with missing data will be excluded from the computation.
-#' @param use.correlation A logical value specifying whether a correlation or covariance matrix 
+#' @param use.correlation A logical value specifying whether a correlation or covariance matrix
 #'                        should be returned.
 #' @examples
 #' my.data <- cbind(c(-0.9, 0.05, 0.1, 0.8), c(1, NaN, 0, -0.9))
@@ -252,8 +252,8 @@ FactorAnalysis <- function(data,
 #' CovarianceAndCorrelationMatrix(my.data, weights = my.weight, pairwise = TRUE)
 #' @export
 CovarianceAndCorrelationMatrix <- function(data,
-                                           weights = NULL, 
-                                           pairwise = FALSE, 
+                                           weights = NULL,
+                                           pairwise = FALSE,
                                            use.correlation = TRUE)
 {
     # Create the input correlation or convariance matrix
@@ -268,7 +268,7 @@ CovarianceAndCorrelationMatrix <- function(data,
         {
             use.string <- "complete.obs"
         }
-        
+
         if (use.correlation)
         {
             input.matrix <- cor(data, use = use.string)
@@ -281,12 +281,12 @@ CovarianceAndCorrelationMatrix <- function(data,
     else
     {
         # Handles all cases
-        input.matrix <- weightedPartialCovarianceMatrix(data, 
-                                                        weight = weights, 
+        input.matrix <- weightedPartialCovarianceMatrix(data,
+                                                        weight = weights,
                                                         correlation = use.correlation)
     }
     return(input.matrix)
-} 
+}
 
 #' @export
 print.flipFactorAnalysis <- function(x, ...)
@@ -306,8 +306,8 @@ print.flipFactorAnalysis <- function(x, ...)
             min.display.loading.value <- 0
         }
 
-        print(x$loadings, 
-              digits = 3, 
+        print(x$loadings,
+              digits = 3,
               cutoff = min.display.loading.value,
               sort = x$sort.coefficients.by.size)
     } else if (print.type == "scree") {
@@ -320,8 +320,8 @@ print.flipFactorAnalysis <- function(x, ...)
 # A better version of print.loadings from package stats.
 # The standard version prints the wrong thing when there is
 # a single factor and the
-#' @export 
-print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...) 
+#' @export
+print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...)
 {
     Lambda <- unclass(x)
     p <- nrow(Lambda)
@@ -346,7 +346,7 @@ print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...)
     varex <- rbind(`SS loadings` = vx)
     if (is.null(attr(x, "covariance"))) {
         varex <- rbind(varex, `Proportion Var` = vx/p)
-        if (factors > 1) 
+        if (factors > 1)
             varex <- rbind(varex, `Cumulative Var` = cumsum(vx/p))
     }
     cat("\n")
@@ -358,8 +358,8 @@ print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...)
 #' \code{ScreePlot}
 #' @description Plot the eigenvalues from an existing principal component or factor analysis
 #'              or plot the eigenvalues from the correlation or covariance matrix of a data frame.
-#' @param x Either a data frame, a numeric vector of eigenvalues, or the eigenvalues from an analysis of 
-#'          class \code{flipFactorAnalysis} from \link{\code{FactorAnalysis}}, or \code{fa} or 
+#' @param x Either a data frame, a numeric vector of eigenvalues, or the eigenvalues from an analysis of
+#'          class \code{flipFactorAnalysis} from \link{\code{FactorAnalysis}}, or \code{fa} or
 #'          \code{principal} from package psych. When x is a data frame, additional arguments can
 #'          be supplied as to how to compute the covariance or correlation matrix.
 #' @inheritParams FactorAnalysis
@@ -372,8 +372,8 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
     {
         prepared.data <- prepareDataForFactorAnalysis(data = x, weights = weights, subset = subset, missing = missing)
         input.matrix <- CovarianceAndCorrelationMatrix(data = prepared.data$subset.data,
-                                                   weights = prepared.data$subset.weights, 
-                                                   pairwise = missing == "Use partial data", 
+                                                   weights = prepared.data$subset.weights,
+                                                   pairwise = missing == "Use partial data (pairwise correlations)",
                                                    use.correlation = use.correlation)
         input.values <- eigen(input.matrix)$values
     }
@@ -385,7 +385,7 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
     {
         input.values <- x$values
     }
-    else 
+    else
     {
         stop(paste0("Can't make a Scree Plot for object of class", class(x)))
     }
@@ -398,12 +398,12 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
     Eigenvalue <- input.values
 
     #my.plot <- metricsgraphics::mjs_plot(df, x = eig.num, y = eig.vals) %>% mjs_line() %>% mjs_point() %>% mjs_labs(x = "Component Number", y="Eigenvalue")
-    my.plot <- plotly::plot_ly(x = `Component Number`, 
-                       y = Eigenvalue, 
+    my.plot <- plotly::plot_ly(x = `Component Number`,
+                       y = Eigenvalue,
                        #line = list(shape = "linear"),
                        mode = "lines+markers"
                        # marker = list(line = list(shape = "linear"), symbol = "100", color = "rgb(16, 32, 77)")
-                       ) #%>% 
+                       ) #%>%
                #layout(title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
                #add_trace(name = "spline", line = list(shape = "spline"))
     plotly::layout(plot = my.plot, title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
@@ -413,9 +413,9 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
 
 
 #' \code{ComponentPlot}
-#' 
+#'
 #' @description Create a scatter plot showing the loadings of each variable on the first two principal components.
-#' 
+#'
 #' @param x An object of class \code{flipFactorAnalysis}.
 #'
 #' @export
@@ -473,13 +473,13 @@ prepareDataForFactorAnalysis <- function(data, weights, subset, missing)
     if (missing == "Error if missing data")
     {
         ErrorIfMissingDataFound(subset.data)
-    } else if (missing == "Imputation") {
+    } else if (missing == "Imputation (replace missing values with estimates)") {
         imputed.data <- imputeForFactorAnalysis(data)
         subset.data <- imputed.data[subset, ]
     } else if (missing == "Exclude cases with missing data") {
         # Ensure only complete responses remain
         subset.data <- ExcludeCasesWithAnyMissingData(subset.data)
-    } else if (missing == "Use partial data") {
+    } else if (missing == "Use partial data (pairwise correlations)") {
         subset.data <- ExcludeCasesWithCompletelyMissingData(subset.data)
     } else {
         stop(paste0("Don't recognize the missing data option", missing))
@@ -515,12 +515,12 @@ prepareDataForFactorAnalysis <- function(data, weights, subset, missing)
 #'          It adds functionality to handle the presence of weights. Where weights are specified
 #'          the input data is standardized using the weighted standard deviation and mean. The data that
 #'          is used to generate the scores is the same as that used to generate the factor analysis
-#'          or PCA. That is, the original subset is isued, if imputation was specified originally, then 
+#'          or PCA. That is, the original subset is isued, if imputation was specified originally, then
 #'          the imputed data is used, otherwise all cases which are not completely missing are used.
 #'
 #'
 #'
-#' @return A data frame with the same dimensions as the data which was originally supplied to 
+#' @return A data frame with the same dimensions as the data which was originally supplied to
 #'          \link{\code{FactorAnalysis}}. Any
 #'
 #' @export
@@ -542,7 +542,7 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
 
     if (!is.null(factor.analysis.object$original.weights))
     {
-        scaled.data <- scaleDataUsingWeights(data = subset.data, weights = subset.weights) 
+        scaled.data <- scaleDataUsingWeights(data = subset.data, weights = subset.weights)
     } else
     {
         scaled.data <- scale(subset.data)
@@ -591,22 +591,22 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
 #'
 #' @export
 # For the sample size, use the min sample size of the correlation matrix
-BartlettTestOfSphericity <- function(data, 
-                         weights = NULL, 
+BartlettTestOfSphericity <- function(data,
+                         weights = NULL,
                          subset = NULL,
                          missing = "Exclude cases with missing data")
 {
     prepared.data <- prepareDataForFactorAnalysis(data, weights, subset, missing)
     correlation.matrix <- CovarianceAndCorrelationMatrix(data = prepared.data$subset.data,
-                                                         weights = prepared.data$subset.weights, 
-                                                         pairwise = missing == "Use partial data", 
+                                                         weights = prepared.data$subset.weights,
+                                                         pairwise = missing == "Use partial data (pairwise correlations)",
                                                          use.correlation = TRUE)
 
     # If using a weight, supply the Effective Sample Size, which is the sum of the weights, otherwise
     # supply the actual sample size of the prepared data.
-    # When missing is set to "Use partial data" then the sample size can vary between cells in
+    # When missing is set to "Use partial data (pairwise correlations)" then the sample size can vary between cells in
     # correlation matrix. In this case, use the smallest sample size, or effective sameple size.
-    if (missing == "Use partial data")
+    if (missing == "Use partial data (pairwise correlations)")
     {
         sample.size.matrix <- sampleSizeMatrix(data, weights)
         sample.size <- min(sample.size.matrix)
@@ -631,7 +631,7 @@ print.flipBartlett <- function(x, ...)
 
 
 # Scale and center data using the weighted mean and standard deviation
-scaleDataUsingWeights <- function(data, weights) 
+scaleDataUsingWeights <- function(data, weights)
 {
     .weightedMeanAndSD <- function(x, weights)
     {
@@ -654,7 +654,7 @@ scaleDataUsingWeights <- function(data, weights)
 
 
 # Calculate the (effective) sample size for each pair of variables in data
-sampleSizeMatrix <- function(data, weights) 
+sampleSizeMatrix <- function(data, weights)
 {
     if (is.null(weights))
     {
@@ -675,7 +675,7 @@ sampleSizeMatrix <- function(data, weights)
                 sample.size <- sum(weights[indicator])
                 sample.size.matrix[row, col] <- sample.size
                 sample.size.matrix[col, row] <- sample.size
-            } 
+            }
         }
     }
     return(sample.size.matrix)

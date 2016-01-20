@@ -39,8 +39,8 @@ test_that("Tests of homogenous variance (Breush-Pagen test)",
     expect_that(Regression(zformula, missing = "Error if missing data", data = bank, subset = bank$ID > 100,  weights = bank$ID), throws_error())
     z <- bank[complete.cases(bank),]
     expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Imputation", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Imputation (replace missing values with estimates)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise correlations)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
 })
 
 
@@ -57,7 +57,7 @@ test_that(missing,
 {
     z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.27732,4))
-    z <- as.numeric(mi$coef[3])
+    z <- as.numeric(Regression(zformula, data = bank, subset = bank$ID > 100,  missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.25451,4))
     z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.2611546, 4))
@@ -66,7 +66,7 @@ test_that(missing,
 })
 
 
-missing <- "Imputation"
+missing <- "Imputation (replace missing values with estimates)"
 test_that(missing,
 {
     z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
@@ -79,7 +79,7 @@ test_that(missing,
     expect_equal(round(z,4),round(0.3358332,4))
 })
 
-missing <- "Use partial data (pairwise)"
+missing <- "Use partial data (pairwise correlations)"
 test_that(missing,
 {
     z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
@@ -88,7 +88,7 @@ test_that(missing,
     expect_equal(round(z,4), round(0.2991385,4))
 })
 
-missing <- "Use partial data (pairwise)"
+missing <- "Use partial data (pairwise correlations)"
 test_that(paste(missing, " with integer weights"),
 {
     wgt <- ceiling(bank$ID/100)
@@ -99,7 +99,7 @@ test_that(paste(missing, " with integer weights"),
 })
 
 
-missing <- "Use partial data (pairwise)"
+missing <- "Use partial data (pairwise correlations)"
 test_that(paste(missing, " with numeric weights"),
 {
     wgt <- bank$ID/100
