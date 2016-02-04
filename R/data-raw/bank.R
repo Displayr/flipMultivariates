@@ -11,6 +11,14 @@ for (i in unique(bank$ID))
 bank$weight <- bank$weight / mean(bank$weight, na.rm = TRUE)
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
+# Exporting the file out again, including the modifications
+data(bank)
+library(foreign)
+write.foreign(bank, "c:/delete/mydata.txt", "c:/delete/mydata.sps",   package="SPSS")
+
+
+
+
 # type type
 data(bank)
 Regression(Overall ~ Fees, data = bank, missing = "Imputation (replace missing values with estimates"))
@@ -62,11 +70,14 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
 
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE, weights = NULL, missing = missing)
 
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
 zbank <- subset(bank, bank$ID > 100 & !is.na(bank$ID))
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zbank, missing = missing)
 summary(zbank)
+
+
 
 print(dim(zbank))
 cv <- cov(zbank, use = "pairwise.complete.obs")
