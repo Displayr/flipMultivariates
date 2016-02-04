@@ -3,7 +3,7 @@
 #' @param list.of.variables A variable in a DataSet or data.frame.
 #' @param coerce.to.numeric Makes factors and ordered factors numeric.
 #' @export
-creatingBinaryoutcomeVariableIfNecessary <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(variable))) {
+DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(variable))) {
     if (!is.factor(variable))
         variable <- factor(variable)
     if (nlevels(variable) == 1)
@@ -14,7 +14,7 @@ creatingBinaryoutcomeVariableIfNecessary <- function(variable, cutoff = 0.5, war
     cut.point <- match(TRUE, cumulative.probs >= cutoff)
     if (cut.point == 1)
         stop(paste(variable.name, "cannot be dichotimized (e.g., perhaps only has 1 value)."))
-    new.factor <- factor(unclass(variable) >= cut.point)
+    new.factor <- factor(unclass(variable) > cut.point)
     levels(new.factor) <- paste0(c("<=", ">="), levels(variable)[c(cut.point - 1, cut.point)])
     if (warning)
         warning(paste(variable.name, "has been dichotimized into", paste(levels(new.factor), collapse = " & ")))
@@ -24,7 +24,8 @@ creatingBinaryoutcomeVariableIfNecessary <- function(variable, cutoff = 0.5, war
 #' @export
 CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
 {
-    CreatingBinaryVariableIfNecessary(data, dependentName(data))
+    outcome.name <- outcomeName(formula)
+    data[, outcome.name] <- CreatingBinaryVariableIfNecessary(data, outcome.name)
 }
 
 #' @export

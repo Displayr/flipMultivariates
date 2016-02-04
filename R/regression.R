@@ -48,12 +48,15 @@ Regression <- function(formula, data, subset = NULL,
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     if (type == "Binary Logit")
-        data <- creatingBinaryoutcomeVariableIfNecessary(formula, data)
-    row.names <- rownames(data)
-    if (is.factor(outcome.variable)) {
-        WarningFactorToNumeric()
-        data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
+        data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
+    else if (type == "Ordered" & !is.factor(outcome.variable))
+        data[, outcome.name] <- ordered(outcome.variable)
+    else if (is.factor(outcome.variable))
+    {
+            WarningFactorToNumeric()
+            data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
     }
+    row.names <- rownames(data)
     if (missing == "Use partial data (pairwise correlations)")
     {
         if (type != "Linear")
@@ -155,9 +158,6 @@ Regression <- function(formula, data, subset = NULL,
     result$flip.residuals <- outcome.variable - result$flip.fitted.values #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
-
-match.arg(c("Imputation (replace missing values with estimates"), c("Error if missing data", "Exclude cases with missing data", "Use partial data (pairwise correlations)", "Imputation (replace missing values with estimates)"),
-          several.ok = TRUE)
 
 
 linearRegressionFromCorrelations <- function(formula, data, subset = NULL,

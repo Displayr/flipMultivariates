@@ -1,4 +1,4 @@
-context("Linear regression")
+context("Regression")
 data(bank)
 
 test_that("allEffects works on Regression object",
@@ -108,6 +108,25 @@ test_that(paste(missing, " with numeric weights"),
     z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID / 100, subset = bank$ID > 100, missing = missing)$coef[3])
     expect_equal(round(z,4),round(0.3016513,4))
 })
+
+
+
+for(missing in c("Imputation (replace missing values with estimates)",
+        "Exclude cases with missing data"))
+    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered"))
+        test_that(paste("No error", missing, type),
+{
+    # no weight, no filter
+    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type), not(throws_error()))
+     # weight
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = bank$ID > 100,  weights = NULL, type = type), not(throws_error()))
+     # weight, filter
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = bank$ID, type = type), not(throws_error()))
+     # weight, filter
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = bank$ID > 100,  weights = bank$ID, type = type), not(throws_error()))
+})
+
+
 
 
 # Robust SE
