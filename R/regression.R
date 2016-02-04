@@ -73,7 +73,6 @@ Regression <- function(formula, data, subset = NULL,
                        "Use partial data (pairwise correlations)" = stop("Error: partial data should have already been processed."),
                        "Imputation (replace missing values with estimates)" = SingleImputation(formula, data, outcome.name))
         post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
-        print("dog")
         estimation.subset <- flipU::IfThen(hasSubset(subset),
             subset[post.missing.data.estimation.subset],
             rep(TRUE, nrow(data.post.missing.value.treatment)))
