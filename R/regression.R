@@ -44,7 +44,7 @@ Regression <- function(formula, data, subset = NULL,
         subset[is.na(subset)] <- FALSE
     if (!is.null(weights))
         weights[is.na(weights)] <- 0
-    cleaned.weights <- weights
+    unfiltered.weights <- weights
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     if (type == "Binary Logit")
@@ -54,7 +54,7 @@ Regression <- function(formula, data, subset = NULL,
     else if (is.factor(outcome.variable))
     {
             WarningFactorToNumeric()
-            data[[outcome.name]] <- outcome.variable <- unclass(outcome.variable)
+            data[, outcome.name] <- outcome.variable <- unclass(outcome.variable)
     }
     row.names <- rownames(data)
     if (missing == "Use partial data (pairwise correlations)")
@@ -120,6 +120,11 @@ Regression <- function(formula, data, subset = NULL,
                 warningRobustInappropriate()
             if (type == "Linear")
                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights))
+            else if (type == "Ordered")
+            {
+                estimation.data$weights <- weights
+                result <- MASS::polr(formula, estimation.data, weights = weights, Hess = TRUE, ...)
+            }
             else
             {
                 result <- switch(type,
@@ -131,7 +136,8 @@ Regression <- function(formula, data, subset = NULL,
         missing.data <- any(!post.missing.data.estimation.subset)
         if (missing == "Imputation (replace missing values with estimates)")
             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
-        result$flip.fitted.values <- predict.lm(result, newdata = data, na.action = na.pass)
+        result$flip.fitted.values <- fitted(result, newdata = data, na.action = na.pass)
+        result$flip.predicted.values <- predict(result, newdata = data, na.action = na.pass)
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
@@ -154,10 +160,12 @@ Regression <- function(formula, data, subset = NULL,
     result$robust.se <- robust.se
     class(result) <- append("Regression", class(result))
     result$type = type
-    result$flip.weights <- cleaned.weights
-    result$flip.residuals <- outcome.variable - result$flip.fitted.values #Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
+    result$flip.weights <- unfiltered.weights
+    result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
+
+
 
 
 linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
@@ -202,7 +210,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
     intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
     fitted <- as.matrix(data[, predictors.index]) %*% beta
-    result$flip.fitted.values <- fitted + intercept
+    result$flip.predicted.values <- result$flip.fitted.values <- fitted + intercept
     partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
@@ -274,7 +282,7 @@ print.Regression <- function(Regression.object, ...)
 #' @export
 predict.Regression <- function(object, ...)
 {
-    object$flip.fitted.values
+    object$flip.predicted.values
 }
 
 #' @export

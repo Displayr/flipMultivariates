@@ -183,9 +183,12 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
     result$flip.fitted.values <- fitted + intercept
 
 missing <- "Imputation (replace missing values with estimates)"
-type = "Poisson"
+type = "Ordered"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
 
+library(MASS)
+z = polr(factor(Overall) ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,weights = bank$ID, subset = bank$ID > 100)
+dim(fitted.values(z))

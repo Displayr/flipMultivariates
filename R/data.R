@@ -15,6 +15,13 @@ allIntegers <- function(x)
 }
 
 
+unclassIfNecessary <- function(x)
+{
+    if(is.factor(x))
+        return(unclass(x));
+    return(x);
+}
+
 anyNegative <- function(x)
 {
     min(c(x, NA), na.rm = TRUE) < 0
