@@ -397,15 +397,9 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
     `Component Number` <- 1:length(input.values)
     Eigenvalue <- input.values
 
-    #my.plot <- metricsgraphics::mjs_plot(df, x = eig.num, y = eig.vals) %>% mjs_line() %>% mjs_point() %>% mjs_labs(x = "Component Number", y="Eigenvalue")
     my.plot <- plotly::plot_ly(x = `Component Number`,
                        y = Eigenvalue,
-                       #line = list(shape = "linear"),
-                       mode = "lines+markers"
-                       # marker = list(line = list(shape = "linear"), symbol = "100", color = "rgb(16, 32, 77)")
-                       ) #%>%
-               #layout(title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
-               #add_trace(name = "spline", line = list(shape = "spline"))
+                       mode = "lines+markers")
     plotly::layout(plot = my.plot, title = "Scree Plot", yaxis = list(range = c(0, max(input.values) + 1)))
     return(my.plot)
 
