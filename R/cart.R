@@ -167,16 +167,18 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
             hcl.color <- rev(colorspace::diverge_hcl(num.color.div,  h = c(260, 0), c = 100, l = c(50, 90)))
             divisions <- seq(0, 1, 1/num.color.div)
             node.color[1] <- "#ccc"
-            for (i in 2:nrow(frame))
-            {
-                y <- max(yprob[i,])
-                div.idx = max(which(y >= divisions))
-                if (div.idx == length(divisions))
+            n.rows <- nrow(frame)
+            if (n.rows > 1)
+                for (i in 2:nrow(frame))
                 {
-                    div.idx <- div.idx - 1
+                    y <- max(yprob[i,])
+                    div.idx = max(which(y >= divisions))
+                    if (div.idx == length(divisions))
+                    {
+                        div.idx <- div.idx - 1
+                    }
+                    node.color[i] <- hcl.color[div.idx]
                 }
-                node.color[i] <- hcl.color[div.idx]
-            }
         }
         else
         {
