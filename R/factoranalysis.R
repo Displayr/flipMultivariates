@@ -25,7 +25,7 @@
 imputeForFactorAnalysis <- function(data)
 {
     names <- colnames(data)
-    all.vars.formula <- paste0(names[1], "~", paste0(names[2:ncol(data)], collapse = "+"))
+    all.vars.formula <- paste0("~", paste0(names[1:ncol(data)], collapse = "+"))
     imputed.data <- SingleImputation(formula, data)
     return(imputed.data)
 }
