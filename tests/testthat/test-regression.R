@@ -113,7 +113,7 @@ test_that(paste(missing, " with numeric weights"),
 
 for(missing in c("Imputation (replace missing values with estimates)",
         "Exclude cases with missing data"))
-    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered"))
+    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
         test_that(paste("No error", missing, type),
 {
     # no weight, no filter

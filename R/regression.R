@@ -104,6 +104,8 @@ Regression <- function(formula, data, subset = NULL,
                         "Binary Logit" = "binomial"))
             else if (type == "Ordered")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
+            else if (type == "NBD")
+                result <- MASS::glm.nb(formula, estimation.data, ...)
             else
                 stop("Unknown regression 'type'.")
 
@@ -124,6 +126,11 @@ Regression <- function(formula, data, subset = NULL,
             {
                 estimation.data$weights <- weights
                 result <- MASS::polr(formula, estimation.data, weights = weights, Hess = TRUE, ...)
+            }
+            else if (type == "NBD")
+            {
+                estimation.data$weights <- weights
+                result <- MASS::glm.nb(formula, estimation.data, weights = weights, ...)
             }
             else
             {
