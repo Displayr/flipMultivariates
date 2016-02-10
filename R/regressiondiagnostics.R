@@ -20,6 +20,7 @@ BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
             test = "Breusch-Pagan test of Non-constant Variance"))
     }
     residuals <- residuals(Regression.object)[subset]
+    residuals <- residuals(Regression.object)[subset]
     squared.residuals <- residuals^2
     U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
     fitted.values <- fitted.values(Regression.object)[subset]
