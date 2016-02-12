@@ -180,10 +180,10 @@ Regression <- function(formula, data, subset = NULL,
 #         fitted.values <- fitted(result)
 #         result$flip.fitted.values <- rep(NA, total.n <- nrow(data))
 #         result$flip.fitted.values[result$flip.subset] <- fitted.values
-# >>>>>>> origin/master
+#
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
-            ifelse(hasSubset(subset), sum(subset), total.n), ".\n")))
+            ifelse(hasSubset(subset), sum(subset), length(row.names)), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
         if(missing.data | missing == "Imputation (replace missing values with estimates)")
@@ -191,11 +191,7 @@ Regression <- function(formula, data, subset = NULL,
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation (replace missing values with estimates)" = "Missing values of predictor variables have been imputed.\n"))
-<<<<<<< HEAD
         result$flip.subset <- row.names %in% rownames(estimation.data)
-=======
-
->>>>>>> origin/master
     }
     result$summary  <- summary(result)
     # Inserting the coefficients from the partial data.
