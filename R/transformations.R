@@ -26,6 +26,7 @@ CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
 {
     outcome.name <- outcomeName(formula)
     data[, outcome.name] <- CreatingBinaryVariableIfNecessary(data, outcome.name)
+    data
 }
 
 #' @export
@@ -42,10 +43,9 @@ CreatingBinaryVariableIfNecessary <- function(data, variable.name)
                 variable <- factor(variable)
             if (nlevels(variable) > 2)
                 variable <- DichotomizeFactor(variable, warning = TRUE, variable.name = variable.name)
-            data[[variable.name]] <- variable
         }
     }
-    data
+    variable
 }
 
 #' Converts a factor into an indicator matrix.

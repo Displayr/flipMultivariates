@@ -205,7 +205,7 @@ missing.indicator <- matrix(rbinom(n = n.rows * ncol(my.cov), size = 1, prob = 0
 
 mcar.data <- initial.data
 mcar.data[missing.indicator] <- NaN
-imputed.data <- imputeForFactorAnalysis(mcar.data)
+imputed.data <- flipMultivariates:::imputeForFactorAnalysis(mcar.data)
 
 # max(abs(cor(initial.data) - cor(mcar.data, use = "pairwise.complete.obs")))
 # max(abs(cor(initial.data) - cor(imputed.data)))

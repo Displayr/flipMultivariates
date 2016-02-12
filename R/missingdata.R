@@ -1,16 +1,76 @@
+#' \code{EstimationData}
+#' Selects the data from a data frame for estimation. Conducts imputation if necessary.
+#' @param formula An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of type specification are given under ‘Details’.
+#' @param data A \code{\link{data.frame}}.
+#' @param subset An optional vector specifying a subset of observations to be used in the fitting process, or,
+#' the name of a variable in \code{data}. It may not be an expression.
+#' \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or,
+#' the name of a variable in \code{data}. It may not be an expression.
+#' @param missing How missing data is to be treated in the regression. Options are:
+#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
+#' \code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.
+#' @export
+EstimationData <- function(formula, data, subset = NULL,
+                             weights = NULL,
+                             missing = "Exclude cases with missing data")
+{
+    # Cleaning weightes and subsets.
+    if (!is.null(subset))
+        subset[is.na(subset)] <- FALSE
+    if (!is.null(weights))
+        weights[is.na(weights)] <- 0
+    unfiltered.weights <- weights
+    # Selecting the relevant variables from the data frame (unless imputation is being used).
+    variable.names <- all.vars(formula)
+    if (missing != "Imputation (replace missing values with estimates)")
+        data.for.model <- data[ ,variable.names]
+    # Addressing missing values.
+    data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data.for.model),
+                   "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data.for.model),
+                   "Use partial data (pairwise correlations)" = data.for.model[complete.cases(data.for.model),],
+                   "Imputation (replace missing values with estimates)" = SingleImputation(formula, data))
+    post.missing.data.estimation.sample <- row.names(data) %in% rownames(data.post.missing.value.treatment)
+    data[post.missing.data.estimation.sample, ] <- data.post.missing.value.treatment
+    estimation.subset <- flipU::IfThen(hasSubset(subset),
+        subset[post.missing.data.estimation.sample],
+        rep(TRUE, nrow(data.post.missing.value.treatment)))
+    if (!is.null(weights))
+    {
+        weights <- weights[post.missing.data.estimation.sample]
+        estimation.subset <- estimation.subset & weights > 0
+        weights <- weights[estimation.subset]
+    }
+    estimation.data <- data.post.missing.value.treatment[estimation.subset, variable.names] #Removing variables not used in the formula.
+    missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
+    if (missing.data.proportion > 0.20)
+        warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
+                      "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
+                      "or, set 'Missing Data' to another option."))
+    if (missing != "Imputation (replace missing values with estimates)")
+        estimation.data <- estimation.data[ ,variable.names]
+
+    list(estimation.data = estimation.data,
+         weights = weights,
+         unfiltered.weights = unfiltered.weights,
+         missing.data.proportion = missing.data.proportion,
+         post.missing.data.estimation.sample = post.missing.data.estimation.sample,
+         estimation.subset = estimation.subset, data = data, subset = subset)
+}
+
+
 #' \code{SingleImputation}
 #' @description This is a wrapper for \code{\link{mice}}.
+#' @param formula A \code{\link{formula}}.
 #' @param data A \code{\link{data.frame}}.
-#' @param outcome.name A If the name of the outcome (outcome)
-#' variable is provided, any cases with missing values on this variable
-#' are excluded from the final data file.
 #' @param ... Optional arguments for \code{\link{mice}}.
 #'# @examples
 #'# df <- data.frame(x = c(NA, 1), y = 1:2)
 #'# ExcludeCasesWithAnyMissingData(df)
 #' @export
-SingleImputation <- function(formula, data, outcome.name = NULL, ...)
+SingleImputation <- function(formula, data, ...)
 {
+    outcome.name <- outcomeName(formula)
     if(!any(is.na(data)))
         warning("Imputation has been selected, but the data has no missing values, so nothing has been imputed.")
     requireNamespace("mice")

@@ -1,19 +1,29 @@
 # Properties of data.
+outcomeName <- function(formula.object)
+{
+
+    if (hasOutcome(formula.object))
+        return(all.vars(formula.object)[1])
+    return(NULL)
+}
+
+
+hasOutcome <- function(formula.object)
+{
+    attr(terms(formula.object), "response") != 0
+}
 
 printDetails <- function(x)
 {
     cat(paste0(deparse(substitute(x)), " n:", length(x), " valid:", sum(!is.na(x)), " missing:",sum(is.na(x)), "\n"))
     print(summary(x))
     cat("\n")
-
 }
-
 
 allIntegers <- function(x)
 {
     all(x%%1==0)
 }
-
 
 unclassIfNecessary <- function(x)
 {
@@ -36,11 +46,6 @@ isCount = function(x) {
         return(FALSE)
     sum(as.integer(u) != u, na.rm = TRUE) == 0}
 
-outcomeName <- function(formula.object)
-{
-    all.vars(formula.object)[1]
-}
-
 
 outcomeVariable <- function(formula.object, data)
 {
@@ -49,9 +54,7 @@ outcomeVariable <- function(formula.object, data)
 
 outcomeVariableFromModel <- function(Regression.object)
 {
-#     print(Regression.object)
-#     print(Regression.object$call)
-    formula <- as.list(Regression.object$call)$formula
+    formula <- as.formula(as.list(Regression.object$call)$formula)
     Regression.object$model[, outcomeName(formula)]
 }
 

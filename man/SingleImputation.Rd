@@ -4,14 +4,12 @@
 \alias{SingleImputation}
 \title{\code{SingleImputation}}
 \usage{
-SingleImputation(formula, data, outcome.name = NULL, ...)
+SingleImputation(formula, data, ...)
 }
 \arguments{
-\item{data}{A \code{\link{data.frame}}.}
+\item{formula}{A \code{\link{formula}}.}
 
-\item{outcome.name}{A If the name of the outcome (outcome)
-variable is provided, any cases with missing values on this variable
-are excluded from the final data file.}
+\item{data}{A \code{\link{data.frame}}.}
 
 \item{...}{Optional arguments for \code{\link{mice}}.
 #}

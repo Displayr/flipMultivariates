@@ -40,11 +40,6 @@ Regression <- function(formula, data, subset = NULL,
                              robust.se = FALSE, ...)
 {
     cl <- match.call()
-    if (!is.null(subset))
-        subset[is.na(subset)] <- FALSE
-    if (!is.null(weights))
-        weights[is.na(weights)] <- 0
-    unfiltered.weights <- weights
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
     if (type == "Binary Logit")
@@ -59,6 +54,11 @@ Regression <- function(formula, data, subset = NULL,
     row.names <- rownames(data)
     if (missing == "Use partial data (pairwise correlations)")
     {
+        if (!is.null(subset))
+            subset[is.na(subset)] <- FALSE
+        if (!is.null(weights))
+            weights[is.na(weights)] <- 0
+        unfiltered.weights <- weights
         if (type != "Linear")
             stop(paste0("'Use partial data (pairwise)' can only be used with 'type' of 'Linear'."))
         if (robust.se)
@@ -68,31 +68,44 @@ Regression <- function(formula, data, subset = NULL,
     }
     else
     {
-        regression.variable.names <- all.vars(formula)
-        if (missing != "Imputation (replace missing values with estimates)")
-            regression.data <- data[ ,regression.variable.names]
-        data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
-                       "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
-                       "Use partial data (pairwise correlations)" = stop("Error: partial data should have already been processed."),
-                       "Imputation (replace missing values with estimates)" = SingleImputation(formula, data, outcome.name))
-        post.missing.data.estimation.subset <- row.names %in% rownames(data.post.missing.value.treatment)
-        estimation.subset <- flipU::IfThen(hasSubset(subset),
-            subset[post.missing.data.estimation.subset],
-            rep(TRUE, nrow(data.post.missing.value.treatment)))
-        if (!is.null(weights))
-        {
-            weights <- weights[post.missing.data.estimation.subset]
-            estimation.subset <- estimation.subset & weights > 0
-            weights <- weights[estimation.subset]
-        }
-        estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
-        missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
-        if (missing.data.proportion > 0.20)
-            warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
-                          "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
-                          "or, set 'Missing Data' to another option."))
-        if (missing != "Imputation (replace missing values with estimates)")
-            estimation.data <- estimation.data[ ,regression.variable.names]
+        processed.data <- EstimationData(formula, data, subset, weights, missing)
+        unfiltered.weights <- processed.data$unfiltered.weights
+        estimation.data <- processed.data$estimation.data
+        post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
+        estimation.subset  <- processed.data$estimation.subset
+        weights <- processed.data$weights
+        subset <-  processed.data$subset
+
+#         if (!is.null(subset))
+#             subset[is.na(subset)] <- FALSE
+#         if (!is.null(weights))
+#             weights[is.na(weights)] <- 0
+#         unfiltered.weights <- weights
+#         regression.variable.names <- all.vars(formula)
+#         if (missing != "Imputation (replace missing values with estimates)")
+#             regression.data <- data[ ,regression.variable.names]
+#         data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
+#                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
+#                        "Use partial data (pairwise correlations)" = stop("Error: partial data should have already been processed."),
+#                        "Imputation (replace missing values with estimates)" = SingleImputation(formula, data, outcome.name))
+#         post.missing.data.estimation.sample <- row.names %in% rownames(data.post.missing.value.treatment)
+#         estimation.subset <- flipU::IfThen(hasSubset(subset),
+#             subset[post.missing.data.estimation.sample],
+#             rep(TRUE, nrow(data.post.missing.value.treatment)))
+#         if (!is.null(weights))
+#         {
+#             weights <- weights[post.missing.data.estimation.sample]
+#             estimation.subset <- estimation.subset & weights > 0
+#             weights <- weights[estimation.subset]
+#         }
+#         estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
+#         missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
+#         if (missing.data.proportion > 0.20)
+#             warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
+#                           "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
+#                           "or, set 'Missing Data' to another option."))
+#         if (missing != "Imputation (replace missing values with estimates)")
+#             estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -128,16 +141,28 @@ Regression <- function(formula, data, subset = NULL,
             else
             {
                 result <- switch(type,
-                                 "Binary Logit" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = binomial()),
+                                 "Binary Logit" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = quasibinomial()),
                                  "Poisson" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = poisson()),
                                  "Quasi-Poisson" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = quasipoisson()))
             }
         }
-        missing.data <- any(!post.missing.data.estimation.subset)
+        missing.data <- any(!post.missing.data.estimation.sample)
         if (missing == "Imputation (replace missing values with estimates)")
-            data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
-        result$flip.fitted.values <- fitted(result, newdata = data, na.action = na.pass)
-        result$flip.predicted.values <- predict(result, newdata = data, na.action = na.pass)
+            data <- processed.data$data
+        result$flip.predicted.values <- ifThen(any(class(result) == "glm"),
+            suppressWarnings(predict.glm(result, newdata = data, na.action = na.pass)),
+            predict(result, newdata = data, na.action = na.pass))
+        fitted.values <- fitted(result)
+        result$flip.fitted.values <- ifThen(is.matrix(fitted.values),
+            fitted.values[match(row.names, rownames(fitted.values)), ],
+            fitted.values[match(row.names, names(fitted.values))])
+
+#         printDetails(dim(data))
+#         printDetails(sum(complete.cases(data)))
+#         print(names(data[, 3:7]))
+#         #printDetails(sum(complete.cases(data[, 3:7] & weights > 0)))
+#         printDetails(length(result$flip.predicted.values))
+#         printDetails(length(result$flip.fitted.values))
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
             ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
@@ -149,7 +174,6 @@ Regression <- function(formula, data, subset = NULL,
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation (replace missing values with estimates)" = "Missing values of predictor variables have been imputed.\n"))
         result$flip.subset <- row.names %in% rownames(estimation.data)
-
     }
     result$summary  <- summary(result)
     # Inserting the coefficients from the partial data.
@@ -161,6 +185,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- unfiltered.weights
+
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
