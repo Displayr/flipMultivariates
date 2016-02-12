@@ -117,6 +117,8 @@ Regression <- function(formula, data, subset = NULL,
                         "Binary Logit" = "binomial"))
             else if (type == "Ordered")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
+            else if (type == "NBD")
+                result <- MASS::glm.nb(formula, estimation.data, ...)
             else
                 stop("Unknown regression 'type'.")
 
@@ -138,6 +140,11 @@ Regression <- function(formula, data, subset = NULL,
                 estimation.data$weights <- weights
                 result <- MASS::polr(formula, estimation.data, weights = weights, Hess = TRUE, ...)
             }
+            else if (type == "NBD")
+            {
+                estimation.data$weights <- weights
+                result <- MASS::glm.nb(formula, estimation.data, weights = weights, ...)
+            }
             else
             {
                 result <- switch(type,
@@ -146,6 +153,7 @@ Regression <- function(formula, data, subset = NULL,
                                  "Quasi-Poisson" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = quasipoisson()))
             }
         }
+# <<<<<<< HEAD
         missing.data <- any(!post.missing.data.estimation.sample)
         if (missing == "Imputation (replace missing values with estimates)")
             data <- processed.data$data
@@ -163,9 +171,19 @@ Regression <- function(formula, data, subset = NULL,
 #         #printDetails(sum(complete.cases(data[, 3:7] & weights > 0)))
 #         printDetails(length(result$flip.predicted.values))
 #         printDetails(length(result$flip.fitted.values))
+# =======
+#         result$flip.subset <- row.names %in% rownames(estimation.data)
+#         missing.data <- any(!post.missing.data.estimation.subset)
+#         if (missing == "Imputation (replace missing values with estimates)")
+#             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
+#         result$flip.predicted.values <- predict(result, newdata = data, na.action = na.pass)
+#         fitted.values <- fitted(result)
+#         result$flip.fitted.values <- rep(NA, total.n <- nrow(data))
+#         result$flip.fitted.values[result$flip.subset] <- fitted.values
+# >>>>>>> origin/master
         result$sample.size <- paste0("n = ", sum(estimation.subset)," cases used in estimation")
         result$sample.size <- paste0(result$sample.size, ifelse(!missing.data, ".\n",paste0(", of a total sample size of ",
-            ifelse(hasSubset(subset), sum(subset), nrow(data)), ".\n")))
+            ifelse(hasSubset(subset), sum(subset), total.n), ".\n")))
         if (!is.null(weights))
             result$sample.size <- paste0(result$sample.size, "Data has been weighted.\n")
         if(missing.data | missing == "Imputation (replace missing values with estimates)")
@@ -173,7 +191,11 @@ Regression <- function(formula, data, subset = NULL,
                 switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded.\n",
                    "Imputation (replace missing values with estimates)" = "Missing values of predictor variables have been imputed.\n"))
+<<<<<<< HEAD
         result$flip.subset <- row.names %in% rownames(estimation.data)
+=======
+
+>>>>>>> origin/master
     }
     result$summary  <- summary(result)
     # Inserting the coefficients from the partial data.
