@@ -1,4 +1,6 @@
 context("CART")
+#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
+#' \code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.
 
 for (type in c("Sankey Plot", "Tree", "Text"))
     test_that(paste("No error", type),

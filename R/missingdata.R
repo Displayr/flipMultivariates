@@ -9,7 +9,7 @@
 #' the name of a variable in \code{data}. It may not be an expression.
 #' @param missing How missing data is to be treated in the regression. Options are:
 #' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' \code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.
+#' \code{"Use partial data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.
 #' @export
 EstimationData <- function(formula, data, subset = NULL,
                              weights = NULL,
@@ -28,10 +28,12 @@ EstimationData <- function(formula, data, subset = NULL,
     # Addressing missing values.
     data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data.for.model),
                    "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data.for.model),
+                   "Use partial data" = data.for.model[complete.cases(data.for.model),],
                    "Use partial data (pairwise correlations)" = data.for.model[complete.cases(data.for.model),],
                    "Imputation (replace missing values with estimates)" = SingleImputation(formula, data))
     post.missing.data.estimation.sample <- row.names(data) %in% rownames(data.post.missing.value.treatment)
-    data[post.missing.data.estimation.sample, ] <- data.post.missing.value.treatment
+    if (missing == "Imputation (replace missing values with estimates)")
+        data[post.missing.data.estimation.sample, ] <- data.post.missing.value.treatment
     estimation.subset <- flipU::IfThen(hasSubset(subset),
         subset[post.missing.data.estimation.sample],
         rep(TRUE, nrow(data.post.missing.value.treatment)))
@@ -49,7 +51,6 @@ EstimationData <- function(formula, data, subset = NULL,
                       "or, set 'Missing Data' to another option."))
     if (missing != "Imputation (replace missing values with estimates)")
         estimation.data <- estimation.data[ ,variable.names]
-
     list(estimation.data = estimation.data,
          weights = weights,
          unfiltered.weights = unfiltered.weights,

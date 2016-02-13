@@ -22,7 +22,7 @@ the name of a variable in \code{data}. It may not be an expression.}
 
 \item{missing}{How missing data is to be treated in the regression. Options are:
 \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-\code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.}
+\code{"Use partial data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.}
 }
 \description{
 \code{EstimationData}

@@ -5,7 +5,7 @@
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
 CART(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot",
-  ...)
+  missing = "Use partial data", ...)
 }
 \arguments{
 \item{formula}{A formula expression. The left-hand-side (response) should
@@ -25,6 +25,10 @@ the name of a variable in \code{data}. It may not be an expression.
 \code{subset} may not}
 
 \item{output}{How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.}
+
+\item{missing}{How missing data is to be treated in the regression. Options are:
+\code{"Error if missing data"}, \code{"Exclude cases with missing data"},
+\code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.}
 
 \item{...}{Additional arguments that are passed to  \code{\link{tree}}
 and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev}

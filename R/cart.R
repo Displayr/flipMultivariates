@@ -12,37 +12,29 @@
 #' @param weights An optional vector of sampling weights, or, the name or,
 #' the name of a variable in \code{data}. It may not be an expression.
 #' @param output How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.
+#' @param missing How missing data is to be treated in the regression. Options are:
+#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
+#' \code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.
 #' @param ... Additional arguments that are passed to  \code{\link{tree}}
 #' and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev
 #'
 #' @details Creates a \code{\link{tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
-CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot", ...)
+CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot", missing = "Use partial data", ...)
 {
+    processed.data <- EstimationData(formula, data, subset, weights, missing)
+    unfiltered.weights <- processed.data$unfiltered.weights
+    estimation.data <- processed.data$estimation.data
+    post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
+    estimation.subset  <- processed.data$estimation.subset
+    subset <-  processed.data$subset
     if (is.null(weights))
-    {
-        if(is.null(subset) || length(subset) == 1)
-        {
-            result <- tree::tree(formula, data = data, model = TRUE, ...)
-        }
-        else
-        {
-            data$sb <- subset
-            result <- tree::tree(formula, data = data, subset = data$sb, model = TRUE, ...)
-        }
-    }
+        result <- tree::tree(formula, data = estimation.data, model = TRUE, ...)
     else
     {
-        if(is.null(subset) || length(subset) == 1)
-            result <- tree::tree(formula, data = data, weights = weights, model = TRUE, ...)
-        else
-        {
-            print("dog")
-            data$sb <- subset
-            result <- tree::tree(formula, data = data, subset = data$sb,
-                           weights = weights, model = TRUE, ...)
-        }
+        estimation.data$wgt <- processed.data$weights
+        result <- tree::tree(formula, data = estimation.data, weights = wgt, model = TRUE, ...)
     }
     result$predicted <- predict(result, newdata = data, type = "tree", na.action = na.exclude)
     class(result) <- append("CART", class(result))
@@ -338,15 +330,14 @@ print.CART <- function(cart.object)
     {
         tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
         plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
-            tooltip = c("n", "Description"), treeColors = TRUE, colorLegend = TRUE, categoryLegend = TRUE)
+            tooltip = c("n", "Description"), treeColors = TRUE)
+        return(plt)
     }
     else if (cart.object$output == "Tree")
     {
         plt <- plot(cart.object)
-        plt <- text(cart.object)
+        return(text(cart.object))
     }
-    else if (cart.object$output == "Text")
-        return(tree:::print.tree(cart.object))
-    print(plt)
+    cart.object #uses print.tree
 }
 

@@ -16,7 +16,6 @@ data(bank)
 library(foreign)
 write.foreign(bank, "c:/delete/mydata.txt", "c:/delete/mydata.sps",   package="SPSS")
 
-data(bank)
 # binary logit.
 data(bank)
 missing <- "Imputation (replace missing values with estimates)"
@@ -39,28 +38,9 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
 
 
-library(survey)
-bnk = bank[1:20,]
-zweight = bnk$ID
-zweight[is.na(zweight)] <- 0
-zdesign = flipMultivariates:::weightedSurveyDesign(bnk, zweight)
-
-zz = svyglm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bnk,design =zdesign)# , subset = bank$ID > 100)
-length(predict.glm(zz, newdata = bnk, na.action = na.pass))
-length(fitted(zz, newdata = bnk, na.action = na.pass))
-
-
-zz = glm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bnk, weight = zweight)# , subset = bank$ID > 100)
-length(predict(zz, newdata = bnk, na.action = na.pass))
-
-sum(complete.cases(bnk[,3:7]))
-dim(bank[,c("Overall", "Fees")])
-sum(complete.cases(bank[,c("Overall", "Fees")]))
-
 
 # type type
 data(bank)
-bnk = bnk
 Regression(Overall ~ Fees, data = bank, missing = "Imputation (replace missing values with estimates"))
 Regression(Overall ~ Fees, data = bank)
 zz <- NULL
