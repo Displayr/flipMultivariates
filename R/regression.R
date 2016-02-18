@@ -37,7 +37,8 @@ Regression <- function(formula, data, subset = NULL,
                              weights = NULL,
                              missing = "Exclude cases with missing data",
                              type = "Linear",
-                             robust.se = FALSE, ...)
+                             robust.se = FALSE, 
+                             r.output = TRUE, ...)
 {
     cl <- match.call()
     outcome.name <- outcomeName(formula)
@@ -203,7 +204,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- unfiltered.weights
-
+    result$r.output <- r.output
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
@@ -312,7 +313,16 @@ print.Regression <- function(Regression.object, ...)
         if (Regression.object$type == "Linear" & isCount(outcome.variable))
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
-    print(Regression.summary, ...)
+    # When r.output is false, print a nicely-formatted table
+    if (!r.output)  
+    {   
+        print(Regression.summary$coefficients)
+    } 
+    else
+    {
+        print(Regression.summary, ...)
+    }
+    
     if (!is.null(Regression.object$lm.cov))
         cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))
     cat(Regression.object$sample.size)
@@ -353,7 +363,7 @@ residuals.Regression <- function(object, ...)
     object$flip.residuals
 }
 
-BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
+BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, r.output = TRUE, ...)
 {
     cl <- match.call()
 
@@ -384,13 +394,14 @@ BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, ...)
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     # result$resid <- outcome.variable - result$predicted
     result$call <- cl
+    result$r.output <- r.output
     class(result) <- append("Regression", class(result))
     result
 }
 
 
 
-OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
+OrderedLogit = function(formula, data, subset = NULL, weights = NULL, r.output = TRUE, ...)
 {
     cl <- match.call()
 
@@ -423,6 +434,7 @@ OrderedLogit = function(formula, data, subset = NULL, weights = NULL, ...)
     # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
     # result$resid <- outcomeVariable(formula, data) - result$predicted
     result$call <- cl
+    result$r.output <- r.output
     class(result) <- append("Regression", class(result))
     result
 }

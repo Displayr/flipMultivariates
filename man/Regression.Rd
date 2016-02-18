@@ -6,7 +6,7 @@
 \usage{
 Regression(formula, data, subset = NULL, weights = NULL,
   missing = "Exclude cases with missing data", type = "Linear",
-  robust.se = FALSE, ...)
+  robust.se = FALSE, r.output = TRUE, ...)
 }
 \arguments{
 \item{formula}{An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of type specification are given under ‘Details’.}
