@@ -37,7 +37,7 @@ Regression <- function(formula, data, subset = NULL,
                              weights = NULL,
                              missing = "Exclude cases with missing data",
                              type = "Linear",
-                             robust.se = FALSE, 
+                             robust.se = FALSE,
                              r.output = TRUE, ...)
 {
     cl <- match.call()
@@ -314,15 +314,15 @@ print.Regression <- function(Regression.object, ...)
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
     # When r.output is false, print a nicely-formatted table
-    if (!r.output)  
-    {   
+    if (!Regression.object$r.output)
+    {
         print(Regression.summary$coefficients)
-    } 
+    }
     else
     {
         print(Regression.summary, ...)
     }
-    
+
     if (!is.null(Regression.object$lm.cov))
         cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))
     cat(Regression.object$sample.size)
