@@ -24,7 +24,7 @@ the name of a variable in \code{data}. It may not be an expression.}
 the name of a variable in \code{data}. It may not be an expression.
 \code{subset} may not}
 
-\item{output}{How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.}
+\item{output}{How the tree is represented: \code{"Sankey"}, \code{"Tree"}, or \code{"Text"}.}
 
 \item{missing}{How missing data is to be treated in the regression. Options are:
 \code{"Error if missing data"}, \code{"Exclude cases with missing data"},

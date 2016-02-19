@@ -6,8 +6,8 @@ bank[matrix(runif(prod(dim(bank))), nrow = nrow(bank)) < 0.05] <- NA # Adding mi
 bank[runif(nrow(bank)) < 0.1, "Overall"] <- NA #Adding missing values to the dependent variable 20%
 bank[runif(nrow(bank)) < 0.5, "Branch"] <- NA #Adding missing values to branch the dependent variable 20%
 bank$weight <- NA
-for (i in unique(bank$ID))
-    bank$weight[bank$ID == i] <- ifelse(runif(1)<.05, NA, max(1, min(rnorm(5,2),10)))
+for (i in unique(wgt))
+    bank$weight[wgt == i] <- ifelse(runif(1)<.05, NA, max(1, min(rnorm(5,2),10)))
 bank$weight <- bank$weight / mean(bank$weight, na.rm = TRUE)
 devtools::use_data(bank, internal = FALSE, overwrite = TRUE)
 
@@ -20,31 +20,32 @@ write.foreign(bank, "c:/delete/mydata.txt", "c:/delete/mydata.sps",   package="S
 data(bank)
 missing <- "Imputation (replace missing values with estimates)"
 type = "Binary Logit"
+wgt <- bank$ID
+attr(wgt, "label") <- "Bank ID"
+sb <- bank$ID > 100
+attr(sb, "label") <- "Bank ID greater than 100"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
 
 type = "Ordered"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
 
 type = "NBD"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
 
 
 
 # type type
 data(bank)
-Regression(Overall ~ Fees, data = bank, missing = "Imputation (replace missing values with estimates"))
-Regression(Overall ~ Fees, data = bank)
-zz <- NULL
-Regression(Overall ~ Fees , weights = zz, subset = TRUE, data = bank, missing = "Imputation (replace missing values with estimates"))
+Regression(Overall ~ Fees, data = bank, missing = "Imputation (replace missing values with estimates)")
 
 
 zdata <- bank#data.frame(Overall = Overall, Fees = Fees)
@@ -58,42 +59,22 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE)
 
 
-
-
-summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = ID, subset = ID > 100))
-
-zw <- bank$ID
-zs <- bank$ID > 100
-summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = zw, subset = zs))
-
-z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
-flipMultivariates:::breusch.pagan(z)
-flipMultivariates:::BreuschPagan(z)
-car:::ncvTest(z)
-summary(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
-
 missing <- "Exclude cases with missing data"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
-
-missing <- "Imputation (replace missing values with estimates)"
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing)
 
 missing <- "Use partial data (pairwise correlations)"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing)
 
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE, weights = NULL, missing = missing)
 
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
-zbank <- subset(bank, bank$ID > 100 & !is.na(bank$ID))
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
+zbank <- subset(bank, wgt > 100 & !is.na(wgt))
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zbank, missing = missing)
 summary(zbank)
 
@@ -171,11 +152,11 @@ covm <- cov(bank)
 psych::setCor(2, 3:8, bank, std = TRUE)$beta
 
 
-bank.filtered <- subset(bank, bank$ID > 100)
+bank.filtered <- subset(bank, wgt > 100)
 library(psych)
 psych::setCor(2, 3:8, bank.filtered)$beta
 
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
 
 
 ), predictors.index,
@@ -192,10 +173,10 @@ Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = ban
 missing <- "Imputation (replace missing values with estimates)"
 type = "Ordered"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
 
 library(MASS)
-z = polr(factor(Overall) ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,weights = bank$ID, subset = bank$ID > 100)
+z = polr(factor(Overall) ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,weights = wgt, subset = sb)
 dim(fitted.values(z))

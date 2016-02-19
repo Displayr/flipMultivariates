@@ -21,22 +21,6 @@
 # but there is currently a bug preventing me from wrapping QInputs in a list.
 
 
-# Imputing the whole data set priort to PCA or factor analysis
-imputeForFactorAnalysis <- function(data)
-{
-    names <- colnames(data)
-    if(is.null(names))
-    {
-        names <- colnames(data) <- letters[1:ncol(data)]
-    }
-    all.vars.formula <- as.formula(paste0("~", paste0(names[1:ncol(data)], collapse = "+")))
-    imputed.data <- SingleImputation(all.vars.formula, data)
-    return(imputed.data)
-}
-
-
-
-
 weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
 {
     weightedPartialCovariance <- function(numeric1, numeric2, input.weight, correlation = FALSE)
@@ -472,7 +456,7 @@ prepareDataForFactorAnalysis <- function(data, weights, subset, missing)
     {
         ErrorIfMissingDataFound(subset.data)
     } else if (missing == "Imputation (replace missing values with estimates)") {
-        imputed.data <- imputeForFactorAnalysis(data)
+        imputed.data <- SingleImputation(data)
         subset.data <- imputed.data[subset, ]
     } else if (missing == "Exclude cases with missing data") {
         # Ensure only complete responses remain

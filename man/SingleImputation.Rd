@@ -4,21 +4,25 @@
 \alias{SingleImputation}
 \title{\code{SingleImputation}}
 \usage{
-SingleImputation(formula, data, ...)
+SingleImputation(data, formula = NULL, method = "try mice")
 }
 \arguments{
-\item{formula}{A \code{\link{formula}}.}
-
 \item{data}{A \code{\link{data.frame}}.}
 
-\item{...}{Optional arguments for \code{\link{mice}}.
-#}
+\item{formula}{A \code{\link{formula}}. Where the formula contains a dependent variable,
+observations with missing values on this variable are deleted after the imputation (von Hippel 2007).}
+
+\item{method}{"mice" applies multivariate imputation by chained equations
+(predictive mean matching) with the \code{\link{mice}} package. "Hot deck" applies the \code{\link{hot.deck}} method.
+The default setting is "try mice", which first applies the  \code{\link{mice}} method and,if an error
+occurs, falls back to \code{\link{hot.deck}}.}
 }
 \description{
 This is a wrapper for \code{\link{mice}}.
 }
-\examples{
-# df <- data.frame(x = c(NA, 1), y = 1:2)
-# ExcludeCasesWithAnyMissingData(df)
+\references{
+von Hippel, Paul T. 2007. "Regression With Missing Y's: An
+Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
+Skyler J. Cranmer and Jeff Gill (2013). We Have to Be Discrete About This: A Non-Parametric Imputation Technique for Missing Categorical Data. British Journal of Political Science, 43, pp 425-449.
 }
 

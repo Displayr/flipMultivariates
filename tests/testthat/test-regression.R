@@ -1,5 +1,10 @@
 context("Regression")
+zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
 data(bank)
+sb <- bank$ID > 100
+attr(sb, "label") <- "ID greater than 100"
+wgt <- bank$ID
+attr(wgt, "label") <- "ID"
 
 test_that("allEffects works on Regression object",
 {
@@ -10,8 +15,16 @@ test_that("allEffects works on Regression object",
 })
 
 
-zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
-data(bank)
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
+    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
+        test_that(paste("Stops gracefully with small sample size", missing, type),
+{
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000, type = type), throws_error())
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000,  weights = wgt, type = type), throws_error())
+})
+
+
+
 
 test_that("Tests of homogenous variance (Breush-Pagen test)",
 {
@@ -21,26 +34,26 @@ test_that("Tests of homogenous variance (Breush-Pagen test)",
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
 
     # Filitered
-    z = BreuschPagan(Regression(zformula, data = bank, subset = bank$ID > 100))
-    z1 = car::ncvTest(lm(zformula, data = bank, subset = ID > 100))
+    z = BreuschPagan(Regression(zformula, data = bank, subset = sb))
+    z1 = car::ncvTest(lm(zformula, data = bank, subset = sb))
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
 
-    z = BreuschPagan(Regression(zformula, data = bank,  weights = bank$ID))
-    z1 = car::ncvTest(lm(zformula, data = bank, weights = ID))
+    z = BreuschPagan(Regression(zformula, data = bank,  weights = wgt))
+    z1 = car::ncvTest(lm(zformula, data = bank, wgt))
     expect_false(round(z$p - z1$p,5) == 0)
 
     # Weighted and filtered
-    z = BreuschPagan(Regression(zformula, data = bank, subset = bank$ID > 100,  weights = bank$ID))
-    z1 = car::ncvTest(lm(zformula, data = bank, subset = ID > 100,  weights = ID))
+    z = BreuschPagan(Regression(zformula, data = bank, subset = sb,  weights = wgt))
+    z1 = car::ncvTest(lm(zformula, data = bank, subset = sb,  wgt))
     expect_false(round(z$p - z1$p,5) == 0)
 
     # Weighted and filtered with various missing value settings
-    expect_that(Regression(zformula, missing = "Exclude cases with missing data", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Error if missing data", data = bank, subset = bank$ID > 100,  weights = bank$ID), throws_error())
+    expect_that(Regression(zformula, missing = "Exclude cases with missing data", data = bank, subset = sb,  weights = wgt), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Error if missing data", data = bank, subset = sb,  weights = wgt), throws_error())
     z <- bank[complete.cases(bank),]
-    expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Imputation (replace missing values with estimates)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
-    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise correlations)", data = bank, subset = bank$ID > 100,  weights = bank$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = z$ID > 100,  weights = z$ID), not(throws_error()))
+    expect_that(Regression(zformula, missing = "Imputation (replace missing values with estimates)", data = bank, subset = sb,  weights = wgt), not(throws_error()))
+    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise correlations)", data = bank, subset = sb,  weights = wgt), not(throws_error()))
 })
 
 
@@ -57,11 +70,11 @@ test_that(missing,
 {
     z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.27732,4))
-    z <- as.numeric(Regression(zformula, data = bank, subset = bank$ID > 100,  missing = missing)$coef[3])
+    z <- as.numeric(Regression(zformula, data = bank, subset = sb,  missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.25451,4))
-    z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, missing = missing)$coef[3])
+    z <- as.numeric(Regression(zformula, data = bank, weights = wgt, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.2611546, 4))
-    z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)$coef[3])
+    z <- as.numeric(Regression(zformula, data = bank, weights = wgt, subset = sb, missing = missing)$coef[3])
     expect_equal(round(z,4),round(0.2539403,4))
 })
 
@@ -69,14 +82,14 @@ test_that(missing,
 missing <- "Imputation (replace missing values with estimates)"
 test_that(missing,
 {
-    z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.3115914,4))
-    z <- as.numeric(Regression(zformula, data = bank, subset = bank$ID > 100, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.3220946,4))
-    z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.3345016,4))
-    z <- as.numeric(Regression(zformula, data = bank, weights = bank$ID, subset = bank$ID > 100, missing = missing)$coef[3])
-    expect_equal(round(z,4),round(0.3358332,4))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
+    expect_equal(round(z, 3), 0.312)
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)$coef[3])
+    expect_equal(round(z, 3), 0.299)
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing)$coef[3])
+    expect_equal(round(z, 3), 0.303)
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing)$coef[3])
+    expect_equal(round(z, 3), 0.312)
 })
 
 missing <- "Use partial data (pairwise correlations)"
@@ -84,46 +97,43 @@ test_that(missing,
 {
     z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.2923788,4))
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, missing = missing)$coef[3])
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.2991385,4))
 })
 
 missing <- "Use partial data (pairwise correlations)"
 test_that(paste(missing, " with integer weights"),
 {
-    wgt <- ceiling(bank$ID/100)
+    wgt <- ceiling(bank$ID/10)
     z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.299794,4))
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = bank$ID > 300, missing = missing)$coef[3])
-    expect_equal(round(z,4),round(0.3480563,4))
+    expect_equal(round(z,3), round(0.303, 3))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = wgt > 1, missing = missing)$coef[3])
+    expect_equal(round(z,3),round(0.303,4))
 })
 
 
 missing <- "Use partial data (pairwise correlations)"
 test_that(paste(missing, " with numeric weights"),
 {
-    wgt <- bank$ID/100
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID / 100, missing = missing)$coef[3])
-    expect_equal(round(z,4), round(0.2646163,4))
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = bank$ID / 100, subset = bank$ID > 100, missing = missing)$coef[3])
-    expect_equal(round(z,4),round(0.3016513,4))
+    wgt <- wgt/100
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt / 100, missing = missing)$coef[3])
+    expect_equal(round(z,3), round(0.661,3))
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt / 100, subset = sb, missing = missing)$coef[3])
+    expect_equal(round(z,3),round(0.132,3))
 })
 
-
-
-for(missing in c("Imputation (replace missing values with estimates)",
-        "Exclude cases with missing data"))
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
     for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
         test_that(paste("No error", missing, type),
 {
-    # no weight, no filter
-    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type), not(throws_error()))
+     # no weight, no filter
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type), not(throws_error()))
      # weight
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = bank$ID > 100,  weights = NULL, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = NULL, type = type), not(throws_error()))
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = bank$ID, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), not(throws_error()))
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = bank$ID > 100,  weights = bank$ID, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
 })
 
 

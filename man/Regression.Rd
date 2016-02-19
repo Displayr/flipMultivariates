@@ -38,14 +38,13 @@ is weighted,  \code{\link{survey::svyglm}}.}
 \code{Regression}Generalized Regression.
 }
 \details{
-"Imputation (replace missing values with estimates)" is performed using multivariate imputation by chained equations
-(predictive mean matching) with the \code{\link{mice}} package. All selected
+"Imputation (replace missing values with estimates)". All selected
 outcome and predictor variables are included in the imputation, including any data excluded
 via \code{subset} and due to having invalid weights. Then,
 cases with missing values in the outcome variable are excluded from the
 analysis (von Hippel 2007). Where "Use partial data (pairwise correlations)" is used, if the data is weighted, a
 synthetic data file is created by sampling with replacement in proportion to the weights,where the
-sample size is the sum of the weights.
+sample size is the sum of the weights. See \code{\link{SingleImputation}}.
 }
 \references{
 von Hippel, Paul T. 2007. "Regression With Missing Y's: An

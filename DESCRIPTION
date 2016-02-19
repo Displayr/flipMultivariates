@@ -12,6 +12,7 @@ imports:
     sankeytreeR,
     MASS,
     hash,
+    hot.deck,
     mice,
     colorspace,
     survey,

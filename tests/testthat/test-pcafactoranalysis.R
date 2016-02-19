@@ -205,7 +205,7 @@ missing.indicator <- matrix(rbinom(n = n.rows * ncol(my.cov), size = 1, prob = 0
 
 mcar.data <- initial.data
 mcar.data[missing.indicator] <- NaN
-imputed.data <- flipMultivariates:::imputeForFactorAnalysis(mcar.data)
+imputed.data <- flipMultivariates:::SingleImputation(mcar.data)
 
 # max(abs(cor(initial.data) - cor(mcar.data, use = "pairwise.complete.obs")))
 # max(abs(cor(initial.data) - cor(imputed.data)))
@@ -225,14 +225,14 @@ for (j in 1L:nrow(initial.data))
     nmar.data[j, which(draw == 1)] <- NaN
 }
 
-imputed.data <- imputeForFactorAnalysis(nmar.data)
+imputed.data <- SingleImputation(nmar.data)
 norm(my.cov - cor(nmar.data, use = "pairwise.complete.obs"), type = "F")
 norm(my.cov - cor(imputed.data), type = "F")
 
 
 nmar.data.2 <- initial.data
 nmar.data.2[nmar.data.2 > 0.9] <- NaN
-imputed.data <- imputeForFactorAnalysis(nmar.data.2)
+imputed.data <- SingleImputation(nmar.data.2)
 norm(my.cov - cor(nmar.data.2, use = "pairwise.complete.obs"), type = "F")
 norm(my.cov - cor(imputed.data), type = "F")
 

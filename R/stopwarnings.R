@@ -12,6 +12,7 @@ stopIfNotCount = function(formula, data)
             to zero. However", dependent.name, "contains negative values."))
 }
 
+warningSampleSizeTooSmall <- function() {"The sample size is too small for it to be possible to conduct the analysis."}
 
 warningPredictorVariableDoesNotExist <- function() {"The specified predictor variable does not exist."}
 

@@ -11,7 +11,7 @@
 #' \code{subset} may not
 #' @param weights An optional vector of sampling weights, or, the name or,
 #' the name of a variable in \code{data}. It may not be an expression.
-#' @param output How the tree is represented: \code{"Sankey Plot"}, \code{"Tree"}, or \code{"Text"}.
+#' @param output How the tree is represented: \code{"Sankey"}, \code{"Tree"}, or \code{"Text"}.
 #' @param missing How missing data is to be treated in the regression. Options are:
 #' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
 #' \code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.
@@ -326,12 +326,12 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 #' @export
 print.CART <- function(cart.object)
 {
-    if (cart.object$output == "Sankey Plot")
+    if (cart.object$output == "Sankey")
     {
         tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
         plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
             tooltip = c("n", "Description"), treeColors = TRUE)
-        return(plt)
+        print(plt)
     }
     else if (cart.object$output == "Tree")
     {
