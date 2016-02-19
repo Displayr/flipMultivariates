@@ -36,7 +36,8 @@ Regression <- function(formula, data, subset = NULL,
                              weights = NULL,
                              missing = "Exclude cases with missing data",
                              type = "Linear",
-                             robust.se = FALSE, ...)
+                             robust.se = FALSE,
+                             r.output = TRUE, ...)
 {
     cl <- match.call()
     outcome.name <- outcomeName(formula)
@@ -71,40 +72,8 @@ Regression <- function(formula, data, subset = NULL,
         if (nrow(estimation.data) < ncol(estimation.data) + 1)
             stop(warningSampleSizeTooSmall())
         post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
-        #estimation.subset  <- processed.data$estimation.subset
         weights <- processed.data$weights
         subset <-  processed.data$subset
-
-#         if (!is.null(subset))
-#             subset[is.na(subset)] <- FALSE
-#         if (!is.null(weights))
-#             weights[is.na(weights)] <- 0
-#         unfiltered.weights <- weights
-#         regression.variable.names <- all.vars(formula)
-#         if (missing != "Imputation (replace missing values with estimates)")
-#             regression.data <- data[ ,regression.variable.names]
-#         data.post.missing.value.treatment <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(regression.data),
-#                        "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(regression.data),
-#                        "Use partial data (pairwise correlations)" = stop("Error: partial data should have already been processed."),
-#                        "Imputation (replace missing values with estimates)" = SingleImputation(formula, data, outcome.name))
-#         post.missing.data.estimation.sample <- row.names %in% rownames(data.post.missing.value.treatment)
-#         estimation.subset <- flipU::IfThen(hasSubset(subset),
-#             subset[post.missing.data.estimation.sample],
-#             rep(TRUE, nrow(data.post.missing.value.treatment)))
-#         if (!is.null(weights))
-#         {
-#             weights <- weights[post.missing.data.estimation.sample]
-#             estimation.subset <- estimation.subset & weights > 0
-#             weights <- weights[estimation.subset]
-#         }
-#         estimation.data <- data.post.missing.value.treatment[estimation.subset, regression.variable.names] #Removing variables not used in the formula.
-#         missing.data.proportion <- 1 - nrow(estimation.data)/ ifelse(hasSubset(subset), sum(subset), nrow(data))
-#         if (missing.data.proportion > 0.20)
-#             warning(paste(FormatAsPercent(missing.data.proportion), "of the data is missing and has been excluded from the analysis.",
-#                           "Consider either filters to ensure that the data that is missing is in-line with your expectations,",
-#                           "or, set 'Missing Data' to another option."))
-#         if (missing != "Imputation (replace missing values with estimates)")
-#             estimation.data <- estimation.data[ ,regression.variable.names]
         if (is.null(weights))
         {
             if (type == "Linear")
@@ -152,8 +121,6 @@ Regression <- function(formula, data, subset = NULL,
                                  "Quasi-Poisson" = survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights), family = quasipoisson()))
             }
         }
-# <<<<<<< HEAD
-        #missing.data <- any(!post.missing.data.estimation.sample)
         if (missing == "Imputation (replace missing values with estimates)")
             data <- processed.data$data
         result$flip.predicted.values <- ifThen(any(class(result) == "glm"),
@@ -163,23 +130,6 @@ Regression <- function(formula, data, subset = NULL,
         result$flip.fitted.values <- ifThen(is.matrix(fitted.values),
             fitted.values[match(row.names, rownames(fitted.values)), ],
             fitted.values[match(row.names, names(fitted.values))])
-
-#         printDetails(dim(data))
-#         printDetails(sum(complete.cases(data)))
-#         print(names(data[, 3:7]))
-#         #printDetails(sum(complete.cases(data[, 3:7] & weights > 0)))
-#         printDetails(length(result$flip.predicted.values))
-#         printDetails(length(result$flip.fitted.values))
-# =======
-#         result$flip.subset <- row.names %in% rownames(estimation.data)
-#         missing.data <- any(!post.missing.data.estimation.subset)
-#         if (missing == "Imputation (replace missing values with estimates)")
-#             data[post.missing.data.estimation.subset, ] = data.post.missing.value.treatment
-#         result$flip.predicted.values <- predict(result, newdata = data, na.action = na.pass)
-#         fitted.values <- fitted(result)
-#         result$flip.fitted.values <- rep(NA, total.n <- nrow(data))
-#         result$flip.fitted.values[result$flip.subset] <- fitted.values
-#
         result$flip.subset <- row.names %in% rownames(estimation.data)
         result$sample.description <- processed.data$description
     }
@@ -193,6 +143,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- unfiltered.weights
+    result$r.output <- r.output
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
@@ -306,7 +257,16 @@ print.Regression <- function(Regression.object, ...)
         if (Regression.object$type == "Linear" & isCount(outcome.variable))
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
-    print(Regression.summary, ...)
+    # When r.output is false, print a nicely-formatted table
+    if (!Regression.object$r.output)
+    {
+        print(Regression.summary$coefficients)
+    }
+    else
+    {
+        print(Regression.summary, ...)
+    }
+
     if (!is.null(Regression.object$lm.cov))
         cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))
     cat(Regression.object$sample.description)
@@ -346,4 +306,83 @@ residuals.Regression <- function(object, ...)
     object$flip.residuals
 }
 
+<<<<<<< HEAD
+=======
+BinaryLogit <- function(formula, data, subset = NULL, weights = NULL, r.output = TRUE, ...)
+{
+    cl <- match.call()
+
+    data <- CreatingBinaryoutcomeVariableIfNecessary(formula, data)
+    if (is.null(weights))
+    {
+        if (is.null(subset) || length(subset) == 1)
+        {
+            result <- glm(formula, data, family = binomial, ...)
+        }
+        else
+        {
+            data$sb <- subset
+            result <- glm(formula,  data , family = binomial, subset = data$sb, ...)
+        }
+    }
+    else
+    {
+        if (is.null(subset) || length(subset) == 1)
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights), family = binomial, ...)
+        else
+        {
+            data$sb <- subset
+            result <- survey::svyglm(formula, weightedSurveyDesign(data, weights),
+                subset = data$sb, family = binomial, ...)
+        }
+    }
+    # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    # result$resid <- outcome.variable - result$predicted
+    result$call <- cl
+    result$r.output <- r.output
+    class(result) <- append("Regression", class(result))
+    result
+}
+
+
+
+OrderedLogit = function(formula, data, subset = NULL, weights = NULL, r.output = TRUE, ...)
+{
+    cl <- match.call()
+
+    outcome.variable = outcomeVariable(formula, data)
+    if (!is.ordered(outcome.variable))
+    {
+        warningNotOrdered()
+        data[[outcomeName(formula)]] = ordered(outcome.variable)
+    }
+    if (is.null(weights))
+    {
+        if(is.null(subset) || length(subset) == 1)
+            result <- MASS::polr(formula, data, Hess = TRUE, ...)
+        else
+        {
+            data$sb <- subset
+            result <- MASS::polr(formula, data, subset = data$sb, Hess = TRUE, ...)
+        }
+    }
+    else
+    {
+        if(is.null(subset) || length(subset) == 1)
+            result <- MASS::polr(formula, data, weights = weights, Hess = TRUE,  ...)
+        else
+        {
+            data$sb <- subset
+            result <- MASS::polr(formula, data, subset = data$sb, weights = weights, Hess = TRUE,  ...)
+        }
+    }
+    # result$predicted <- predict(result, newdata = data, na.action = na.exclude)
+    # result$resid <- outcomeVariable(formula, data) - result$predicted
+    result$call <- cl
+    result$r.output <- r.output
+    class(result) <- append("Regression", class(result))
+    result
+}
+
+>>>>>>> origin/master
 
