@@ -114,7 +114,7 @@ testthat::expect_equal(
 ###
 
 #test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors = 7, type = "Unweighted least squares")
-test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors = 7, type = "Generalized least squares")
+#test.fa <- FactorAnalysis(data = test.data.2, use.correlation = TRUE, n.factors = 7, type = "Generalized least squares")
 
 ###
 # Replicate SPSS Factor Analysis Scores
