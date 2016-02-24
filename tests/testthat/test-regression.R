@@ -26,14 +26,14 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 
 
 
-test_that("Tests of homogenous variance (Breush-Pagen test)",
+test_that("Tests of homogenous variance (Breusch-Pagen test)",
 {
-    # Unfilitered
+    # Unfiltered
     z = BreuschPagan(Regression(zformula, data = bank))
     z1 = car::ncvTest(lm(zformula, data = bank))
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
 
-    # Filitered
+    # Filtered
     z = BreuschPagan(Regression(zformula, data = bank, subset = sb))
     z1 = car::ncvTest(lm(zformula, data = bank, subset = sb))
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
