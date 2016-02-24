@@ -8,7 +8,7 @@ Description: Multivariate models and supporting code.
 Depends:
     R (>= 3.1.1)
 License: MIT + file LICENSE
-imports:
+Imports:
     sankeytreeR,
     MASS,
     hash,
@@ -22,7 +22,9 @@ imports:
     lmtest,
     RcmdrMisc,
     effects,
-    flipU,
     flipPlots,
     plotly,
     flipU
+Suggests:
+    DAAG,
+    testthat
