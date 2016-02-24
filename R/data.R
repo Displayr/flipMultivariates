@@ -54,8 +54,8 @@ outcomeVariable <- function(formula.object, data)
 
 outcomeVariableFromModel <- function(Regression.object)
 {
-    formula <- as.formula(as.list(Regression.object$call)$formula)
-    Regression.object$model[, outcomeName(formula)]
+    form <- formula(Regression.object)
+    Regression.object$model[, outcomeName(form)]
 }
 
 hasSubset <- function(subset) {!is.null(subset) & length(subset) != 1}

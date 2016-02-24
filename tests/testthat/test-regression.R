@@ -137,6 +137,14 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 })
 
 
+test_that("Printing of Regression objects works with direct and text formulae",
+{
+    z.text <- suppressWarnings(Regression(zformula, data = bank))
+    z.direct <- suppressWarnings(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
+
+    expect_that(suppressWarnings(capture.output(print(z.text))), not(throws_error()))
+    expect_equal(formula(z.text), formula(z.direct))
+})
 
 
 # Robust SE
