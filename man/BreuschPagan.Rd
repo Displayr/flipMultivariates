@@ -2,7 +2,7 @@
 % Please edit documentation in R/regressiondiagnostics.R
 \name{BreuschPagan}
 \alias{BreuschPagan}
-\title{\code{BreuschPagan}Breusch-Pagan test for non-constant variance.}
+\title{\code{BreuschPagan} Breusch-Pagan test for non-constant variance.}
 \usage{
 BreuschPagan(Regression.object, show.warnings = TRUE)
 }
@@ -12,7 +12,7 @@ BreuschPagan(Regression.object, show.warnings = TRUE)
 \item{show.warnings}{Returns a warning if the sample size is less than 4.}
 }
 \description{
-\code{BreuschPagan}Breusch-Pagan test for non-constant variance.
+\code{BreuschPagan} Breusch-Pagan test for non-constant variance.
 }
 \details{
 Weights are ignored when conducting the test.
