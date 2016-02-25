@@ -1,7 +1,7 @@
 #' \code{CleanSubset}
 #' Takes a QSubset variable and turns it into a logical vector with no missing values
 #' @param subset A QSubset variable from Displayr or Q.
-#' @param n.total The total numbe of observations.
+#' @param n.total The total number of observations.
 #' @export
 
 CleanSubset <- function(subset, n.total)
@@ -49,18 +49,22 @@ CleanWeights <- function(weights)
     weights
 }
 
-#' \code{EstimationData}
-#' Selects the data from a data frame for estimation. Conducts imputation if necessary.
-#' @param formula An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of type specification are given under ‘Details’.
+#' \code{EstimationData} Selects the data from a data frame for estimation.
+#' Conducts imputation if necessary.
+#' @param formula An object of class \code{\link{formula}} (or one that can be
+#'   coerced to that class): a symbolic description of the model to be fitted.
+#'   The details of type specification are given under \sQuote{Details}.
 #' @param data A \code{\link{data.frame}}.
-#' @param subset An optional vector specifying a subset of observations to be used in the fitting process, or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' \code{subset} may not
-#' @param weights An optional vector of sampling weights, or, the name or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' @param missing How missing data is to be treated in the regression. Options are:
-#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' \code{"Use partial data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @param missing How missing data is to be treated in the regression. Options
+#'   are: \code{"Error if missing data"}, \code{"Exclude cases with missing
+#'   data"}, \code{"Use partial data"}, \code{"Use partial data (pairwise
+#'   correlations)"}, and \code{"Imputation (replace missing values with
+#'   estimates)"}.
 #' @export
 EstimationData <- function(formula, data, subset = NULL,
                              weights = NULL,
@@ -124,17 +128,21 @@ EstimationData <- function(formula, data, subset = NULL,
 
 #' \code{SampleDescription}
 #'
-#' @description Describes the sample, for use as footers in multivariate analyses.
+#' @description Describes the sample, for use as footers in multivariate
+#'   analyses.
 #' @param n.total  Total number of observations in the database.
-#' @param n.subset Total number of observations in the subset (less than or equal to \code{n.total}).
-#' @param n.estimation The total number of observations used in estimation (less than or equal to \code{subset}).
+#' @param n.subset Total number of observations in the subset (less than or
+#'   equal to \code{n.total}).
+#' @param n.estimation The total number of observations used in estimation (less
+#'   than or equal to \code{subset}).
 #' @param subset.label Total number of observations in the database.
 #' @param weighted Total number of observations in the database.
 #' @param weight.label Total number of observations in the database.
-#' @param missing How missing data is to be treated in the analysis. Options are:
-#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' ,and \code{"Imputation (replace missing values with estimates)"}.
-
+#' @param missing How missing data is to be treated in the analysis. Options
+#'   are: \code{"Error if missing data"}, \code{"Exclude cases with missing
+#'   data"}, ,and \code{"Imputation (replace missing values with estimates)"}.
+#' @param imputation.label TODO
+#'
 #' @export
 SampleDescription <- function(n.total, n.subset, n.estimation, subset.label, weighted = TRUE, weight.label = "", missing, imputation.label = NULL)
 {
@@ -200,8 +208,8 @@ SingleImputation <- function(data, formula = NULL, method = "try mice")
         warning("Imputation has been selected, but the data has no missing values, so nothing has been imputed.")
         return(data)
     }
+
     requireNamespace("mice")
-    library(mice)
     if(method != "Hot deck")
     {
         set.seed(12321)

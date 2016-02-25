@@ -1,17 +1,25 @@
-#' LinearDiscriminantAnalysis
 #' \code{LinearDiscriminantAnalysis} Fits linear discriminant analysis models.
-#' @param x A matrix or data frame of explanatory variables.
-#' @param y A variable containg the group memberships (i.e., to be predicted or explained by x).
-#' @param prior The assumed probability of each value of y occurring in the population.  By default this is set to "observed" and
-#' the value is computed based on the observed data.  If set to "constant" the prior will be set to be equal for each group (this is the
-#' default in SPSS).  Alternatively, a vector of probabilities can be provided.
-#' @param ... Additional arguments.
-#' @details
-#' This is a wrapper for MASS::lda and MASS::qda.
 #'
-#' #### Linear discriminant analysis #####
-# http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm
+#' @param x A matrix or data frame of explanatory variables.
+#' @param grouping A variable containg the group memberships (i.e., to be
+#'   predicted or explained by x).
+#' @param prior The assumed probability of each value of y occurring in the
+#'   population.  By default this is set to "observed" and the value is computed
+#'   based on the observed data.  If set to "constant" the prior will be set to
+#'   be equal for each group (this is the default in SPSS).  Alternatively, a
+#'   vector of probabilities can be provided.
+#' @param tol TODO
+#' @param method TODO
+#' @param weights TODO
+#' @param CV TODO
+#' @param nu TODO
+#' @param ... Additional arguments.
+#' @details This is a wrapper for MASS::lda and MASS::qda.
+#'
+#'   #### Linear discriminant analysis #####
+#'   \url{http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm}
 #' @export
+
 LinearDiscriminantAnalysis = function (x, grouping, prior = proportions, tol = 1e-04,
                                        method = c("moment", "mle"),
                                        weights = rep(1, n.cases),

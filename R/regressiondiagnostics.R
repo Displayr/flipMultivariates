@@ -1,10 +1,10 @@
 
 
-#'  \code{BreuschPagan}Breusch-Pagan test for non-constant variance.
+#' \code{BreuschPagan} Breusch-Pagan test for non-constant variance.
 #'
 #' @param Regression.object An object of class \code{\link{Regression}}.
+#' @param show.warnings Returns a warning if the sample size is less than 4.
 #' @details Weights are ignored when conducting the test.
-#' @details show.warnings Returns a warning if the sample size is less than 4.
 #' @export
 BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
 {

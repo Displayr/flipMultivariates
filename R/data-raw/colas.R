@@ -1,6 +1,10 @@
 library(foreign)
 colas <- read.spss("C:/q/Install/Examples/colas.sav",
                   to.data.frame = TRUE)
+
+levels(colas$d2) <- enc2utf8(levels(colas$d2))
+levels(colas$q7) <- enc2utf8(levels(colas$q7))
+
 devtools::use_data(colas, internal = FALSE, overwrite = TRUE)
 
 data(colas)

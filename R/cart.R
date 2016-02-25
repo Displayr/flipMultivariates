@@ -42,14 +42,24 @@ CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey 
     return(result)
 }
 
-#' \code{treeFrameToList} Converts a \code{\link{tree}} into a format usable in a sankeytree.
-#' @param max.tooltip.length The maximum length of the tooltip (determines the scale of the tree).
-#' @param show.whole.factor Controls whether or not all the factor levels are displayed in the tooltip.
+#' \code{treeFrameToList} Converts a \code{\link{tree}} into a format usable in
+#' a sankeytree.
+#'
+#' @param tree The tree to convert.
+#' @param max.tooltip.length The maximum length of the tooltip (determines the
+#'   scale of the tree).
+#' @param show.whole.factor Controls whether or not all the factor levels are
+#'   displayed in the tooltip.
 #' @param numeric.distribution Outputs additional diagnostics in the tooltip.
-#' @param custom.color logical; if \code{true}, generates custom tree color, else use colors provided by sankeyTree package.
-#' @param num.color.div positive integer in the range [2,inf]. Controls the color resolution of the tree. A higher value gives a smoother color transition.
-#' @param const.bin.size logical; if \code{true}, each color spans an equal step of y-value or an equal number of points.
-#' @param draw.legend logical; if \code{true}, output the colors as a sorted RBG value list to draw legend
+#' @param custom.color logical; if \code{true}, generates custom tree color,
+#'   else use colors provided by sankeyTree package.
+#' @param num.color.div positive integer in the range [2,inf]. Controls the
+#'   color resolution of the tree. A higher value gives a smoother color
+#'   transition.
+#' @param const.bin.size logical; if \code{true}, each color spans an equal step
+#'   of y-value or an equal number of points.
+#' @param draw.legend logical; if \code{true}, output the colors as a sorted RBG
+#'   value list to draw legend
 
 treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = FALSE, numeric.distribution = FALSE,
                             custom.color = TRUE, num.color.div = 101, const.bin.size = TRUE, draw.legend = TRUE)
@@ -324,20 +334,20 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 }
 
 #' @export
-print.CART <- function(cart.object)
+print.CART <- function(x, ...)
 {
-    if (cart.object$output == "Sankey")
+    if (x$output == "Sankey")
     {
-        tree.list <- treeFrameToList(cart.object, custom.color = TRUE)
+        tree.list <- treeFrameToList(x, custom.color = TRUE)
         plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
             tooltip = c("n", "Description"), treeColors = TRUE)
         print(plt)
     }
-    else if (cart.object$output == "Tree")
+    else if (x$output == "Tree")
     {
-        plt <- plot(cart.object)
-        return(text(cart.object))
+        plt <- plot(x)
+        return(text(x))
     }
-    cart.object #uses print.tree
+    x #uses print.tree
 }
 

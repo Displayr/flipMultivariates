@@ -32,8 +32,7 @@ FormatAsReal <- function(x, digits = 2, format = "fg", ...)
 #' unless is really close to 0.
 #'
 #' @param p The number(s)
-#' @param digits Number of significant digits
-#' @param format See \code{\link{formatC}}.
+#' @param p.cutoff TODO
 #' @param ... Additional arguments that are passed to \code{\link{formatC}}.
 
 #' @export

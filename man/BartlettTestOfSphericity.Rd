@@ -12,23 +12,29 @@ BartlettTestOfSphericity(data, weights = NULL, subset = NULL,
 
 \item{weights}{A numeric vector containing the weight for each case in data.}
 
-\item{subset}{A logical vector which describes the subset of \code{data} to be analyzed.}
+\item{subset}{A logical vector which describes the subset of \code{data} to
+be analyzed.}
 
-\item{missing}{A string specifiying what to do when the \code{data} contains missing values.
-The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
-with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.}
+\item{missing}{A string specifiying what to do when the \code{data} contains
+missing values. The valid options are \code{"Error if missing data found"},
+\code{"Exclude cases with missing data"}, \code{"Use partial data (pairwise
+correlations)"}, and \code{"Imputation (replace missing values with
+estimates)"}.}
 }
 \value{
-A list containing the Chi-Square value, degrees of freedom (\code{df}), and p-value for the test.
+A list containing the Chi-Square value, degrees of freedom
+  (\code{df}), and p-value for the test.
 }
 \description{
 Conduct the Bartlett Test of Sphericity for a set of data, which
-tests that the correlation matrix of the data is not the identity matrix.
+  tests that the correlation matrix of the data is not the identity matrix.
 }
 \details{
-This function wraps \link{\code{psych::cortest.bartlett}}. In particular, it extends the existing
-funcitonality to weighted data, and it computes the test using a more conservative value of the sample size
-when there is missing data. The value for the sample size that is used is the size of the smallest pairwise
--complete set of cases amond all pairs of variables. This is consistent with SPSS.
+This function wraps \code{\link[psych]{cortest.bartlett}}. In
+  particular, it extends the existing funcitonality to weighted data, and it
+  computes the test using a more conservative value of the sample size when
+  there is missing data. The value for the sample size that is used is the
+  size of the smallest pairwise-complete set of cases among all pairs of
+  variables. This is consistent with SPSS.
 }
 

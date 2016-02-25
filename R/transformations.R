@@ -1,7 +1,11 @@
-#' \code{DichotomizeFactor} Converts a list of variable or data frames into a data.frame.
+#' \code{DichotomizeFactor} Converts a list of variable or data frames into a
+#' data.frame.
 #'
-#' @param list.of.variables A variable in a DataSet or data.frame.
-#' @param coerce.to.numeric Makes factors and ordered factors numeric.
+#' @param variable A variable in a DataSet or data.frame.
+#' @param cutoff The cutoff point to split the variable into.
+#' @param warning If TRUE, raise a warning showing the new levels.
+#' @param variable.name An alternate name to show instead of the deparsed
+#'   variable name.
 #' @export
 DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.name = deparse(substitute(variable))) {
     if (!is.factor(variable))

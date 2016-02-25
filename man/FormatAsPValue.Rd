@@ -12,11 +12,9 @@ FormatAsPValue(p, p.cutoff = 0.05, ...)
 \arguments{
 \item{p}{The number(s)}
 
+\item{p.cutoff}{TODO}
+
 \item{...}{Additional arguments that are passed to \code{\link{formatC}}.}
-
-\item{digits}{Number of significant digits}
-
-\item{format}{See \code{\link{formatC}}.}
 }
 \description{
 \code{FormatAsPValue}

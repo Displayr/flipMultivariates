@@ -1,36 +1,43 @@
-#'  \code{Regression}Generalized Regression.
+#' \code{Regression} Generalized Regression.
 #'
-#' @param formula An object of class \code{\link{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted. The details of type specification are given under ‘Details’.
+#' @param formula An object of class \code{\link{formula}} (or one that can be
+#'   coerced to that class): a symbolic description of the model to be fitted.
+#'   The details of type specification are given under \sQuote{Details}.
 #' @param data A \code{\link{data.frame}}.
-#' @param subset An optional vector specifying a subset of observations to be used in the fitting process, or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' \code{subset} may not
-#' @param weights An optional vector of sampling weights, or, the name or,
-#' the name of a variable in \code{data}. It may not be an expression.
-#' @param missing How missing data is to be treated in the regression. Options are:
-#' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
-#' \code{"Use partial data (pairwise correlations)"},and \code{"Imputation (replace missing values with estimates)"}.
-#' @param robust.se Computes standard errors that are robust to violations
-#' of the assumption of constant variance, using the HC1 (degrees of freedom)
-#' modification of White's (1980) estimator (Long and Ervin, 2000).
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @param missing How missing data is to be treated in the regression. Options
+#'   are: \code{"Error if missing data"}, \code{"Exclude cases with missing
+#'   data"}, \code{"Use partial data (pairwise correlations)"},and
+#'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param type Defaults to \code{"linear"}. Other types are: \code{"Poisson"},
-#' \code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"}, and \code{"Ordered Logit"}
-#' @param ... Additional argments to be past to  \code{\link{lm}} or, if the data
-#' is weighted,  \code{\link{survey::svyglm}}.
+#'   \code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"}, and
+#'   \code{"Ordered Logit"}
+#' @param robust.se Computes standard errors that are robust to violations of
+#'   the assumption of constant variance, using the HC1 (degrees of freedom)
+#'   modification of White's (1980) estimator (Long and Ervin, 2000).
+#' @param r.output TODO
+#' @param ... Additional argments to be past to  \code{\link{lm}} or, if the
+#'   data is weighted,  \code{\link[survey]{svyglm}}.
 #'
 #' @details "Imputation (replace missing values with estimates)". All selected
-#' outcome and predictor variables are included in the imputation, including any data excluded
-#' via \code{subset} and due to having invalid weights. Then,
-#' cases with missing values in the outcome variable are excluded from the
-#' analysis (von Hippel 2007). Where "Use partial data (pairwise correlations)" is used, if the data is weighted, a
-#' synthetic data file is created by sampling with replacement in proportion to the weights,where the
-#' sample size is the sum of the weights. See \code{\link{SingleImputation}}.
+#'   outcome and predictor variables are included in the imputation, including
+#'   any data excluded via \code{subset} and due to having invalid weights.
+#'   Then, cases with missing values in the outcome variable are excluded from
+#'   the analysis (von Hippel 2007). Where "Use partial data (pairwise
+#'   correlations)" is used, if the data is weighted, a synthetic data file is
+#'   created by sampling with replacement in proportion to the weights,where the
+#'   sample size is the sum of the weights. See \code{\link{SingleImputation}}.
 #' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
-#' Improved Strategy for Analyzing Multiply Imputed Data." Sociological Methodology 37:83-117.
-#' White, H. (1980), A heteroskedastic-consistent covariance matrix estimator and a direct
-#' test of heteroskedasticity. Econometrica, 48, 817-838.
-#' Long, J. S. and Ervin, L. H. (2000). Using heteroscedasticity consistent standard errors
-#' in the linear regression model. The American Statistician, 54( 3): 217– 224.
+#'   Improved Strategy for Analyzing Multiply Imputed Data." Sociological
+#'   Methodology 37:83-117. White, H. (1980), A heteroskedastic-consistent
+#'   covariance matrix estimator and a direct test of heteroskedasticity.
+#'   Econometrica, 48, 817-838. Long, J. S. and Ervin, L. H. (2000). Using
+#'   heteroscedasticity consistent standard errors in the linear regression
+#'   model. The American Statistician, 54( 3): 217-224.
 #' @export
 Regression <- function(formula, data, subset = NULL,
                              weights = NULL,
@@ -225,8 +232,9 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
 }
 
 #' @export
-print.Regression <- function(Regression.object, ...)
+print.Regression <- function(x, ...)
 {
+    Regression.object <- x
     Regression.summary <- Regression.object$summary
 
     if (Regression.object$robust.se)

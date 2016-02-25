@@ -1,19 +1,23 @@
 #' \code{CANormalization}
-#' @description Normalizes the coordinates of a \code{\link{ca::ca}} object.
-#' @param normalization The method used to normalize the coordinates of the correspondence analysis plot (this changes
-#' the plot, but not the outputs of \code{\link{ca::ca}} itself. The default method is \code{"Principal"}, which
-#' plots the principal coordinates (i.e., the standard coordinates multipled by the singular values). \code{"Row principal"}
-#' and \code{"Column principal"} plot the standard coordinates of the columns (rows) against the principal coordinates.
-#' \code{"Symmetrical (½)"} plots the standard coordinates multiplied by the square root of the singular values.
-#' \code{"None"} plots the standard coordinates.
+#' @description Normalizes the coordinates of a \code{\link[ca]{ca}} object.
+#' @param ca.object The object to normalize.
+#' @param normalization The method used to normalize the coordinates of the
+#'   correspondence analysis plot (this changes the plot, but not the outputs of
+#'   \code{\link[ca]{ca}} itself. The default method is \code{"Principal"},
+#'   which plots the principal coordinates (i.e., the standard coordinates
+#'   multipled by the singular values). \code{"Row principal"} and \code{"Column
+#'   principal"} plot the standard coordinates of the columns (rows) against the
+#'   principal coordinates. \code{"Symmetrical (\u00BD)"} plots the standard
+#'   coordinates multiplied by the square root of the singular values.
+#'   \code{"None"} plots the standard coordinates.
 #' @export
 CANormalization <- function(ca.object, normalization = "Principal")
 {
     .normalize = function(coords, power) sweep(coords[,1:2], 2, ca.object$sv[1:2]^power, "*")
     rows <- .normalize(ca.object$rowcoord, switch(normalization,
-        "Principal" = 1, "Row principal" = 1, "Column principal" = 0, "Symmetrical (½)" = 0.5, "None" = 0))
+        "Principal" = 1, "Row principal" = 1, "Column principal" = 0, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
     columns <- .normalize(ca.object$colcoord, switch(normalization,
-        "Principal" = 1, "Row principal" = 0, "Column principal" = 1, "Symmetrical (½)" = 0.5, "None" = 0))
+        "Principal" = 1, "Row principal" = 0, "Column principal" = 1, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
     list(row.coordinates = rows, column.coordinates = columns)
 }
 
@@ -21,18 +25,22 @@ CANormalization <- function(ca.object, normalization = "Principal")
 #' \code{CorrespondenceAnalysis}
 #' @description Removes rows or columns from the table.
 #' @param x A table.
-#' @param normalization The method used to normalize the coordinates of the correspondence analysis plot (this changes
-#' the plot, but not the outputs of \code{\link{ca::ca}} itself. The default method is \code{"Principal"}, which
-#' plots the principal coordinates (i.e., the standard coordinates multipled by the singular values). \code{"Row principal"}
-#' and \code{"Column principal"} plot the standard coordinates of the columns (rows) against the principal coordinates.
-#' Note that the plotting occurs via \code{\link{print.CorresponenceAnalysis}}.
-#' @param interactive If \code{true}, an \code{\link{flipPlots::InteractiveLabeledScatterPlot}} is plotted. Otherwise,
-#' a \code{\link{flipPlots::LabeledScatterPlot}} is plotted..
+#' @param normalization The method used to normalize the coordinates of the
+#'   correspondence analysis plot (this changes the plot, but not the outputs of
+#'   \code{\link[ca]{ca}} itself. The default method is \code{"Principal"},
+#'   which plots the principal coordinates (i.e., the standard coordinates
+#'   multipled by the singular values). \code{"Row principal"} and \code{"Column
+#'   principal"} plot the standard coordinates of the columns (rows) against the
+#'   principal coordinates. Note that the plotting occurs via
+#'   \code{\link{print.CorrespondenceAnalysis}}.
+#' @param interactive If \code{true}, an
+#'   \code{\link[flipPlots]{InteractiveLabeledScatterPlot}} is plotted.
+#'   Otherwise, a \code{\link[flipPlots]{LabeledScatterPlot}} is plotted.
 #' @param row.names.to.remove A vector of the row labels to remove.
 #' @param column.names.to.remove A vector of the column labels to remove.
-#' variable is provided, any cases with missing values on this variable
-#' are excluded from the final data file.
-#' @param ... Optional arguments for \code{\link{ca::ca}}.
+#'   variable is provided, any cases with missing values on this variable are
+#'   excluded from the final data file.
+#' @param ... Optional arguments for \code{\link[ca]{ca}}.
 #' @export
 CorrespondenceAnalysis = function(x,
         normalization = "Principal",
@@ -53,10 +61,12 @@ CorrespondenceAnalysis = function(x,
 
 #' \code{print.CorrespondenceAnalysis}
 #' @description Creates a plot displaying the correspondence analysis results.
-#' @param CorrespondenceAnalysis.object CorrespondenceAnalysis object.
+#' @param x CorrespondenceAnalysis object.
+#' @param ... further arguments passed to or from other methods.
 #' @export
-print.CorrespondenceAnalysis <- function(CorrespondenceAnalysis.object)
+print.CorrespondenceAnalysis <- function(x, ...)
 {
+    CorrespondenceAnalysis.object <- x
     normed <- CANormalization(CorrespondenceAnalysis.object, CorrespondenceAnalysis.object$normalization)
     singular.values <- round(CorrespondenceAnalysis.object$sv^2, 6)
     variance.explained <- paste(as.character(round(100 * prop.table(singular.values), 1)), "%", sep = "")[1:2]

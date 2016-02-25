@@ -87,34 +87,45 @@ weightedPartialCovarianceMatrix <- function(data, weight, correlation = FALSE)
 #'
 #' @description Calculate a Factor Analysis or Principal Component Analysis
 #'
-#' @param data A data framer with numeric columns which contains the data to be analyzed.
+#' @param data A data frame with numeric columns which contains the data to be
+#'   analyzed.
 #' @param weights A numeric vector containing the weight for each case in data.
-#' @param subset A logical vector which describes the subset of \code{data} to be analyzed.
-#' @param missing A string specifiying what to do when the \code{data} contains missing values.
-#'                The valid options are \code{"Error if missing data found"}, \code{"Exclude cases
-#'                with missing data"}, \code{"Use partial data (pairwise correlations)"}, and \code{"Imputation (replace missing values with estimates)"}.
-#' @param use.correlation A logical value specifying whether to use the correlation matrix (\code{TRUE}),
-#'                        or the covariance matrix (\code{FALSE}).
-#' @param type A string specifying the type of analysis to do. Valid options are \code{"PCA"},
-#'             \code{"Unweighted least squares"}, \code{"Generalized least squares"}, and
-#'             \code{"Maximum likelihood"}.
-#' @param rotation A string specifying the type of rotation to be used. Valid options are  \code{"none"},
-#'                 \code{"varimax"}, \code{"quartimax"}, \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"},
-#'                 \code{"geominT"}, \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"},
-#'                 \code{"bentlerQ"}, \code{"geominQ"}, \code{"biquartimin"}, and \code{"cluster"}. More
-#'                 details are found in package \code{psych}.
-#' @param sort.coefficients.by.size A logical value determining whether loadings should be sorted when printed.
-#' @param min.display.loading.value Loadings smaller than this value will not be displayed when printed.
-#' @param print.type A string specifying the type of printing that should be done. Valid options are
-#'                   \code{"table"} to display a loading table, \code{"scree"} to display a Scree Plot, and
-#'                   \code{"scatter"} to display a plot of the first two dimensions of the final loadings.
-#'                   The latter two options make use of HTML widgets.
-#' @param plot.labels A logical value which determines whether or not the scatter plot will show the labels
-#'                    of the input data, or just integers specifying the column number of each variable.
+#' @param subset A logical vector which describes the subset of \code{data} to
+#'   be analyzed.
+#' @param missing A string specifiying what to do when the \code{data} contains
+#'   missing values. The valid options are \code{"Error if missing data found"},
+#'   \code{"Exclude cases with missing data"}, \code{"Use partial data (pairwise
+#'   correlations)"}, and \code{"Imputation (replace missing values with
+#'   estimates)"}.
+#' @param use.correlation A logical value specifying whether to use the
+#'   correlation matrix (\code{TRUE}), or the covariance matrix (\code{FALSE}).
+#' @param type A string specifying the type of analysis to do. Valid options are
+#'   \code{"PCA"}, \code{"Unweighted least squares"}, \code{"Generalized least
+#'   squares"}, and \code{"Maximum likelihood"}.
+#' @param rotation A string specifying the type of rotation to be used. Valid
+#'   options are  \code{"none"}, \code{"varimax"}, \code{"quartimax"},
+#'   \code{"bentlerT"}, \code{"equamax"}, \code{"varimin"}, \code{"geominT"},
+#'   \code{"bifactor"}, \code{"promax"}, \code{"oblimin"}, \code{"simplimax"},
+#'   \code{"bentlerQ"}, \code{"geominQ"}, \code{"biquartimin"}, and
+#'   \code{"cluster"}. More details are found in package \code{psych}.
+#' @param n.factors TODO
+#' @param sort.coefficients.by.size A logical value determining whether loadings
+#'   should be sorted when printed.
+#' @param suppress.small.coefficients TODO
+#' @param min.display.loading.value Loadings smaller than this value will not be
+#'   displayed when printed.
+#' @param print.type A string specifying the type of printing that should be
+#'   done. Valid options are \code{"table"} to display a loading table,
+#'   \code{"scree"} to display a Scree Plot, and \code{"scatter"} to display a
+#'   plot of the first two dimensions of the final loadings. The latter two
+#'   options make use of HTML widgets.
+#' @param plot.labels A logical value which determines whether or not the
+#'   scatter plot will show the labels of the input data, or just integers
+#'   specifying the column number of each variable.
 #'
-#' @details This function is a wrapper for the functions \code{\link{fa}} and \code{link{principal}} from
-#'          package \code{psych}. It adds options for handling of missing data, weighting, filtering, and
-#'          printing.
+#' @details This function is a wrapper for the functions \code{\link[psych]{fa}}
+#'   and \code{\link[psych]{principal}} from package \code{psych}. It adds
+#'   options for handling of missing data, weighting, filtering, and printing.
 #'
 #' @export
 FactorAnalysis <- function(data,
@@ -298,7 +309,7 @@ print.flipFactorAnalysis <- function(x, ...)
               digits = 3,
               cutoff = min.display.loading.value,
               sort = x$sort.coefficients.by.size)
-    } else if (print.type == "scree") {
+    } else if (x$print.type == "scree") {
         print(ScreePlot(x))
     } else {
         print(ComponentPlot(x))
@@ -344,12 +355,14 @@ print.loadings <- function (x, digits = 3L, cutoff = 0.1, sort = FALSE, ...)
 
 
 #' \code{ScreePlot}
-#' @description Plot the eigenvalues from an existing principal component or factor analysis
-#'              or plot the eigenvalues from the correlation or covariance matrix of a data frame.
-#' @param x Either a data frame, a numeric vector of eigenvalues, or the eigenvalues from an analysis of
-#'          class \code{flipFactorAnalysis} from \link{\code{FactorAnalysis}}, or \code{fa} or
-#'          \code{principal} from package psych. When x is a data frame, additional arguments can
-#'          be supplied as to how to compute the covariance or correlation matrix.
+#' @description Plot the eigenvalues from an existing principal component or
+#'   factor analysis or plot the eigenvalues from the correlation or covariance
+#'   matrix of a data frame.
+#' @param x Either a data frame, a numeric vector of eigenvalues, or the
+#'   eigenvalues from an analysis of class \code{flipFactorAnalysis} from
+#'   \code{\link{FactorAnalysis}}, or \code{fa} or \code{principal} from package
+#'   psych. When x is a data frame, additional arguments can be supplied as to
+#'   how to compute the covariance or correlation matrix.
 #' @inheritParams FactorAnalysis
 #'
 #' @return An HTML widget object from plotly containing the Scree Plot.
@@ -396,9 +409,11 @@ ScreePlot <- function(x, weights = NULL, subset = NULL, missing = "Exclude cases
 
 #' \code{ComponentPlot}
 #'
-#' @description Create a scatter plot showing the loadings of each variable on the first two principal components.
+#' @description Create a scatter plot showing the loadings of each variable on
+#'   the first two principal components.
 #'
 #' @param x An object of class \code{flipFactorAnalysis}.
+#' @param show.labels Label the points with the row names.
 #'
 #' @export
 ComponentPlot <- function(x, show.labels = TRUE)
@@ -481,29 +496,30 @@ prepareDataForFactorAnalysis <- function(data, weights, subset, missing)
 
 #' \code{GenerateScoresFromFactorAnalysis}
 #'
-#'  @description Generates a set of scores from a factor analysis or principal component analysis,
-#'               which is a new set of data corresponding to the principal components or factors.
+#' @description Generates a set of scores from a factor analysis or principal
+#'   component analysis, which is a new set of data corresponding to the
+#'   principal components or factors.
 #'
-#' @param factor.analysis.object The results of a factor analysis or principal component analysis
-#'                               that was done using \link{\code{FactorAnlysis}}. This provides the
-#'                               loadings, the raw data to transform, as well as wieghts and subset
-#'                               information.
-#' @param method A string describing the method to use to obtain the scores. The allowed options are
-#'               \code{Regression}, \code{Bartlett}, and \code{Anderson-Rubin}, and these map to the
-#'               options used by package psych \code{Thurstone}, \code{Bartlett}, and \code{Anderson}
-#'               respectively.
+#' @param factor.analysis.object The results of a factor analysis or principal
+#'   component analysis that was done using \code{\link{FactorAnalysis}}. This
+#'   provides the loadings, the raw data to transform, as well as weights and
+#'   subset information.
+#' @param method A string describing the method to use to obtain the scores. The
+#'   allowed options are \code{Regression}, \code{Bartlett}, and
+#'   \code{Anderson-Rubin}, and these map to the options used by package psych
+#'   \code{Thurstone}, \code{Bartlett}, and \code{Anderson} respectively.
 #'
-#' @details This function provides a wrapper for the function \code{factor.scores} from package psych.
-#'          It adds functionality to handle the presence of weights. Where weights are specified
-#'          the input data is standardized using the weighted standard deviation and mean. The data that
-#'          is used to generate the scores is the same as that used to generate the factor analysis
-#'          or PCA. That is, the original subset is isued, if imputation was specified originally, then
-#'          the imputed data is used, otherwise all cases which are not completely missing are used.
+#' @details This function provides a wrapper for the function
+#'   \code{factor.scores} from package psych. It adds functionality to handle
+#'   the presence of weights. Where weights are specified the input data is
+#'   standardized using the weighted standard deviation and mean. The data that
+#'   is used to generate the scores is the same as that used to generate the
+#'   factor analysis or PCA. That is, the original subset is is used, if
+#'   imputation was specified originally, then the imputed data is used,
+#'   otherwise all cases which are not completely missing are used.
 #'
-#'
-#'
-#' @return A data frame with the same dimensions as the data which was originally supplied to
-#'          \link{\code{FactorAnalysis}}. Any
+#' @return A data frame with the same dimensions as the data which was
+#'   originally supplied to \code{\link{FactorAnalysis}}.
 #'
 #' @export
 GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "Regression")
@@ -561,17 +577,22 @@ GenerateScoresFromFactorAnalysis <- function(factor.analysis.object, method = "R
 }
 
 #' \code{BartlettTestOfSphericity}
+#'
 #' @description Conduct the Bartlett Test of Sphericity for a set of data, which
-#' tests that the correlation matrix of the data is not the identity matrix.
+#'   tests that the correlation matrix of the data is not the identity matrix.
 #' @param data A data frame containing the data to test.
 #' @inheritParams FactorAnalysis
-#' @return A list containing the Chi-Square value, degrees of freedom (\code{df}), and p-value for the test.
-#' @details This function wraps \link{\code{psych::cortest.bartlett}}. In particular, it extends the existing
-#' funcitonality to weighted data, and it computes the test using a more conservative value of the sample size
-#' when there is missing data. The value for the sample size that is used is the size of the smallest pairwise
-#' -complete set of cases amond all pairs of variables. This is consistent with SPSS.
+#' @return A list containing the Chi-Square value, degrees of freedom
+#'   (\code{df}), and p-value for the test.
+#' @details This function wraps \code{\link[psych]{cortest.bartlett}}. In
+#'   particular, it extends the existing funcitonality to weighted data, and it
+#'   computes the test using a more conservative value of the sample size when
+#'   there is missing data. The value for the sample size that is used is the
+#'   size of the smallest pairwise-complete set of cases among all pairs of
+#'   variables. This is consistent with SPSS.
 #'
 #' @export
+
 # For the sample size, use the min sample size of the correlation matrix
 BartlettTestOfSphericity <- function(data,
                          weights = NULL,

@@ -13,7 +13,7 @@ SingleImputation(data, formula = NULL, method = "try mice")
 observations with missing values on this variable are deleted after the imputation (von Hippel 2007).}
 
 \item{method}{"mice" applies multivariate imputation by chained equations
-(predictive mean matching) with the \code{\link{mice}} package. "Hot deck" applies the \code{\link{hot.deck}} method.
+(predictive mean matching) with the \code{\link{mice}} package. "hot deck" applies the \code{\link{hot.deck}} method.
 The default setting is "try mice", which first applies the  \code{\link{mice}} method and,if an error
 occurs, falls back to \code{\link{hot.deck}}.}
 }

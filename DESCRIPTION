@@ -6,25 +6,26 @@ Author: Numbers International Pty Ltd
 Maintainer: Tim Bock <tim.bock@numbers.net.au>
 Description: Multivariate models and supporting code.
 Depends:
-    R (>= 3.1.1)
+    R (>= 3.1.1),
+    mice
 License: MIT + file LICENSE
 Imports:
     sankeytreeR,
     MASS,
     hash,
     hot.deck,
-    mice,
     colorspace,
     survey,
     rpart,
     tree,
+    ca,
     car,
     lmtest,
-    RcmdrMisc,
-    effects,
     flipPlots,
     plotly,
+    psych,
     flipU
 Suggests:
     DAAG,
+    effects,
     testthat
