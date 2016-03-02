@@ -169,7 +169,7 @@ baseDescription <- function(description.of.n, n.total, n.subset, n.estimation, s
 {
     base <- paste0(
                 ifelse(n.estimation < n.subset,
-                    paste0(", of a total sample size of ", n.subset,
+                    paste0(" of a total sample size of ", n.subset,
                         ifelse(n.subset < n.total,
                             paste0(" (", subset.label, ")"),
                             "")), ""),

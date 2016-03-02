@@ -29,3 +29,4 @@ Suggests:
     DAAG,
     effects,
     testthat
+RoxygenNote: 5.0.1

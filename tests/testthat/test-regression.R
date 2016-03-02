@@ -147,4 +147,19 @@ test_that("Printing of Regression objects works with direct and text formulae",
 })
 
 
+
+# Nice summary printing function
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
+    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
+        test_that(paste("No error in nice print function", missing, type),
+                  {
+                      z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type, r.output = FALSE)
+                      expect_that(print(z), not(throws_error()))
+                  })
+
+
+
+
 # Robust SE
+
+
