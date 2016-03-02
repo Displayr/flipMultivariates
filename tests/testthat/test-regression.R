@@ -6,6 +6,25 @@ attr(sb, "label") <- "ID greater than 100"
 wgt <- bank$ID
 attr(wgt, "label") <- "ID"
 
+
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
+    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
+        test_that(paste("Residuals", missing, type),
+      {
+          # no weight, no filter
+          z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type)
+          # weight
+          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = NULL, type = type), not(throws_error()))
+          # weight, filter
+          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), not(throws_error()))
+          # weight, filter
+          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
+      })
+
+
+
+
+
 test_that("allEffects works on Regression object",
 {
     data(cpus, package = "MASS")
@@ -13,7 +32,6 @@ test_that("allEffects works on Regression object",
     zlm <- lm(log10(perf) ~ syct+mmin+mmax+cach+chmin+chmax, data = cpus)
     expect_equal(effects::allEffects(z), effects::allEffects(zlm))
 })
-
 
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
     for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
@@ -23,17 +41,14 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
      expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000,  weights = wgt, type = type), throws_error())
 })
 
-
-
-
-test_that("Tests of homogenous variance (Breusch-Pagen test)",
+test_that("Tests of homogenous variance (Breush-Pagen test)",
 {
-    # Unfiltered
+    # Unfilitered
     z = BreuschPagan(Regression(zformula, data = bank))
     z1 = car::ncvTest(lm(zformula, data = bank))
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
 
-    # Filtered
+    # Filitered
     z = BreuschPagan(Regression(zformula, data = bank, subset = sb))
     z1 = car::ncvTest(lm(zformula, data = bank, subset = sb))
     expect_equal(z$p, z1$p, tolerance = 1.0e-8)
@@ -63,8 +78,6 @@ test_that("Error due to missing data",
     expect_error(Regression(zFormula, data = bank, missing = missing), tolerance = 1.0e-8)
 })
 
-
-
 missing <- "Exclude cases with missing data"
 test_that(missing,
 {
@@ -77,7 +90,6 @@ test_that(missing,
     z <- as.numeric(Regression(zformula, data = bank, weights = wgt, subset = sb, missing = missing)$coef[3])
     expect_equal(round(z,4),round(0.2539403,4))
 })
-
 
 missing <- "Imputation (replace missing values with estimates)"
 test_that(missing,
@@ -137,29 +149,6 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 })
 
 
-test_that("Printing of Regression objects works with direct and text formulae",
-{
-    z.text <- suppressWarnings(Regression(zformula, data = bank))
-    z.direct <- suppressWarnings(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
 
-    expect_that(suppressWarnings(capture.output(print(z.text))), not(throws_error()))
-    expect_equal(formula(z.text), formula(z.direct))
-})
-
-
-
-# Nice summary printing function
-for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
-    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered", "NBD"))
-        test_that(paste("No error in nice print function", missing, type),
-                  {
-                      z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type, r.output = FALSE)
-                      expect_that(print(z), not(throws_error()))
-                  })
-
-
-
-
-# Robust SE
 
 
