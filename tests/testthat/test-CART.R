@@ -20,7 +20,8 @@ test_that("Error if missing data",
 })
 
 
-# CART(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE,  weights = NULL, output = "Sankey", missing = "Imputation (replace missing values with estimates)")
+
+#CART(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE,  weights = NULL, output = "Sankey", missing = "Imputation (replace missing values with estimates)")
 # CART(yesno ~ crl.tot + dollar + bang + money + n000 + make, data = spam.sample, subset = TRUE,  weights = NULL, output = "Sankey", missing = "Imputation (replace missing values with estimates)")
 #data(colas)
 #CART(d2 ~ d1, data = colas, subset = TRUE,  weights = NULL, output = "Sankey", missing = "Imputation (replace missing values with estimates)")
