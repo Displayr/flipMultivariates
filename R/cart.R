@@ -348,6 +348,6 @@ print.CART <- function(x, ...)
         plt <- plot(x)
         return(text(x))
     }
-    print.default(x) #uses print.tree
+    print(x$predicted)
 }
 
