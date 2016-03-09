@@ -21,7 +21,7 @@
 #' @details Creates a \code{\link{tree}} and plots it as a \code{\link{sankeytree}}
 #' @export
 
-CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot", missing = "Use partial data", ...)
+CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey", missing = "Use partial data", ...)
 {
     processed.data <- EstimationData(formula, data, subset, weights, missing)
     unfiltered.weights <- processed.data$unfiltered.weights
@@ -341,13 +341,13 @@ print.CART <- function(x, ...)
         tree.list <- treeFrameToList(x, custom.color = TRUE)
         plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
             tooltip = c("n", "Description"), treeColors = TRUE)
-        print(plt)
+        return(print(plt))
     }
     else if (x$output == "Tree")
     {
         plt <- plot(x)
         return(text(x))
     }
-    x #uses print.tree
+    print(x$predicted)
 }
 
