@@ -336,18 +336,18 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 #' @export
 print.CART <- function(x, ...)
 {
-    if (x$output == "Sankey")
+    if (x$output == "Sankey Plot")
     {
         tree.list <- treeFrameToList(x, custom.color = TRUE)
         plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
             tooltip = c("n", "Description"), treeColors = TRUE)
-        print(plt)
+        return(print(plt))
     }
     else if (x$output == "Tree")
     {
         plt <- plot(x)
         return(text(x))
     }
-    x #uses print.tree
+    print.default(x) #uses print.tree
 }
 
