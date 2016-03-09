@@ -4,7 +4,7 @@
 \alias{CART}
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
-CART(formula, data, weights = NULL, subset = NULL, output = "Sankey Plot",
+CART(formula, data, weights = NULL, subset = NULL, output = "Sankey",
   missing = "Use partial data", ...)
 }
 \arguments{
