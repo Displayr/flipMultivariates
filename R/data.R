@@ -20,11 +20,6 @@ printDetails <- function(x)
     cat("\n")
 }
 
-allIntegers <- function(x)
-{
-    all(x%%1==0)
-}
-
 unclassIfNecessary <- function(x)
 {
     if(is.factor(x))

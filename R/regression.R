@@ -185,7 +185,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
         n <- n - 1
     body(.pairwise.regression)[n] <- NULL
     estimation.data <- ifThen(weighted,
-                              AdjustDataToReflectWeights(subset.data, weights),
+                              flipU::AdjustDataToReflectWeights(subset.data, weights),
                               subset.data)
 #     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
 #         data = estimation.data, std = FALSE)
