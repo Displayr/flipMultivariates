@@ -29,6 +29,8 @@ CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey"
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     estimation.subset  <- processed.data$estimation.subset
     subset <-  processed.data$subset
+    #print(summary(estimation.data))
+    #print(dim(estimation.data))
     if (is.null(weights))
         result <- tree::tree(formula, data = estimation.data, model = TRUE, ...)
     else
@@ -348,6 +350,7 @@ print.CART <- function(x, ...)
         plt <- plot(x)
         return(text(x))
     }
-    print(x$predicted)
+    class(x) <- "tree"
+    print(x)
 }
 
