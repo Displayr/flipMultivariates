@@ -21,12 +21,18 @@ BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
     }
     residuals <- residuals(Regression.object)[subset]
     squared.residuals <- residuals^2
-    U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
-    fitted.values <- fitted.values(Regression.object)[subset]
-    mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
-    SS <- anova(mod)$"Sum Sq"
-    RegSS <- sum(SS) - SS[length(SS)]
-    Chisq <- RegSS/2
+    if (Regression.object$summary$r.squared > 0.9999) {
+        Chisq <- 0.0
+    }
+    else
+    {
+        U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
+        fitted.values <- fitted.values(Regression.object)[subset]
+        mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
+        SS <- anova(mod)$"Sum Sq"
+        RegSS <- sum(SS) - SS[length(SS)]
+        Chisq <- RegSS/2
+    }
     result <- list(#formula = var.formula, formula.name = "Variance",
         ChiSquare = Chisq, Df = 1, p = pchisq(Chisq, 1, lower.tail = FALSE),
         test = "Breusch-Pagan test of Non-constant Variance")
