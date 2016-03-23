@@ -35,7 +35,7 @@ data"}, \code{"Use partial data (pairwise correlations)"},and
 the assumption of constant variance, using the HC1 (degrees of freedom)
 modification of White's (1980) estimator (Long and Ervin, 2000).}
 
-\item{r.output}{TODO}
+\item{r.output}{More detailed outputs.}
 
 \item{...}{Additional argments to be past to  \code{\link{lm}} or, if the
 data is weighted,  \code{\link[survey]{svyglm}}.}
@@ -45,8 +45,9 @@ data is weighted,  \code{\link[survey]{svyglm}}.}
 }
 \details{
 "Imputation (replace missing values with estimates)". All selected
-  outcome and predictor variables are included in the imputation, including
-  any data excluded via \code{subset} and due to having invalid weights.
+  outcome and predictor variables are included in the imputation, excluding
+  cases that are excluded via subset or have invalid weights, but including
+  cases with missing values of the outcome variable.
   Then, cases with missing values in the outcome variable are excluded from
   the analysis (von Hippel 2007). Where "Use partial data (pairwise
   correlations)" is used, if the data is weighted, a synthetic data file is

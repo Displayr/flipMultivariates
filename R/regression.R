@@ -52,7 +52,7 @@ Regression <- function(formula, data, subset = NULL,
     outcome.variable <- data[[outcome.name]]
     if (type == "Binary Logit")
         data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
-    else if (type == "Ordered Logit" & !is.factor(outcome.variable))
+    else if (type == "Ordered Logit")
         data[, outcome.name] <- ordered(outcome.variable)
     else if (is.factor(outcome.variable))
     {
@@ -291,6 +291,7 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     }
     else
     {
+        cat(paste0(Regression.object$type, " regression\n"))
         print(Regression.summary, ...)
         if (!is.null(Regression.object$lm.cov))
             cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))

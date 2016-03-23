@@ -12,11 +12,16 @@ y[!filter] <- 4-one.if.filtered[!filter]
 #y <- y + rnorm(n, 0, 0.01)
 
 binary <- as.integer(y > 2)
-ordered = factor(binary)
-testweightsfilters <- data.frame(filter, wgt, y, one.if.filtered, binary, ordered)
+count <- round(y)
+ordered <- factor(count)
+testweightsfilters <- data.frame(filter, wgt, y, one.if.filtered, binary, ordered, count)
 rm(filter, wgt, y, one.if.filtered, binary,n, k, ordered)
+devtools::use_data(testweightsfilters, internal = FALSE, overwrite = TRUE)
 
-#sb <-  testweightsfilters$filter
+
+
+
+data(testweightsfilters)
 
 Regression(y ~ one.if.filtered, data = testweightsfilters)
 Regression(y ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
@@ -36,46 +41,32 @@ Regression(ordered ~ one.if.filtered, data = testweightsfilters, type = type, we
 Regression(ordered ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
 
 type = "Poisson"
-Regression(binary ~ one.if.filtered, data = testweightsfilters)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
+
+# Comparisons of alternative models. NB: svy.glm corresponds to Stata results.
+n <- 1
+tempData <- data.frame(x = rep(c(3.3702579, 0.7609655, 2.2110524, 0.9685861, 2.7369464), n),
+    y = rep(c(3, 1, 2, 1, 3), n))
+
+sDesign <- survey::svydesign(id = ~ 1, weights = rep(1, 5 * n), data = tempData)
+summary(survey::svyglm(y~x, sDesign,  family = poisson()), df.resid = Inf)
+
+summary(glm(y~x, data = tempData, family = poisson))
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, robust.se = TRUE, subset = testweightsfilters$filter)
+
+
 
 type = "Quasi-Poisson"
-Regression(binary ~ one.if.filtered, data = testweightsfilters)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
 
-type = "Quasi-Poisson"
-Regression(binary ~ one.if.filtered, data = testweightsfilters)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
-Regression(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
-
-
-
-
-type = linear
-
-
-BinaryLogit(binary ~ one.if.filtered, data = testweightsfilters)
-BinaryLogit(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$sb)
-BinaryLogit(binary ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
-BinaryLogit(binary ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$sb, weights = testweightsfilters$wgt)
-
-
-
-lm(y ~ one.if.filtered, data = testweightsfilters)
-
-lm(y ~ one.if.filtered, weights = wgt)
-lm(y ~ one.if.filtered, subset = filter, weights = wgt)
-
-lm(y ~ one.if.filtered)
-lm(y ~ one.if.filtered, subset = filter)
-lm(y ~ one.if.filtered, weights = wgt)
-lm(y ~ one.if.filtered, subset = filter, weights = wgt)
-
-
-devtools::use_data(testweightsfilters, internal = FALSE, overwrite = TRUE)
-
+type = "NBD"
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, type = type, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)

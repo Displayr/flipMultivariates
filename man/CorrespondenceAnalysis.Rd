@@ -15,7 +15,7 @@ CorrespondenceAnalysis(x, normalization = "Principal", interactive = FALSE,
 correspondence analysis plot (this changes the plot, but not the outputs of
 \code{\link[ca]{ca}} itself. The default method is \code{"Principal"},
 which plots the principal coordinates (i.e., the standard coordinates
-multipled by the singular values). \code{"Row principal"} and \code{"Column
+multiplied by the singular values). \code{"Row principal"} and \code{"Column
 principal"} plot the standard coordinates of the columns (rows) against the
 principal coordinates. Note that the plotting occurs via
 \code{\link{print.CorrespondenceAnalysis}}.}
