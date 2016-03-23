@@ -19,13 +19,14 @@
 #' @param robust.se Computes standard errors that are robust to violations of
 #'   the assumption of constant variance, using the HC1 (degrees of freedom)
 #'   modification of White's (1980) estimator (Long and Ervin, 2000).
-#' @param r.output TODO
+#' @param r.output More detailed outputs.
 #' @param ... Additional argments to be past to  \code{\link{lm}} or, if the
 #'   data is weighted,  \code{\link[survey]{svyglm}}.
 #'
 #' @details "Imputation (replace missing values with estimates)". All selected
-#'   outcome and predictor variables are included in the imputation, including
-#'   any data excluded via \code{subset} and due to having invalid weights.
+#'   outcome and predictor variables are included in the imputation, excluding
+#'   cases that are excluded via subset or have invalid weights, but including
+#'   cases with missing values of the outcome variable.
 #'   Then, cases with missing values in the outcome variable are excluded from
 #'   the analysis (von Hippel 2007). Where "Use partial data (pairwise
 #'   correlations)" is used, if the data is weighted, a synthetic data file is
@@ -51,7 +52,7 @@ Regression <- function(formula, data, subset = NULL,
     outcome.variable <- data[[outcome.name]]
     if (type == "Binary Logit")
         data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
-    else if (type == "Ordered" & !is.factor(outcome.variable))
+    else if (type == "Ordered Logit" & !is.factor(outcome.variable))
         data[, outcome.name] <- ordered(outcome.variable)
     else if (is.factor(outcome.variable))
     {
@@ -90,7 +91,7 @@ Regression <- function(formula, data, subset = NULL,
                         "Poisson" = poisson,
                         "Quasi-Poisson" = quasipoisson,
                         "Binary Logit" = "binomial"))
-            else if (type == "Ordered")
+            else if (type == "Ordered Logit")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
             else if (type == "NBD")
                 result <- MASS::glm.nb(formula, estimation.data, ...)
@@ -110,7 +111,7 @@ Regression <- function(formula, data, subset = NULL,
                 warningRobustInappropriate()
             if (type == "Linear")
                 result <- survey::svyglm(formula, weightedSurveyDesign(estimation.data, weights))
-            else if (type == "Ordered")
+            else if (type == "Ordered Logit")
             {
                 estimation.data$weights <- weights
                 result <- MASS::polr(formula, estimation.data, weights = weights, Hess = TRUE, ...)

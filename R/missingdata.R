@@ -81,9 +81,8 @@ EstimationData <- function(formula, data, subset = NULL,
     }
     unfiltered.weights <- weights
     # Filtering the data
-    filter <- ifThen(weighted, subset & weights > 0, subset)
-    data.subset <- subset(data, filter)
-
+    filter.ewerrfdfdsrew045 <- ifThen(weighted, subset & weights > 0, subset) #Name to avoid bug in subset.data.frame
+    data.subset <- subset.data.frame(data, filter.ewerrfdfdsrew045)
     # Selecting the relevant variables from the data frame (unless imputation is being used).
     variable.names <- all.vars(formula)
     if (missing == "Imputation (replace missing values with estimates)")
@@ -94,7 +93,7 @@ EstimationData <- function(formula, data, subset = NULL,
         data.for.estimation = SingleImputation(data.subset, formula)
         imputation.label <- attr(data.for.estimation, "imputation.method")
         #Filtering for the whole data set (as if using only the non-filter,the sample may be too small)
-        data$zdsfds.filter <- as.integer(filter) # Adding the filter as a variable to assist the imputation (name is to avoid duplicates).
+        data$filter.ewerrfdfdsrew045 <- as.integer(filter.ewerrfdfdsrew045) # Adding the filter as a variable to assist the imputation (name is to avoid duplicates).
         data = SingleImputation(data)
         # Inserting the values imputed for estimation sample.
         estimation.sample <- row.names(data) %in% rownames(data.for.estimation)
@@ -105,9 +104,9 @@ EstimationData <- function(formula, data, subset = NULL,
     {
         data.subset <- data.subset[ ,variable.names]
         data.for.estimation <- switch(missing, "Error if missing data" = ErrorIfMissingDataFound(data.subset),
-                   "Exclude cases with missing data" = ExcludeCasesWithAnyMissingData(data.subset),
-                   "Use partial data" = removeCasesWithAnyNA(data.subset),
-                   "Use partial data (pairwise correlations)" = removeCasesWithAnyNA(data.subset))
+                   "Exclude cases with missing data" = removeCasesWithAnyNA(data.subset),
+                   "Use partial data" = removeCasesWithAllNA(data.subset),
+                   "Use partial data (pairwise correlations)" = removeCasesWithAllNA(data.subset))
         estimation.sample <- row.names(data) %in% rownames(data.for.estimation)
     }
     if (weighted)
@@ -128,6 +127,11 @@ EstimationData <- function(formula, data, subset = NULL,
 
 
 removeCasesWithAnyNA <- function(x)
+{
+    x[apply(is.na(x), 1, sum) == 0, ]
+}
+
+removeCasesWithAllNA <- function(x)
 {
     x[apply(is.na(x), 1, sum) < ncol(x), ]
 }

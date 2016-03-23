@@ -49,8 +49,8 @@ CorrespondenceAnalysis = function(x,
         column.names.to.remove = c("NET", "Total", "SUM"),
         ...)
 {
-    x = flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
-    x.ca = ca::ca(x, ...)
+    x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
+    x.ca <- ca::ca(x, ...)
     x.ca$interactive <- interactive
     class(x.ca) <- c("CorrespondenceAnalysis", class(x.ca))
     x.ca$normalization <- normalization
