@@ -14,12 +14,12 @@
 #'   data"}, \code{"Use partial data (pairwise correlations)"},and
 #'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param type Defaults to \code{"linear"}. Other types are: \code{"Poisson"},
-#'   \code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"}, and
-#'   \code{"Ordered Logit"}
+#'   \code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"},
+#'   \code{"Ordered Logit"}, and \code{"Multinomial Logit"}
 #' @param robust.se Computes standard errors that are robust to violations of
 #'   the assumption of constant variance, using the HC1 (degrees of freedom)
 #'   modification of White's (1980) estimator (Long and Ervin, 2000).
-#' @param r.output More detailed outputs.
+#' @param detail More detailed outputs.
 #' @param ... Additional argments to be past to  \code{\link{lm}} or, if the
 #'   data is weighted,  \code{\link[survey]{svyglm}}.
 #'
@@ -45,7 +45,7 @@ Regression <- function(formula, data, subset = NULL,
                              missing = "Exclude cases with missing data",
                              type = "Linear",
                              robust.se = FALSE,
-                             r.output = TRUE, ...)
+                             detail = TRUE, ...)
 {
     cl <- match.call()
     outcome.name <- outcomeName(formula)
@@ -54,6 +54,16 @@ Regression <- function(formula, data, subset = NULL,
         data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
     else if (type == "Ordered Logit")
         data[, outcome.name] <- ordered(outcome.variable)
+    else if (type == "Multinomial Logit")
+    {
+        data[, outcome.name] <- factor(outcome.variable)
+        if (!detail)
+        {
+            warning("The 'Detailed output' option has not been selected. Only detailed output is available
+                    with Multinomial Logit.")
+            detail = TRUE
+        }
+    }
     else if (is.factor(outcome.variable))
     {
             WarningFactorToNumeric()
@@ -93,6 +103,8 @@ Regression <- function(formula, data, subset = NULL,
                         "Binary Logit" = "binomial"))
             else if (type == "Ordered Logit")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
+            else if (type == "Multinomial Logit")
+                result <- nnet::multinom(formula, estimation.data, Hess = TRUE, ...)
             else if (type == "NBD")
                 result <- MASS::glm.nb(formula, estimation.data, ...)
             else
@@ -115,6 +127,11 @@ Regression <- function(formula, data, subset = NULL,
             {
                 estimation.data$weights <- weights
                 result <- MASS::polr(formula, estimation.data, weights = weights, Hess = TRUE, ...)
+            }
+            else if (type == "Multinomial Logit")
+            {
+                estimation.data$weights <- weights
+                result <- nnet::multinom(formula, estimation.data, weights = weights, Hess = TRUE, ...)
             }
             else if (type == "NBD")
             {
@@ -151,7 +168,7 @@ Regression <- function(formula, data, subset = NULL,
     class(result) <- append("Regression", class(result))
     result$type = type
     result$flip.weights <- unfiltered.weights
-    result$r.output <- r.output
+    result$detail <- detail
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
@@ -266,8 +283,8 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
         if (Regression.object$type == "Linear" & isCount(outcome.variable))
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
-    # When r.output is false, print a nicely-formatted table
-    if (!Regression.object$r.output)
+    # When detail is false, print a nicely-formatted table
+    if (!Regression.object$detail)
     {
         sample.description <- Regression.object$sample.description
         sample.description <- sub("[\\.]$", "", sample.description)
@@ -278,7 +295,7 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
             extra.caption <- partial.data.r2.message
         else if (Regression.object$type == "Linear")
             extra.caption <- paste0("Multiple R-squared: ", formatC(Regression.summary$r.squared, digits = digits))
-        else if (Regression.object$type == "Ordered")
+        else if (Regression.object$type == "Ordered Logit" | Regression.object$type == "Multinomial Logit")
             extra.caption <- paste0("AIC: ", formatC(Regression.summary$deviance, digits = digits))
         else if (!is.null(Regression.summary$aic))
             extra.caption <- paste0("AIC: ", formatC(Regression.summary$aic, digits = digits))

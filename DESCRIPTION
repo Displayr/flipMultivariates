@@ -13,6 +13,7 @@ Imports:
     sankeytreeR,
     curl,
     MASS,
+    nnet,
     hash,
     hot.deck,
     colorspace,

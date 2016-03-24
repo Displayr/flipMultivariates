@@ -6,7 +6,7 @@
 \usage{
 Regression(formula, data, subset = NULL, weights = NULL,
   missing = "Exclude cases with missing data", type = "Linear",
-  robust.se = FALSE, r.output = TRUE, ...)
+  robust.se = FALSE, detail = TRUE, ...)
 }
 \arguments{
 \item{formula}{An object of class \code{\link{formula}} (or one that can be
@@ -28,14 +28,14 @@ data"}, \code{"Use partial data (pairwise correlations)"},and
 \code{"Imputation (replace missing values with estimates)"}.}
 
 \item{type}{Defaults to \code{"linear"}. Other types are: \code{"Poisson"},
-\code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"}, and
-\code{"Ordered Logit"}}
+\code{"Quasi-Poisson"}, \code{"Binary Logit"}, \code{"NBD"},
+\code{"Ordered Logit"}, and \code{"Multinomial Logit"}}
 
 \item{robust.se}{Computes standard errors that are robust to violations of
 the assumption of constant variance, using the HC1 (degrees of freedom)
 modification of White's (1980) estimator (Long and Ervin, 2000).}
 
-\item{r.output}{More detailed outputs.}
+\item{detail}{More detailed outputs.}
 
 \item{...}{Additional argments to be past to  \code{\link{lm}} or, if the
 data is weighted,  \code{\link[survey]{svyglm}}.}

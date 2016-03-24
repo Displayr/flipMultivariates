@@ -8,7 +8,7 @@ attr(wgt, "label") <- "ID"
 
 
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
-    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
+    for (type in c( "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
         test_that(paste("Residuals", missing, type),
       {
           # no weight, no filter
@@ -34,7 +34,7 @@ test_that("allEffects works on Regression object",
 })
 
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
-    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
+    for (type in c("Multinomial Logit","Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
         test_that(paste("Stops gracefully with small sample size", missing, type),
 {
      expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000, type = type), throws_error())
@@ -135,23 +135,19 @@ test_that(paste(missing, " with numeric weights"),
 })
 
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
-    for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
-        test_that(paste("No error", missing, type),
+    for (type in c("Multinomial Logit", "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
+        for (detail in c(FALSE, TRUE))
+            test_that(paste("No error", missing, type, "detail =", detail),
 {
      # no weight, no filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = NULL, type = type), not(throws_error()))
      # weight
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = NULL, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb, detail = detail, weights = NULL, type = type), not(throws_error()))
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = wgt, type = type), not(throws_error()))
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
+     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, detail = detail, type = type), not(throws_error()))
 })
-
-
-missing = "Imputation (replace missing values with estimates)"
-type = "Linear"
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type)
 
 
 

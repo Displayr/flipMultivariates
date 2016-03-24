@@ -18,15 +18,19 @@ testweightsfilters <- data.frame(filter, wgt, y, one.if.filtered, binary, ordere
 rm(filter, wgt, y, one.if.filtered, binary,n, k, ordered)
 devtools::use_data(testweightsfilters, internal = FALSE, overwrite = TRUE)
 
+library(foreign)
+write.foreign(testweightsfilters, "c:/delete/testweightsfilters.txt", "c:/delete/testweightsfilters.sps",   package="SPSS")
+write.csv(testweightsfilters, "c:/delete/testweightsfilters.csv")
 
 
 
 data(testweightsfilters)
 
-Regression(y ~ one.if.filtered, data = testweightsfilters)
-Regression(y ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
-Regression(y ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
-Regression(y ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters)
+Regression(count ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter)
+Regression(count ~ one.if.filtered, data = testweightsfilters, robust.se = TRUE, subset = testweightsfilters$filter)
+Regression(count ~ one.if.filtered, data = testweightsfilters, weights = testweightsfilters$wgt)
+Regression(count ~ one.if.filtered, data = testweightsfilters, subset = testweightsfilters$filter, weights = testweightsfilters$wgt)
 
 type = "Binary Logit"
 Regression(binary ~ one.if.filtered, data = testweightsfilters, type = type)
