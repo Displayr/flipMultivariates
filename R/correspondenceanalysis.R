@@ -1,27 +1,3 @@
-#' \code{CANormalization}
-#' @description Normalizes the coordinates of a \code{\link[ca]{ca}} object.
-#' @param ca.object The object to normalize.
-#' @param normalization The method used to normalize the coordinates of the
-#'   correspondence analysis plot (this changes the plot, but not the outputs of
-#'   \code{\link[ca]{ca}} itself. The default method is \code{"Principal"},
-#'   which plots the principal coordinates (i.e., the standard coordinates
-#'   multipled by the singular values). \code{"Row principal"} and \code{"Column
-#'   principal"} plot the standard coordinates of the columns (rows) against the
-#'   principal coordinates. \code{"Symmetrical (\u00BD)"} plots the standard
-#'   coordinates multiplied by the square root of the singular values.
-#'   \code{"None"} plots the standard coordinates.
-#' @export
-CANormalization <- function(ca.object, normalization = "Principal")
-{
-    .normalize = function(coords, power) sweep(coords[,1:2], 2, ca.object$sv[1:2]^power, "*")
-    rows <- .normalize(ca.object$rowcoord, switch(normalization,
-        "Principal" = 1, "Row principal" = 1, "Column principal" = 0, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
-    columns <- .normalize(ca.object$colcoord, switch(normalization,
-        "Principal" = 1, "Row principal" = 0, "Column principal" = 1, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
-    list(row.coordinates = rows, column.coordinates = columns)
-}
-
-
 #' \code{CorrespondenceAnalysis}
 #' @description Removes rows or columns from the table.
 #' @param x A table.
@@ -43,13 +19,35 @@ CANormalization <- function(ca.object, normalization = "Principal")
 #' @param ... Optional arguments for \code{\link[ca]{ca}}.
 #' @export
 CorrespondenceAnalysis = function(x,
-        normalization = "Principal",
-        interactive = FALSE,
-        row.names.to.remove = c("NET", "Total", "SUM"),
-        column.names.to.remove = c("NET", "Total", "SUM"),
-        ...)
+                                  normalization = "Principal",
+                                  interactive = FALSE,
+                                  row.names.to.remove = c("NET", "Total", "SUM"),
+                                  column.names.to.remove = c("NET", "Total", "SUM"),
+                                  ...)
 {
-    x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
+    dim.x <- dim(x)
+    dim.names <- dimnames(x)
+    if (length(dim.x) != 2)
+    {
+        if (length(dim.x) == 3 & !is.null(dim.names))
+        {
+            x <- x[ , ,1]
+            warning(paste0("Correspondence analysis has been performed on the first statistic in the table (",
+                           dim.names[[3]][1], ")."))
+        }
+        else
+        {
+            stop("Correspondence analysis can only be peformed with a two-dimensional table (i.e., a table with one set of row headings, one set of columns headings, and one statistic in each cell.")
+        }
+    }
+    if (is.null(dim.names))
+    {
+        dimnames(x) <- list(Rows = 1:nrow(x), Columns = 1:ncol(x))
+    }
+    else
+    {
+        x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
+    }
     x.ca <- ca::ca(x, ...)
     x.ca$interactive <- interactive
     class(x.ca) <- c("CorrespondenceAnalysis", class(x.ca))
@@ -87,4 +85,29 @@ print.CorrespondenceAnalysis <- function(x, ...)
     else
         print(flipPlots::LabeledScatterPlot(coords, column.labels = column.labels, fixed.aspect = TRUE, group = groups))
 }
+
+
+#' \code{CANormalization}
+#' @description Normalizes the coordinates of a \code{\link[ca]{ca}} object.
+#' @param ca.object The object to normalize.
+#' @param normalization The method used to normalize the coordinates of the
+#'   correspondence analysis plot (this changes the plot, but not the outputs of
+#'   \code{\link[ca]{ca}} itself. The default method is \code{"Principal"},
+#'   which plots the principal coordinates (i.e., the standard coordinates
+#'   multipled by the singular values). \code{"Row principal"} and \code{"Column
+#'   principal"} plot the standard coordinates of the columns (rows) against the
+#'   principal coordinates. \code{"Symmetrical (\u00BD)"} plots the standard
+#'   coordinates multiplied by the square root of the singular values.
+#'   \code{"None"} plots the standard coordinates.
+#' @export
+CANormalization <- function(ca.object, normalization = "Principal")
+{
+    .normalize = function(coords, power) sweep(coords[,1:2], 2, ca.object$sv[1:2]^power, "*")
+    rows <- .normalize(ca.object$rowcoord, switch(normalization,
+        "Principal" = 1, "Row principal" = 1, "Column principal" = 0, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
+    columns <- .normalize(ca.object$colcoord, switch(normalization,
+        "Principal" = 1, "Row principal" = 0, "Column principal" = 1, "Symmetrical (\u00BD)" = 0.5, "None" = 0))
+    list(row.coordinates = rows, column.coordinates = columns)
+}
+
 
