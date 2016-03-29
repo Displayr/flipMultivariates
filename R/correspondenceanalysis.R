@@ -46,6 +46,7 @@ CorrespondenceAnalysis = function(x,
     }
     else
     {
+        print(x)
         x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
     }
     x.ca <- ca::ca(x, ...)
