@@ -494,7 +494,12 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL)
         caption <- paste0(caption, "; Results highlighted when p < " , p.cutoff)
     }
 
-    dt <- flipU::DataTableWithRItemFormat(pretty.coefs, caption = caption, header.alignments = rep("right", ncol(pretty.coefs)))
+    dt <- flipU::DataTableWithRItemFormat(pretty.coefs,
+                                          caption = caption,
+                                          header.alignments = rep("right", ncol(pretty.coefs)),
+                                          page.length = nrow(pretty.coefs),
+                                          allow.paging = FALSE,
+                                          show.info = FALSE)
     test.info <- .findTestInCoefficientTable(pretty.coefs)
 
     # Highlight significant coefficients
