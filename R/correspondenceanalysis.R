@@ -34,6 +34,8 @@ CorrespondenceAnalysis = function(x,
             x <- x[ , ,1]
             warning(paste0("Correspondence analysis has been performed on the first statistic in the table (",
                            dim.names[[3]][1], ")."))
+            if (is.character(x[1,1]))
+                x <- matrix(as.numeric(x), nrow(x), dimnames = dimnames(x))
         }
         else
         {
@@ -46,7 +48,6 @@ CorrespondenceAnalysis = function(x,
     }
     else
     {
-        print(x)
         x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
     }
     x.ca <- ca::ca(x, ...)
