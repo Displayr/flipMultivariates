@@ -25,31 +25,7 @@ CorrespondenceAnalysis = function(x,
                                   column.names.to.remove = c("NET", "Total", "SUM"),
                                   ...)
 {
-    dim.x <- dim(x)
-    dim.names <- dimnames(x)
-    if (length(dim.x) != 2)
-    {
-        if (length(dim.x) == 3 & !is.null(dim.names))
-        {
-            x <- x[ , ,1]
-            warning(paste0("Correspondence analysis has been performed on the first statistic in the table (",
-                           dim.names[[3]][1], ")."))
-            if (is.character(x[1,1]))
-                x <- matrix(as.numeric(x), nrow(x), dimnames = dimnames(x))
-        }
-        else
-        {
-            stop("Correspondence analysis can only be peformed with a two-dimensional table (i.e., a table with one set of row headings, one set of columns headings, and one statistic in each cell.")
-        }
-    }
-    if (is.null(dim.names))
-    {
-        dimnames(x) <- list(Rows = 1:nrow(x), Columns = 1:ncol(x))
-    }
-    else
-    {
-        x <- flipU::RemoveRowsAndOrColumns(x, row.names.to.remove, column.names.to.remove)
-    }
+    x <- flipU::GetTidyTwoDimensionalArray(x, row.names.to.remove, column.names.to.remove)
     x.ca <- ca::ca(x, ...)
     x.ca$interactive <- interactive
     class(x.ca) <- c("CorrespondenceAnalysis", class(x.ca))
