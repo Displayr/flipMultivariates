@@ -7,9 +7,9 @@
 BreuschPagan(Regression.object, show.warnings = TRUE)
 }
 \arguments{
-\item{Regression.object}{An object of class \code{\link{Regression}}.}
-
 \item{show.warnings}{Returns a warning if the sample size is less than 4.}
+
+\item{mod}{An object of class \code{\link{Regression}}.}
 }
 \description{
 \code{BreuschPagan} Breusch-Pagan test for non-constant variance.

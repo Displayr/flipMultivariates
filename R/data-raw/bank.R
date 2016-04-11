@@ -24,7 +24,7 @@ wgt <- bank$ID
 attr(wgt, "label") <- "Bank ID"
 sb <- bank$ID > 100
 attr(sb, "label") <- "Bank ID greater than 100"
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
@@ -54,7 +54,7 @@ Regression(Overall ~ Fees, zdata)
 Regression(log(Overall) ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank)
 
-type = "Ordered"
+type = "Ordered Logit"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type)
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE)
 

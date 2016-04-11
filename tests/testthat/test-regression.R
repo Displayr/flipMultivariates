@@ -22,9 +22,6 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
       })
 
 
-
-
-
 test_that("allEffects works on Regression object",
 {
     data(cpus, package = "MASS")
@@ -39,36 +36,6 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 {
      expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000, type = type), throws_error())
      expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = wgt > 30000,  weights = wgt, type = type), throws_error())
-})
-
-test_that("Tests of homogenous variance (Breush-Pagen test)",
-{
-    # Unfilitered
-    z = BreuschPagan(Regression(zformula, data = bank))
-    z1 = car::ncvTest(lm(zformula, data = bank))
-    expect_equal(z$p, z1$p, tolerance = 1.0e-8)
-
-    # Filitered
-    z = BreuschPagan(Regression(zformula, data = bank, subset = sb))
-    z1 = car::ncvTest(lm(zformula, data = bank, subset = sb))
-    expect_equal(z$p, z1$p, tolerance = 1.0e-8)
-
-    z = BreuschPagan(Regression(zformula, data = bank,  weights = wgt))
-    z1 = car::ncvTest(lm(zformula, data = bank, wgt))
-    expect_false(round(z$p - z1$p,5) == 0)
-
-    # Weighted and filtered
-    z = BreuschPagan(Regression(zformula, data = bank, subset = sb,  weights = wgt))
-    z1 = car::ncvTest(lm(zformula, data = bank, subset = sb,  wgt))
-    expect_false(round(z$p - z1$p,5) == 0)
-
-    # Weighted and filtered with various missing value settings
-    expect_that(Regression(zformula, missing = "Exclude cases with missing data", data = bank, subset = sb,  weights = wgt), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Error if missing data", data = bank, subset = sb,  weights = wgt), throws_error())
-    z <- bank[complete.cases(bank),]
-    expect_that(Regression(zformula, missing = "Error if missing data", data = z, subset = z$ID > 100,  weights = z$ID), not(throws_error()))
-    expect_that(Regression(zformula, missing = "Imputation (replace missing values with estimates)", data = bank, subset = sb,  weights = wgt), not(throws_error()))
-    expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = "Use partial data (pairwise correlations)", data = bank, subset = sb,  weights = wgt), not(throws_error()))
 })
 
 
@@ -150,8 +117,9 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 })
 
 
-
-
-
-
+# missing = "Imputation (replace missing values with estimates)"
+# type = "Multinomial Logit"
+# detail = FALSE
+# Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = NULL, type = type)
+#
 

@@ -1,4 +1,5 @@
 context("Correspondence Analysis")
+
 x <- matrix(c(0.3004, 0.6864, 0.4975, 0.2908, 0.2781, 0.2642, 0.1916, 0.284,  0.3514, 0.2534, 0.2089,
                            c(  0.0198, 0.4604, 0.2151, 0.5235, 0.1151, 0.12,   0.5457, 0.3041, 0.06312,    0.384,  0.06064),
                            c(  0.01114,    0.4111, 0.1904, 0.4494, 0.06931,    0.1112, 0.4716, 0.2859, 0.0495, 0.3296, 0.03837),
@@ -11,26 +12,19 @@ x.with.labels <- x
 dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red\nBull","Lift\nPlus",'Diet.Coke','Fanta','Lift','Pepsi'),
                                        Attribute=c('Kids', 'Teens',    "Enjoy life",   'Picks you up', 'Refreshes',    'Cheers you up',    'Energy',   'Up-to-date',   'Fun',  'When tired',   'Relax'))
 
-test_that("Correspondence analysis"
+test_that("CorrespondenceAnalysis (mainly GetTidyTwoDimensionalArray)",
           {
-    expect_that(CorrespondenceAnalysis(x.with.labels), not(throws_error()))
+    expect_that(CorrespondenceAnalysis(x.with.labels, "NET", "NET"), not(throws_error()))
     expect_that(CorrespondenceAnalysis(x), not(throws_error()))
     # 3D array with no names
     z <- array(NA, c(8,11,2))
     z[,,1] <- x
-    expect_that(CorrespondenceAnalysis(z), throws_error()))
+    expect_that(CorrespondenceAnalysis(z), throws_error())
     dimnames(z) <- list(dimnames(x.with.labels)[[1]], dimnames(x.with.labels)[[2]], 1:2)
-    expect_that(CorrespondenceAnalysis(z), not(throws_error())))
+    expect_that(suppressWarnings(CorrespondenceAnalysis(z)), not(throws_error()))
 })
 
-dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red\nBull","Lift\nPlus",'Diet.Coke','Fanta','Lift','Pepsi'),
 
-CorrespondenceAnalysis(x)
-
-CorrespondenceAnalysis(x)
-
-CorrespondenceAnalysis(z)
-CorrespondenceAnalysis(z)
-
-
-x.with.labels[[1]]
+#
+#
+# x.with.labels[[1]]

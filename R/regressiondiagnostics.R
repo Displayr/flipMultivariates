@@ -1,15 +1,25 @@
-
+#' @export
+vif.Regression <- function (mod, ...)
+{
+    if(!any(c("lm", "glm") %in%  class(mod)))
+    {
+    print("z")
+        mod <- Regression(as.formula(mod$call$formula),
+            weights = mod$weights, subset = mod$flip.subset, robust.se = mod$robust.se, data = mod$model)
+    }
+    car:::vif.default(mod)
+}
 
 #' \code{BreuschPagan} Breusch-Pagan test for non-constant variance.
 #'
-#' @param Regression.object An object of class \code{\link{Regression}}.
+#' @param mod An object of class \code{\link{Regression}}.
 #' @param show.warnings Returns a warning if the sample size is less than 4.
 #' @details Weights are ignored when conducting the test.
 #' @export
 BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
 {
     if (class(Regression.object)[1] != "Regression")
-        stop("Breusch-Pagan Test has only been written for Regression objects.")
+        return(car::ncvTest(Regression.object))
     #Modified from car::ncvTest, to addess different size of input data.
     subset <- Regression.object$flip.subset
     if(sum(subset) < 4)

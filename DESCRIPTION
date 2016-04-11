@@ -10,7 +10,7 @@ Depends:
     mice
 License: MIT + file LICENSE
 Imports:
-    sankeytreeR,
+    rhtmlSankeyTree,
     curl,
     MASS,
     nnet,

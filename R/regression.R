@@ -104,7 +104,7 @@ Regression <- function(formula, data, subset = NULL,
             else if (type == "Ordered Logit")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
             else if (type == "Multinomial Logit")
-                result <- nnet::multinom(formula, estimation.data, Hess = TRUE, ...)
+                result <- nnet::multinom(formula, estimation.data, Hess = TRUE, trace = FALSE, maxit = 10000, ...)
             else if (type == "NBD")
                 result <- MASS::glm.nb(formula, estimation.data, ...)
             else
@@ -131,7 +131,7 @@ Regression <- function(formula, data, subset = NULL,
             else if (type == "Multinomial Logit")
             {
                 estimation.data$weights <- weights
-                result <- nnet::multinom(formula, estimation.data, weights = weights, Hess = TRUE, ...)
+                result <- nnet::multinom(formula, estimation.data, weights = weights, Hess = TRUE, trace = FALSE, maxit = 10000, ...)
             }
             else if (type == "NBD")
             {
@@ -148,6 +148,10 @@ Regression <- function(formula, data, subset = NULL,
         }
         if (missing == "Imputation (replace missing values with estimates)")
             data <- processed.data$data
+        if (type %in% c("Ordered Logit", "Multinomial Logit") )
+            result$predicted.probabilities <- suppressWarnings(predict(result, newdata = data, na.action = na.pass, type = "probs"))
+        else if (type != "Linear")
+            result$predicted.probabilities <- suppressWarnings(predict(result, newdata = data, na.action = na.pass, type = "response"))
         result$flip.predicted.values <- ifThen(any(class(result) == "glm"),
             suppressWarnings(predict.glm(result, newdata = data, na.action = na.pass)),
             predict(result, newdata = data, na.action = na.pass))
@@ -172,6 +176,7 @@ Regression <- function(formula, data, subset = NULL,
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
+
 
 
 linearRegressionFromCorrelations <- function(formula, data, subset = NULL,

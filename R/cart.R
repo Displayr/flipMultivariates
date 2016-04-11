@@ -18,7 +18,7 @@
 #' @param ... Additional arguments that are passed to  \code{\link{tree}}
 #' and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev
 #'
-#' @details Creates a \code{\link{tree}} and plots it as a \code{\link{sankeytree}}
+#' @details Creates a \code{\link{tree}} and plots it as a \code{\link{SankeyTree}}
 #' @export
 
 CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey", missing = "Use partial data", ...)
@@ -341,7 +341,7 @@ print.CART <- function(x, ...)
     if (x$output == "Sankey")
     {
         tree.list <- treeFrameToList(x, custom.color = TRUE)
-        plt <- sankeytreeR::sankeytree(tree.list, value = "n", nodeHeight = 100,
+        plt <- rhtmlSankeyTree::SankeyTree(tree.list, value = "n", nodeHeight = 100,
             tooltip = c("n", "Description"), treeColors = TRUE)
         return(print(plt))
     }
