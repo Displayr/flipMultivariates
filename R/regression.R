@@ -490,14 +490,8 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL)
     pretty.coefs <- .formatRegressionCoefficientMatrix(coefs)
     pretty.coefs <- as.data.frame(pretty.coefs, stringsAsFactors = FALSE)
 
-    # Check for p values in last column
-    num.col <- ncol(coefs)
-    has.p.values <- substr(colnames(coefs)[num.col], 1, 3) == "Pr("
-    any.significant <- has.p.values && length(which(coefs[, num.col] < p.cutoff)) > 0
-    if (has.p.values && any.significant)
-    {
-        caption <- paste0(caption, "; Results highlighted when p < " , p.cutoff)
-    }
+    caption <- paste0(caption, "; Results highlighted when p < " , p.cutoff)
+
 
     dt <- flipU::DataTableWithRItemFormat(pretty.coefs,
                                           caption = caption,
@@ -508,21 +502,20 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL)
     test.info <- .findTestInCoefficientTable(pretty.coefs)
 
     # Highlight significant coefficients
-    if (has.p.values && any.significant)
+
+    if (test.info$test.type == "t")
     {
-        if (test.info$test.type == "t")
-        {
-            t.val <- qt(p.cutoff / 2, df = x$df.residual)
-            dt <- flipU::AddSignificanceHighlightingToDataTable(dt, columns.to.color = "Estimate",
-                                                                column.to.check = "t value",#test.info$test.column,
-                                                                red.value = t.val, blue.value = -1L * t.val)
-        } else if (test.info$test.type == "z") {
-            z.val <- qnorm(p.cutoff / 2)
-            dt <- flipU::AddSignificanceHighlightingToDataTable(dt, columns.to.color = 1,
-                                                                column.to.check = test.info$test.column,
-                                                                red.value = z.val, blue.value = -1L * z.val)
-        }
+        t.val <- qt(p.cutoff / 2, df = x$df.residual)
+        dt <- flipU::AddSignificanceHighlightingToDataTable(dt, columns.to.color = 1,
+                                                            column.to.check = "t value",#test.info$test.column,
+                                                            red.value = t.val, blue.value = -1L * t.val)
+    } else if (test.info$test.type == "z") {
+        z.val <- qnorm(p.cutoff / 2)
+        dt <- flipU::AddSignificanceHighlightingToDataTable(dt, columns.to.color = 1,
+                                                            column.to.check = test.info$test.column,
+                                                            red.value = z.val, blue.value = -1L * z.val)
     }
+
     return(dt)
 }
 
