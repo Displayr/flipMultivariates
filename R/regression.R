@@ -50,8 +50,16 @@ Regression <- function(formula, data, subset = NULL,
     cl <- match.call()
     outcome.name <- outcomeName(formula)
     outcome.variable <- data[[outcome.name]]
+    if (!is.null(weights) & length(weights) != nrow(data))
+        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
+    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
+        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+
     if (type == "Binary Logit")
+    {
         data <- CreatingBinaryDependentVariableIfNecessary(formula, data)
+        outcome.variable <- data[[outcome.name]]
+    }
     else if (type == "Ordered Logit")
         data[, outcome.name] <- ordered(outcome.variable)
     else if (type == "Multinomial Logit")
@@ -66,8 +74,8 @@ Regression <- function(formula, data, subset = NULL,
     }
     else if (is.factor(outcome.variable))
     {
-            WarningFactorToNumeric()
-            data[, outcome.name] <- outcome.variable <- unclass(outcome.variable)
+        WarningFactorToNumeric()
+        data[, outcome.name] <- outcome.variable <- unclass(outcome.variable)
     }
     row.names <- rownames(data)
     if (missing == "Use partial data (pairwise correlations)")
@@ -100,13 +108,13 @@ Regression <- function(formula, data, subset = NULL,
                 result <- glm(formula, estimation.data, family = switch(type,
                         "Poisson" = poisson,
                         "Quasi-Poisson" = quasipoisson,
-                        "Binary Logit" = "binomial"))
+                        "Binary Logit" = binomial(link = "logit")))
             else if (type == "Ordered Logit")
                 result <- MASS::polr(formula, estimation.data, Hess = TRUE, ...)
             else if (type == "Multinomial Logit")
                 result <- nnet::multinom(formula, estimation.data, Hess = TRUE, trace = FALSE, maxit = 10000, ...)
             else if (type == "NBD")
-                result <- MASS::glm.nb(formula, estimation.data, ...)
+                result <- MASS::glm.nb(formula, estimation.data)
             else
                 stop("Unknown regression 'type'.")
 
@@ -148,6 +156,7 @@ Regression <- function(formula, data, subset = NULL,
         }
         if (missing == "Imputation (replace missing values with estimates)")
             data <- processed.data$data
+        # Predicted values and probabilities and fitted values
         if (type %in% c("Ordered Logit", "Multinomial Logit") )
             result$predicted.probabilities <- suppressWarnings(predict(result, newdata = data, na.action = na.pass, type = "probs"))
         else if (type != "Linear")
@@ -159,6 +168,11 @@ Regression <- function(formula, data, subset = NULL,
         result$flip.fitted.values <- ifThen(is.matrix(fitted.values),
             fitted.values[match(row.names, rownames(fitted.values)), ],
             fitted.values[match(row.names, names(fitted.values))])
+        if (isCount(type))
+            result$flip.predicted.values <- floor(exp(result$flip.predicted.values))
+        else if (type == "Binary Logit")
+            result$flip.predicted.values <- factor(as.integer(result$flip.predicted.values >= 0) + 1, labels = levels(outcome.variable))
+
         result$flip.subset <- row.names %in% rownames(estimation.data)
         result$sample.description <- processed.data$description
     }
@@ -173,11 +187,10 @@ Regression <- function(formula, data, subset = NULL,
     result$type = type
     result$flip.weights <- unfiltered.weights
     result$detail <- detail
+    result$outcome.name <- outcome.name
     result$flip.residuals <- unclassIfNecessary(outcome.variable) - unclassIfNecessary(result$flip.predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     return(result)
 }
-
-
 
 linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
                              weights = NULL, outcome.variable, outcome.name, ...)
@@ -281,48 +294,46 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     }
     outcome.variable <- outcomeVariableFromModel(Regression.object)
     if (length(unique(outcome.variable)) == 2 && Regression.object$type == "Linear")
-        warning(paste0("The outcome variable contains only two unique values. A BinaryLogit may be
+        warning(paste0("The outcome variable contains only two unique values. A Binary Logit may be
                        more appropriate."))
     else
     {
         if (Regression.object$type == "Linear" & isCount(outcome.variable))
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
-    # When detail is false, print a nicely-formatted table
-    if (!Regression.object$detail)
-    {
-        sample.description <- Regression.object$sample.description
-        sample.description <- sub("[\\.]$", "", sample.description)
-        sample.description <- gsub("[\\.][[:space:]+]", "; ", sample.description)
-        caption <- c(paste0(Regression.object$type, " Regression; ", sample.description))
-        # Work out which R^2 / Objective function to add
-        if (!is.null(Regression.object$lm.cov))
-            extra.caption <- partial.data.r2.message
-        else if (Regression.object$type == "Linear")
-            extra.caption <- paste0("Multiple R-squared: ", formatC(Regression.summary$r.squared, digits = digits))
-        else if (Regression.object$type == "Ordered Logit" | Regression.object$type == "Multinomial Logit")
-            extra.caption <- paste0("AIC: ", formatC(Regression.summary$deviance, digits = digits))
-        else if (!is.null(Regression.summary$aic))
-            extra.caption <- paste0("AIC: ", formatC(Regression.summary$aic, digits = digits))
-
-        if (!is.null(extra.caption))
-            caption <- paste0(caption, "; ", extra.caption)
-
-        dt <- createRegressionDataTable(Regression.object, p.cutoff = p.cutoff, caption = caption)
-        print(dt)
-    }
+    # Creating a nicely formatted text description of the model.
+    caption <- Regression.object$sample.description
+    caption <- sub("[\\.]$", "", caption)
+    caption <- gsub("[\\.][[:space:]+]", "; ", caption)
+    # Work out which R^2 / Objective function to add
+    if (!is.null(Regression.object$lm.cov))
+        extra.caption <- partial.data.r2.message
     else
+        extra.caption <- paste0("R-Squared: ", formatC(GoodnessOfFit(Regression.object)$value), digits = digits)
+    extra.caption <- paste0(extra.caption, "; Correct predictions: ", formatC(Accuracy(Regression.object)*100, digits = digits),"%")
+    if (Regression.object$type == "Ordered Logit" | Regression.object$type == "Multinomial Logit")
+        aic <- paste0(extra.caption, "; AIC: ", formatC(Regression.summary$deviance, digits = digits))
+    else if (!is.null(Regression.summary$aic))
+        aic <- paste0(extra.caption, "; AIC: ", formatC(Regression.summary$aic, digits = digits))
+    if (!is.null(extra.caption))
+        caption <- paste0(caption, "; ", extra.caption)
+    # When detail is false, print a nicely-formatted table
+    if (Regression.object$detail)
     {
         cat(paste0(Regression.object$type, " regression\n"))
         print(Regression.summary, ...)
         if (!is.null(Regression.object$lm.cov))
             cat(paste0("Partial-data Multiple R-squared ", FormatAsReal(Regression.object$lm.cov$R2, 4), " (the R-squared and F above are based only on complete cases).\n"))
-        cat(Regression.object$sample.description)
+        cat(caption)
         if (Regression.object$robust.se)
             cat("Heteroscedastic-robust standard errors.")
     }
-
-
+    else
+    {
+        caption <- c(paste0(Regression.object$type, " Regression; ", caption))
+        dt <- createRegressionDataTable(Regression.object, p.cutoff = p.cutoff, caption = caption)
+        print(dt)
+    }
 }
 
 
@@ -342,6 +353,24 @@ fitted.Regression <- function(object, ...)
 fitted.values.Regression <- function(object, ...)
 {
     object$flip.fitted.values
+}
+
+#' \code{observed} Observed values used in fitting a model with an outcome variable.
+#'
+#' @export
+Observed <- function(x) UseMethod("Observed", x)
+
+#' #' @export
+#' Observed.default <- function(x)
+#' {
+#'     fitted(x)
+#' }
+
+##' #@method observed Regression
+#' @export
+Observed.Regression <- function(x)
+{
+    x$model[[x$outcome.name]]
 }
 
 
