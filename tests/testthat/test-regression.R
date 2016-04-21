@@ -6,9 +6,8 @@ attr(sb, "label") <- "ID greater than 100"
 wgt <- bank$ID
 attr(wgt, "label") <- "ID"
 
-
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
-    for (type in c( "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
+    for (type in c("Multinomial Logit", "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
         test_that(paste("Residuals", missing, type),
       {
           # no weight, no filter
@@ -116,10 +115,4 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
      expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, detail = detail, type = type), not(throws_error()))
 })
 
-
-# missing = "Imputation (replace missing values with estimates)"
-# type = "Multinomial Logit"
-# detail = FALSE
-# Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = NULL, type = type)
-#
 
