@@ -15,15 +15,17 @@ DichotomizeFactor <- function(variable, cutoff = 0.5, warning = FALSE, variable.
     else if (nlevels(variable) == 2)
         return(variable)
     cumulative.probs <- cumsum(prop.table(table(variable)))
-    cut.point <- match(TRUE, cumulative.probs >= cutoff)
+    cut.point <- match(TRUE, cumulative.probs > cutoff)
     if (cut.point == 1)
         stop(paste(variable.name, "cannot be dichotimized (e.g., perhaps only has 1 value)."))
-    new.factor <- factor(unclass(variable) > cut.point)
-    levels(new.factor) <- paste0(c("<=", ">="), levels(variable)[c(cut.point - 1, cut.point)])
+    new.factor <- factor(unclass(variable) >= cut.point)
+    levels(new.factor) <- paste0(c("<=", ">="), levels(variable)[c(cut.point - 1, cut.point )])
     if (warning)
         warning(paste(variable.name, "has been dichotimized into", paste(levels(new.factor), collapse = " & ")))
     new.factor
 }
+
+
 
 #' @export
 CreatingBinaryDependentVariableIfNecessary <- function(formula, data)
