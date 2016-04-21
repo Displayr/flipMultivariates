@@ -1,11 +1,32 @@
 context("Regression Diagnostics")
-context("Regression")
 zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
 data(bank)
 sb <- bank$ID > 100
 attr(sb, "label") <- "ID greater than 100"
 wgt <- bank$ID
+wgt[is.na(wgt)] = 0
 attr(wgt, "label") <- "ID"
+
+
+
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
+    for (type in c( "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD", "Multinomial Logit"))
+        test_that(paste("Accuracy and R-square:",missing, type),
+        {
+            z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, type = type)
+            expect_true(Accuracy(z) > 0.2)
+            expect_true(GoodnessOfFit(z)$value > 0.17)
+            z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  type = type)
+            expect_true(Accuracy(z) > 0.2)
+            expect_true(GoodnessOfFit(z)$value > 0.17)
+            z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = wgt, missing = missing, data = bank, type = type)
+            expect_true(Accuracy(z) > 0.2)
+            expect_true(GoodnessOfFit(z)$value > 0.17)
+            z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = wgt, missing = missing, data = bank, subset = sb,  type = type)
+            expect_true(Accuracy(z) > 0.2)
+            expect_true(GoodnessOfFit(z)$value > 0.17)
+        })
+
 
 test_that("Tests of homogenous variance (Breush-Pagen test)",
 {
@@ -48,43 +69,45 @@ test_that("Tests of homogenous variance (Breush-Pagen test)",
     # Weighted.
     zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)
     zWLS <- lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)
-    expect_equal(round(BreuschPagan(zRegression)$p),round(BreuschPagan(zWLS)$p,1))
+    expect_equal(round(BreuschPagan(zRegression)$p, 1),round(BreuschPagan(zWLS)$p,1))
 
 })
-
-data(bank)
 
 test_that("VIF",
            {
      library(car)
-     # Unweighted
+     # Unweighted - linear
      zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
      zR <- vif(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank))
      expect_equal(zRegression, zR)
-     # Filtered
+     # Filtered - linear
      zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100))
      zR <- vif(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100))
      expect_equal(zRegression, zR)
      # Weighted.
-     zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID))
-     zR <- vif(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID))
-     expect_equal(zRegression, zR)
-     # Logit
+     expect_that(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)), not(throws_error()))
+     # Logit (used as a proxy for all the glms)
      type = "Binary Logit"
-     zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type))
-     zR <- vif(glm(Overall >= 4 ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,  family = "binomial"))
-     expect_equal(zRegression, zR)
-     # Logit, filtered
-     type = "Binary Logit"
-     zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100))
-     zR <- vif(glm(Overall >= 4 ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,  family = "binomial", subset = bank$ID > 100))
-     expect_equal(zRegression, zR)
-     # Logit, weighted, filtered
-     type = "Binary Logit"
-     zRegression <- vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100, weights = bank$ID))
-     zR <- vif(glm(Overall >= 4 ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,  family = "binomial", subset = bank$ID > 100, weights = bank$ID))
-     expect_equal(zRegression, zR)
+     zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type)
+     zR <- glm(Overall >= 4 ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,  family = binomial(link = "logit"))
+     expect_equal(vif(zRegression), vif(zR))
+     # Logit - filtered
+     zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100)
+     zR <- glm(Overall >= 4 ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank,  family = binomial(link = "logit"), subset = bank$ID > 100)
+     expect_equal(vif(zRegression), vif(zR))
+     # Logit - filtered and weighted
+     z = wgt > 0 & complete.cases(bank[,c("Overall","Fees","Interest","Phone","Branch","Online","ATM")])
+     zBank = bank[z, ]
+     zBank$dd = zBank$Overall >= 4
+     zwgt = wgt[z]
+     zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zBank, weights = zwgt, type = type)
+     zR <- survey::svyglm(dd ~ Fees + Interest + Phone + Branch + Online + ATM, data = zBank, design = flipMultivariates:::weightedSurveyDesign(zBank, zwgt), family = quasibinomial())
+     expect_equal(vif(zRegression), vif(zR))
+     # Checking for errors in other types of models
+     for (type in c("Poisson", "Quasi-Poisson", "Ordered Logit", "NBD", "Multinomial Logit"))
+        expect_that(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100, weights = bank$ID)), not(throws_error()))
  })
+
 
 
 
