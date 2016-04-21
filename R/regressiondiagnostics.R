@@ -1,11 +1,132 @@
+
+#' \code{ConfusionMatrixFromVariables}
+#'
+#' @param observed A \code{factor}.
+#' @param predicted A \code{factor}.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#'
+#' @details A contingency table showing the observed versus predicted values from a model.
+#' @export
+ConfusionMatrixFromVariables <- function(observed, predicted, subset = NULL, weights = NULL)
+{
+    # if(!is.factor(observed))
+    #     observed <- factor(observed)
+    # if(!is.factor(observed))
+    #     predicted <- factor(predicted)
+    # levels.observed <- levels(observed)
+    # n <- length(levels)
+    # # Ensuring that the observed and predicted values line up)
+    # predicted <- factor(match(predicted, levels.observed))
+    # levels(predicted) <- levels.observed
+    if (is.null(weights))
+    {
+        if (is.null(subset))
+            return(xtabs(~ observed + predicted))
+        else
+            return(xtabs(~ observed + predicted, subset = subset))
+    }
+    else
+    {
+        if (is.null(subset))
+            return(xtabs(weights ~ observed + predicted))
+        else
+            return(xtabs(weights ~ observed + predicted, subset = subset))
+    }
+}
+
+
+#' \code{ConfusionMatrixFromVariablesLinear}
+#'
+#' @param observed A \code{factor}.
+#' @param predicted A \code{factor}.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#'
+#' @details A contingency table showing the observed versus predicted values from a model, for linear models.
+#' Prediced values are assigned the value of the closest observed value.
+#' @export
+ConfusionMatrixFromVariablesLinear <- function(observed, predicted, subset = NULL, weights = NULL)
+{
+    if (is.factor(observed))
+        observed <- as.numeric(observed)
+    if (is.factor(predicted))
+        predicted <- as.numeric(predicted)
+    unique.observed <- unique(observed)
+    unique.observed <- unique.observed[!is.na(unique.observed)]
+    predicted.na <- is.na(predicted)
+    if(any(predicted.na))
+        predicted[predicted.na] <- -Inf
+    predicted <- sapply(predicted, function(x) unique.observed[which.min(abs(unique.observed - x))])
+    predicted[predicted.na] <- NA
+    ConfusionMatrixFromVariables(observed, predicted)
+}
+
+
+
+#' \code{ConfusionMatrix}
+#'
+#' @param obj A model with an outcome variable.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @details The proportion of observed values that take the same values as the predicted values.
+#' Where the outcome
+#' variable in the model is not a factor and not a count, predicted values are assigned to the closest observed
+#' value.
+#' @export
+ConfusionMatrix <- function(obj, subset = NULL, weights = NULL)
+{
+    observed <- Observed(obj)
+    predicted <- predict(obj)
+
+    if (is(obj,"Regression") & obj$type == "Linear")
+        return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
+    return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
+}
+
+
+#' \code{Accuracy}
+#'
+#' @param obj A model with an outcome variable.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression. \code{subset} may not
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @details The proportion of observed values that take the same values as the predicted values.
+#' Where the outcome
+#' variable in the model is not a factor and not a count, predicted values are assigned to the closest observed
+#' value.
+#' @export
+Accuracy <- function(obj, subset = NULL, weights = NULL)
+{
+    cm <- ConfusionMatrix(obj, subset, weights)
+    n <- sum(cm)
+    rnames <- rownames(cm)
+    cnames <- colnames(cm)
+    cm <- cm[rnames %in% cnames, cnames %in% rnames]
+    correct <- sum(diag(cm))
+    correct / n
+}
+
+
 #' @export
 vif.Regression <- function (mod, ...)
 {
+
     if(!any(c("lm", "glm") %in%  class(mod)))
     {
-    print("z")
         mod <- Regression(as.formula(mod$call$formula),
-            weights = mod$weights, subset = mod$flip.subset, robust.se = mod$robust.se, data = mod$model)
+            weights = mod$flip.weights, subset = mod$flip.subset, robust.se = mod$robust.se, data = mod$model)
     }
     car:::vif.default(mod)
 }
@@ -50,52 +171,3 @@ BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
     class(result) <- "chisqTest"
     result
 }
-#
-# breusch.pagan <- function(Regression.object)
-# {   #Modified from car::ncvTest, to addess different size of input data.
-# #    data <- getCall(Regression.object)$data
-# #    if (!is.null(data)) {
-#     # print("cat")
-#     Regression.summary = summary.lm(Regression.object)
-#         data <- Regression.object$model
-#         if (hasSubset(Regression.object$subset))
-#             data <- subset(data, Regression.object$subset)
-#         #update(Regression.object, formula(Regression.object))#, na.action = "na.exclude",            data = data)
-#     #}
-# #    else update(Regression.object, formula(Regression.object))#, na.action = "na.exclude")
-# ##    sumry <- summary(Regression.object)
-#     residuals <- residuals(Regression.object, type = "pearson")
-#     printDetails(residuals)
-#     S.sq <- df.residual(Regression.object) * (Regression.summary$sigma)^2/sum(!is.na(residuals))
-#     printDetails(S.sq)
-#     U <- (residuals^2)/S.sq
-# #     if (missing(var.formula)) {
-#     fitted.values <- fitted.values(Regression.object)
-#     #print(Regression.object)
-#     #residuals <- residuals(Regression.object)#outcome <- outcomeVariableFromModel(Regression.object)
-#
-#     # stop("dog")
-#         mod <- lm(U ~ fitted.values, subset = Regression.object$subset)
-#         varnames <- "fitted.values"
-#         var.formula <- ~fitted.values
-#         df <- 1
-# #     }
-# #     else {
-# #         form <- as.formula(paste(".U ~ ", as.character(var.formula)[[2]],
-# #             sep = ""))
-# #         mod <- if (!is.null(data)) {
-# #             data$.U <- .U
-# #             lm(form, data = data)
-# #         }
-# #         else lm(form)
-# #         df <- sum(!is.na(coefficients(mod))) - 1
-# #     }
-#     SS <- anova(mod)$"Sum Sq"
-#     RegSS <- sum(SS) - SS[length(SS)]
-#     Chisq <- RegSS/2
-#     result <- list(formula = var.formula, formula.name = "Variance",
-#         ChiSquare = Chisq, Df = df, p = pchisq(Chisq, df, lower.tail = FALSE),
-#         test = "Non-constant Variance Score Test")
-#     class(result) <- "chisqTest"
-#     result
-# }
