@@ -158,17 +158,17 @@ psych::setCor(2, 3:8, bank.filtered)$beta
 
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
 
-
-), predictors.index,
-        data = estimation.data, std = FALSE)
-    partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
-    dimnames(partial.coefs) <- list(variable.names[predictors.index],
-        c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
-    beta <- as.matrix(lm.cov$beta)
-    fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
-    intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
-    fitted <- as.matrix(data[, predictors.index]) %*% beta
-    result$flip.fitted.values <- fitted + intercept
+#
+# ), predictors.index,
+#         data = estimation.data, std = FALSE)
+#     partial.coefs <- cbind(lm.cov$beta, lm.cov$se, lm.cov$t, lm.cov$Probability)
+#     dimnames(partial.coefs) <- list(variable.names[predictors.index],
+#         c("Estimate", "Std. Error", "t value", "Pr(>|t|)"))
+#     beta <- as.matrix(lm.cov$beta)
+#     fitted <- as.matrix(estimation.data[, predictors.index]) %*% beta
+#     intercept <- mean(estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
+#     fitted <- as.matrix(data[, predictors.index]) %*% beta
+#     result$flip.fitted.values <- fitted + intercept
 
 missing <- "Imputation (replace missing values with estimates)"
 type = "Ordered"

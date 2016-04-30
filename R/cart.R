@@ -15,14 +15,26 @@
 #' @param missing How missing data is to be treated in the regression. Options are:
 #' \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
 #' \code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.
+#' @param method A character string giving the method to use. The only other useful value is "model.frame".
 #' @param ... Additional arguments that are passed to  \code{\link{tree}}
 #' and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev
 #'
 #' @details Creates a \code{\link{tree}} and plots it as a \code{\link{SankeyTree}}
 #' @export
 
-CART <- function(formula, data, weights = NULL, subset = NULL, output = "Sankey", missing = "Use partial data", ...)
+CART <- function(formula,
+                 data,
+                 weights, subset,
+                 output = "Sankey",
+                 missing = "Use partial data",
+                 method = "recursive.partition",...)
 {
+    if (method == "model.frame")
+        return(data)
+    cl <- match.call()
+    data <- getData(formula, data)
+    weights <- getVector(formula, data, weights)
+    subset <- getVector(formula, data, subset)
     processed.data <- EstimationData(formula, data, subset, weights, missing)
     unfiltered.weights <- processed.data$unfiltered.weights
     estimation.data <- processed.data$estimation.data

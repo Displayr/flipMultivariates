@@ -1,3 +1,45 @@
+
+# Extracts data from the environment of the formula, if it has not
+# been provided as an argument.
+getData <- function(formula, data)
+{
+    if (is.null(data)) # Extracting the data from the environment
+    {
+        variable.names <- all.vars(formula)
+        data <- environment(formula)
+        data <- as.data.frame(lapply(variable.names, function(x) {get(x, data)}))
+        names(data) <- variable.names
+    }
+    else if (!is.data.frame(data))
+        stop("'data' must be a 'data.frame'.")
+    data
+}
+
+
+# Extracts a vector from data, or, from the environment of the formula.
+getVector = function(formula, data, x)
+{
+    # eval(substitute(x), data, environment(formula))
+
+    # if (!hasArg(x))
+    #     return(NULL)
+    # x.name <- deparse(substitute(x))
+    # if (missing(data) & x.name %in% names(data))
+    #
+    # print(x.name)
+    # print(names(environment(formula)))
+    # is.data <- x.name %in% names(environment(formula))
+    # if (is.data)
+    #     return(x)
+    # if (hasArg(data) & !is.null(data) & x.name %in% names(data))
+    #     return(data[[x.name]])
+    # if (x.name %in% names(environment(formula)))
+    #     return(get(x.name, environment(formula)))
+    # NULL#stop(paste0("'", x.name, "' does not exist."))
+}
+# getVector(Overall ~ Fees, data = bank, wgt > 30000)
+
+
 # Properties of data.
 outcomeName <- function(formula.object)
 {

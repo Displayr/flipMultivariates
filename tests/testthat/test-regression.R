@@ -6,6 +6,64 @@ attr(sb, "label") <- "ID greater than 100"
 wgt <- bank$ID
 attr(wgt, "label") <- "ID"
 
+test_that(paste("Alternative ways of passing data in"),
+{
+      type = "Linear"
+      # no weight, no filter
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = NULL, type = type)
+      attach(bank)
+      z1 = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = NULL, type = type)
+      expect_true(all.equal(z$coefficients, z1$coefficients))
+      detach(bank)
+      # filter and weight a part of the data frame.
+      zbank <- cbind(bank, w = wgt, f = sb)
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zbank, subset = f, weights = w, type = type)
+      attach(zbank)
+      z1 = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = w, subset = f, type = type)
+      detach(zbank)
+      expect_true(all.equal(z$coefficients, z1$coefficients))
+      # filter and weight a part of the data frame and are formulas.
+      zbank <- cbind(bank, w = wgt, f = sb)
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = zbank, subset = f == TRUE, weights = w, type = type)
+      attach(zbank)
+      z1 = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = w, subset = f == TRUE, type = type)
+      detach(zbank)
+      expect_true(all.equal(z$coefficients, z1$coefficients))
+      # filter and weight are not part of the data frame.
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, weights = wgt, type = type)
+      attach(zbank)
+      z1 = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, subset = sb, weights = wgt, type = type)
+      detach(zbank)
+      expect_true(all.equal(z$coefficients, z1$coefficients))
+
+})
+
+test_that(paste("Robust se does something"),
+{
+      type = "Linear"
+      # no weight, no filter
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE,  weights = NULL, type = type)
+      zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
+      expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, subset = TRUE,  weights = NULL, type = type)
+      zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
+      expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
+      expect_that(capture.output(print(z)), not(throws_error()))
+      expect_that(capture.output(print(zs)), not(throws_error()))
+
+      type = "Poisson"
+      # no weight, no filter
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = TRUE,  weights = NULL, type = type)
+      zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
+      expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
+      z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, subset = TRUE,  weights = NULL, type = type)
+      zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
+      expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
+      expect_that(capture.output(print(z)), not(throws_error()))
+      expect_that(capture.output(print(zs)), not(throws_error()))
+})
+
+
 for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
     for (type in c("Multinomial Logit", "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
         test_that(paste("Residuals", missing, type),
@@ -17,7 +75,8 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
           # weight, filter
           expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), not(throws_error()))
           # weight, filter
-          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
+          expect_that(z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
+          expect_that(capture.output(print(z)), not(throws_error()))
       })
 
 
@@ -47,7 +106,7 @@ test_that("Error due to missing data",
 missing <- "Exclude cases with missing data"
 test_that(missing,
 {
-    z <- as.numeric(Regression(zformula, data = bank, missing = missing)$coef[3])
+    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.27732,4))
     z <- as.numeric(Regression(zformula, data = bank, subset = sb,  missing = missing)$coef[3])
     expect_equal(round(z,4), round(0.25451,4))
@@ -56,6 +115,8 @@ test_that(missing,
     z <- as.numeric(Regression(zformula, data = bank, weights = wgt, subset = sb, missing = missing)$coef[3])
     expect_equal(round(z,4),round(0.2539403,4))
 })
+
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
 
 missing <- "Imputation (replace missing values with estimates)"
 test_that(missing,

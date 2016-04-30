@@ -4,8 +4,8 @@
 \alias{CART}
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
-CART(formula, data, weights = NULL, subset = NULL, output = "Sankey",
-  missing = "Use partial data", ...)
+CART(formula, data, weights, subset, output = "Sankey",
+  missing = "Use partial data", method = "recursive.partition", ...)
 }
 \arguments{
 \item{formula}{A formula expression. The left-hand-side (response) should
@@ -29,6 +29,8 @@ the name of a variable in \code{data}. It may not be an expression.
 \item{missing}{How missing data is to be treated in the regression. Options are:
 \code{"Error if missing data"}, \code{"Exclude cases with missing data"},
 \code{"Use partial data"},and \code{"Imputation (replace missing values with estimates)"}.}
+
+\item{method}{A character string giving the method to use. The only other useful value is "model.frame".}
 
 \item{...}{Additional arguments that are passed to  \code{\link{tree}}
 and \code{\link{tree.control}}. Normally used for mincut, minsize or mindev}

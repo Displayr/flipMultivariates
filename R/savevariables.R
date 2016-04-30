@@ -1,3 +1,4 @@
-setGeneric("Predict", predict)
+# setGeneric("Predict", predict)
 
-Predict.flip <- function(flip.object) {flip.object$predicted}
+
+# Predict.flip <- function(flip.object) {flip.object$predicted}

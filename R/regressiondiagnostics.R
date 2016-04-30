@@ -1,3 +1,163 @@
+#' \code{DurbinWatson}
+#'
+#' @param residuals Residuals from a model.
+#' @param n.permutations Number of permutations used in computing the p-value.
+#' @details Computes the Durbin-Watson statistic. A permutation test is used for
+#' computing the p-value. Tests to a lag of 1. Two-sided.
+#' Durbin, J.; Watson, G. S. (1950). "Testing for Serial Correlation in Least Squares Regression, I". Biometrika 37 (3–4): 409–428.
+#' @export
+DurbinWatson <- function(model, n.permutations = 1000)
+{
+    set.seed(123)
+    residuals <- model$residuals[model$subset]
+    r <- residuals[!is.na(residuals)]
+    n <- length(residuals)
+    if (n <= 2)
+        return(list(d = NA, p = NA))
+    .dW <- function(x)
+    {
+        #        flipMultivariates:::printDetails(x[-n])
+        #       flipMultivariates:::printDetails(x[-1])
+        sum((x[-n] - x[-1]) ^ 2) / sum(x^2)
+    }
+    .permute <- function(x) { .dW(sample(x)) }
+    d <- .dW(r)
+    replicates <- replicate(n.permutations, .permute(r))
+    p = sum(if (d < 2) d > replicates else d < replicates) / n.permutations * 2
+    list(d = d, p = p)}
+
+
+#' @export
+cooks.distance.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("lm", "glm"),"cooks.distance")
+    cooks.distance(model$original)
+
+    # mod <- model
+    # if(!any(c("lm", "glm") %in%  class(mod)))
+    # {
+    #     cat("Cooks distance has been computed using a linear regression model.\n")
+    #     mod <- Regression(as.formula(mod$call$formula),
+    #         weights = mod$weights, subset = mod$subset,
+    #         robust.se = mod$robust.se, data = mod$model)
+    # }
+    # model$cooks.distance
+    #
+    #diagnosticTest(model, "cooks.distance", ...)
+}
+
+checkAcceptableModel <- function(x, classes, diagnostic, exclude.partial.data = TRUE)
+{
+    if (exclude.partial.data & x$missing == "Use partial data (pairwise correlations)")
+        stop(paste0("'", diagnostic, "' is not computed for model that are computed using 'Use partial data (pairwise correlations)'"))
+    if (!any(classes %in% class(x$original)))
+        stop(paste0("'", diagnostic, "' is not computed for models of this type or class."))
+}
+
+#' @export
+vif.Regression <- function (mod, ...)
+{
+    checkAcceptableModel(mod, c("lm", "glm"), "vif")
+    diagnosticTestFromCar(mod, "vif", ...)
+    # if (mod$missing == "Use partial data (pairwise correlations)")
+    #     stop(paste0("Variance Inflation Factor (VIF) is not computed for model that are computed using 'Use partial data (pairwise correlations)'"))
+    # if(any(c("lm", "glm") %in%  class(mod$original)))
+    #     model <- mod$original
+    # {
+    #     cat("The Variance Inflation Factor (VIF) has been computed using a linear regression model.\n")
+    #     model <- Regression(as.formula(mod$original$call$formula),
+    #         weights = mod$weights, subset = mod$subset,
+    #             robust.se = mod$robust.se, data = mod$model)
+    # }
+    # assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
+    # assign(".formula", model$formula, envir=.GlobalEnv)
+    # v <- car::vif(model$original, ...)#BreuschPagan(x$original)
+    # remove(".formula", envir=.GlobalEnv)
+    # remove(".estimation.data", envir=.GlobalEnv)
+    #v
+}
+
+#' @export
+ncvTest.Regression <- function(model, ...)
+{
+    if (any("svyglm" %in% class(model$original)))
+        stop(paste0("'ncvTest is not applicable for models with sampling weights."))
+
+    checkAcceptableModel(model, "lm", "ncvTest")
+    diagnosticTestFromCar(model, "ncvTest", ...)
+    # diagnosticTest(mod, "cooks.distance", ...)
+    # assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
+    # assign(".formula", model$formula, envir=.GlobalEnv)
+    # bp.test <- car::ncvTest(model$original, ...)#BreuschPagan(x$original)
+    # remove(".formula", envir=.GlobalEnv)
+    # remove(".estimation.data", envir=.GlobalEnv)
+    # bp.test
+}
+
+#' @export
+residualPlots.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "residualPlots")
+    diagnosticTestFromCar(model, "residualPlots", ...)
+}
+
+
+#' @export
+influenceIndexPlot.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "influenceIndexPlot")
+    diagnosticTestFromCar(model, "influenceIndexPlot", ...)
+}
+
+#' @export
+influencePlot.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "influencePlot")
+    diagnosticTestFromCar(model, "influencePlot", ...)
+}
+
+
+#' @export
+infIndexPlot.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "influenceIndexPlot")
+    diagnosticTestFromCar(model, "influenceIndexPlot", ...)
+}
+
+
+#' #' @export
+#' marginalModelPlots.Regression <- function(model, ...)
+#' {
+#'     checkAcceptableModel(model, c("glm","lm"), "residualPlots")
+#'     diagnosticTestFromCar(model, "marginalModelPlots", ...)
+#' }
+#'
+
+diagnosticTestFromCar<- function(x, diagnostic, ...)
+{
+    model <- x$original
+    assign(".estimation.data", x$estimation.data, envir=.GlobalEnv)
+    assign(".formula", model$formula, envir=.GlobalEnv)
+    txt <- paste0("car::", diagnostic, "(model)")
+    t <- eval(parse(text = txt))
+    # require(car)
+    # t <- switch("vif" = vif(model, ...),
+    #             "ncvTest"car::ncvTest(model, ...)#BreuschPagan(x$original)
+    #     # remove(".formula", envir=.GlobalEnv)
+    #     # remove(".estimation.data", envir=.GlobalEnv)
+    # #     bp.test
+    # #
+    # #
+    # # }
+    #     # t <- car::ncvTest(model, ...)
+    # }
+    # else
+    #     stop(paste0("'", diagnostic, "' is not a known diagnostic for 'Regression' objects."))
+    remove(".formula", envir=.GlobalEnv)
+    remove(".estimation.data", envir=.GlobalEnv)
+    t
+}
+
 
 #' \code{ConfusionMatrixFromVariables}
 #'
@@ -120,54 +280,54 @@ Accuracy <- function(obj, subset = NULL, weights = NULL)
 
 
 #' @export
-vif.Regression <- function (mod, ...)
+allEffects.Regression <- function(model, ...)
 {
-
-    if(!any(c("lm", "glm") %in%  class(mod)))
-    {
-        mod <- Regression(as.formula(mod$call$formula),
-            weights = mod$flip.weights, subset = mod$flip.subset, robust.se = mod$robust.se, data = mod$model)
-    }
-    car:::vif.default(mod)
+    assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
+    effects <- effects::allEffects(model$original, ...)#BreuschPagan(x$original)
+    remove(".estimation.data", envir=.GlobalEnv)
+    effects
 }
 
-#' \code{BreuschPagan} Breusch-Pagan test for non-constant variance.
-#'
-#' @param mod An object of class \code{\link{Regression}}.
-#' @param show.warnings Returns a warning if the sample size is less than 4.
-#' @details Weights are ignored when conducting the test.
-#' @export
-BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
-{
-    if (class(Regression.object)[1] != "Regression")
-        return(car::ncvTest(Regression.object))
-    #Modified from car::ncvTest, to addess different size of input data.
-    subset <- Regression.object$flip.subset
-    if(sum(subset) < 4)
-    {
-        if (show.warnings)
-            warning("Sample size too small for Breusch-Pagan test.")
-        return(list(ChiSquare = NA, Df = NA, p = 1,
-            test = "Breusch-Pagan test of Non-constant Variance"))
-    }
-    residuals <- residuals(Regression.object)[subset]
-    fitted.values <- fitted.values(Regression.object)[subset]
-    squared.residuals <- residuals^2
-    r.squared <- 1 - var(residuals) / var(fitted.values)
-    if (r.squared> 0.9999) {
-        Chisq <- 0.0
-    }
-    else
-    {
-        U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
-        mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
-        SS <- anova(mod)$"Sum Sq"
-        RegSS <- sum(SS) - SS[length(SS)]
-        Chisq <- RegSS/2
-    }
-    result <- list(#formula = var.formula, formula.name = "Variance",
-        ChiSquare = Chisq, Df = 1, p = pchisq(Chisq, 1, lower.tail = FALSE),
-        test = "Breusch-Pagan test of Non-constant Variance")
-    class(result) <- "chisqTest"
-    result
-}
+
+
+
+#' #' \code{BreuschPagan} Breusch-Pagan test for non-constant variance.
+#' #'
+#' #' @param mod An object of class \code{\link{Regression}}.
+#' #' @param show.warnings Returns a warning if the sample size is less than 4.
+#' #' @details Weights are ignored when conducting the test.
+#' #' @export
+#' BreuschPagan <- function(Regression.object, show.warnings = TRUE)#, var.formula)
+#' {
+#'     if (class(Regression.object)[1] != "Regression")
+#'         return(car::ncvTest(Regression.object))
+#'     #Modified from car::ncvTest, to addess different size of input data.
+#'     subset <- Regression.object$subset
+#'     if(sum(subset) < 4)
+#'     {
+#'         if (show.warnings)
+#'             warning("Sample size too small for Breusch-Pagan test.")
+#'         return(list(ChiSquare = NA, Df = NA, p = 1,
+#'             test = "Breusch-Pagan test of Non-constant Variance"))
+#'     }
+#'     residuals <- residuals(Regression.object)[subset]
+#'     fitted.values <- fitted.values(Regression.object)[subset]
+#'     squared.residuals <- residuals^2
+#'     r.squared <- 1 - var(residuals) / var(fitted.values)
+#'     if (r.squared> 0.9999) {
+#'         Chisq <- 0.0
+#'     }
+#'     else
+#'     {
+#'         U <- squared.residuals / mean(squared.residuals)#mean.squared.error#sum(squared.residuals)
+#'         mod <- lm(U ~ fitted.values)#, subset = Regression.object$subset)
+#'         SS <- anova(mod)$"Sum Sq"
+#'         RegSS <- sum(SS) - SS[length(SS)]
+#'         Chisq <- RegSS/2
+#'     }
+#'     result <- list(#formula = var.formula, formula.name = "Variance",
+#'         ChiSquare = Chisq, Df = 1, p = pchisq(Chisq, 1, lower.tail = FALSE),
+#'         test = "Breusch-Pagan test of Non-constant Variance")
+#'     class(result) <- "chisqTest"
+#'     result
+#' }

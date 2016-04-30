@@ -4,9 +4,9 @@
 \alias{Regression}
 \title{\code{Regression} Generalized Regression.}
 \usage{
-Regression(formula, data, subset = NULL, weights = NULL,
+Regression(formula, data = NULL, subset = NULL, weights = NULL,
   missing = "Exclude cases with missing data", type = "Linear",
-  robust.se = FALSE, detail = TRUE, ...)
+  robust.se = FALSE, method = "default", detail = TRUE, ...)
 }
 \arguments{
 \item{formula}{An object of class \code{\link{formula}} (or one that can be
@@ -34,6 +34,9 @@ data"}, \code{"Use partial data (pairwise correlations)"},and
 \item{robust.se}{Computes standard errors that are robust to violations of
 the assumption of constant variance, using the HC1 (degrees of freedom)
 modification of White's (1980) estimator (Long and Ervin, 2000).}
+
+\item{method}{The method to be used; for fitting. This will only do something if
+method = "model.frame", which returns the model frame.}
 
 \item{detail}{More detailed outputs.}
 

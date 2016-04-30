@@ -82,7 +82,7 @@ EstimationData <- function(formula, data, subset = NULL,
     unfiltered.weights <- weights
     # Filtering the data
     filter.ewerrfdfdsrew045 <- ifThen(weighted, subset & weights > 0, subset) #Name to avoid bug in subset.data.frame
-    data.subset <- subset.data.frame(data, filter.ewerrfdfdsrew045)
+    data.subset <- subset(data, filter.ewerrfdfdsrew045)
     # Selecting the relevant variables from the data frame (unless imputation is being used).
     variable.names <- all.vars(formula)
     if (missing == "Imputation (replace missing values with estimates)")
@@ -113,6 +113,8 @@ EstimationData <- function(formula, data, subset = NULL,
         weights <- weights[estimation.sample]
     # Reporting.
     n.estimation <- sum(estimation.sample)
+    if (n.estimation < length(variable.names))
+        stop("Sample size is too small ")
     description <- SampleDescription(n.total, n.subset, n.estimation,
         attr(subset, "label"), weighted, weight.label, missing, imputation.label)
     list(estimation.data = data.for.estimation,
@@ -169,9 +171,9 @@ SampleDescription <- function(n.total, n.subset, n.estimation, subset.label, wei
         n.total, n.subset, n.estimation, subset.label, weighted, weight.label)
     description <- paste(description, ifThen(missing.data | missing == "Imputation (replace missing values with estimates)",
                switch(missing, "Error if missing data" = "",
-                   "Exclude cases with missing data" = " Cases containing missing values have been excluded.",
+                   "Exclude cases with missing data" = " Cases containing missing values have been excluded;",
                    "Imputation (replace missing values with estimates)" =
-                       paste0(" Missing values of predictor variables have been imputed using ", imputation.label, ".")), ""))
+                       paste0(" Missing values of predictor variables have been imputed using ", imputation.label, "; ")), ""))
     description
 }
 
@@ -184,11 +186,11 @@ baseDescription <- function(description.of.n, n.total, n.subset, n.estimation, s
                         ifelse(n.subset < n.total,
                             paste0(" (", subset.label, ")"),
                             "")), ""),
-                ".")
+                "; ")
 
     paste0(description.of.n,base,
         ifelse(weighted,
-               paste0(" Data has been weighted (", weight.label, ")."),
+               paste0(" Data has been weighted (", weight.label, "); "),
                ""))
 }
 
@@ -226,7 +228,7 @@ SingleImputation <- function(data, formula = NULL, method = "try mice")
         set.seed(12321)
         imputed.data <- try({mice::complete(mice::mice(data, seed = 12321, m = 1, printFlag = FALSE), 1)}, silent = TRUE)
         attr(imputed.data, "imputation.method") <- "chained equations (predictive mean matching)"
-        if (method == "mice" &&  .errorInImputation(imputed.data, formula))
+        if (method == "mice" && .errorInImputation(imputed.data, formula))
             stop("Mice imputation failed.")
     }
     if(method != "mice" && (method == "hot deck" || .errorInImputation(imputed.data, formula)))
