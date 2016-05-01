@@ -206,7 +206,6 @@ Regression <- function(formula,
     row.names <- rownames(data)
     if (missing == "Use partial data (pairwise correlations)")
     {
-
         subset <- CleanSubset(subset, nrow(data))
         unfiltered.weights <- weights <- CleanWeights(weights)
         if (type != "Linear")
@@ -214,8 +213,10 @@ Regression <- function(formula,
         if (robust.se)
             stop(paste0("Robust standard errors cannot be computed with 'missing' set to ", missing, "."))
         result <- list(original = linearRegressionFromCorrelations(.formula, data, subset,
-                                                                   weights, outcome.variable, outcome.name, ...),
-                       call = cl)
+            weights, outcome.variable, outcome.name, ...),
+            call = cl)
+        result$summary <- result$original$summary
+        result$original$summary <- NULL
     }
     else
     {
@@ -276,44 +277,52 @@ Regression <- function(formula,
             }
             else
             {
+                wgt.svy.des <- weightedSurveyDesign(.estimation.data, weights)
                 original <- switch(type,
-                                   "Binary Logit" = survey::svyglm(.formula, weightedSurveyDesign(.estimation.data, weights), family = quasibinomial()),
-                                   "Poisson" = survey::svyglm(.formula, weightedSurveyDesign(.estimation.data, weights), family = poisson()),
-                                   "Quasi-Poisson" = survey::svyglm(.formula, weightedSurveyDesign(.estimation.data, weights), family = quasipoisson()))
+                                   "Binary Logit" = survey::svyglm(.formula, wgt.svy.des, family = quasibinomial()),
+                                   "Poisson" = survey::svyglm(.formula, wgt.svy.des, family = poisson()),
+                                   "Quasi-Poisson" = survey::svyglm(.formula, wgt.svy.des, family = quasipoisson()))
+                assign("wgt.svy.des", wgt.svy.des, envir=.GlobalEnv)
+                original$aic <- AIC(original)[2]
+                remove("wgt.svy.des", envir=.GlobalEnv)
+
             }
         }
         result <- list(original = original, call = cl)
+        # if(is.null(result$aic))
+        # {
+        #     result$aic<- AIC(original)
+        #     result$bic <- BIC(original)
+        # }
         require(car)
         if (missing == "Imputation (replace missing values with estimates)")
             data <- processed.data$data
         # Predicted values and probabilities and fitted values
-        if (type %in% c("Ordered Logit", "Multinomial Logit") )
-            result$predicted.probabilities <- suppressWarnings(predict(result$original, newdata = data, na.action = na.pass, type = "probs"))
-        else if (type != "Linear")
-            result$predicted.probabilities <- suppressWarnings(predict(result$original, newdata = data, na.action = na.pass, type = "response"))
-        result$predicted.values <- ifThen(any(class(original) == "glm"),
-              suppressWarnings(predict.glm(result$original, newdata = data, na.action = na.pass)),
-              predict(result$original, newdata = data, na.action = na.pass))
-        fitted.values <- fitted(result)
-        result$fitted.values <- ifThen(is.matrix(fitted.values),
-               fitted.values[match(row.names, rownames(fitted.values)), ],
-               fitted.values[match(row.names, names(fitted.values))])
-        if (isCount(type))
-            result$predicted.values <- floor(exp(result$predicted.values))
-        else if (type == "Binary Logit")
-            result$predicted.values <- factor(as.integer(result$predicted.values >= 0) + 1, labels = levels(outcome.variable))
+        # if (type %in% c("Ordered Logit", "Multinomial Logit") )
+        #     result$predicted.probabilities <- suppressWarnings(predict(result$original, newdata = data, na.action = na.pass, type = "probs"))
+        # else if (type != "Linear")
+        #     result$predicted.probabilities <- suppressWarnings(predict(result$original, newdata = data, na.action = na.pass, type = "response"))
+        # result$predicted.values <- ifThen(any(class(original) == "glm"),
+        #       suppressWarnings(predict.glm(result$original, newdata = data, na.action = na.pass)),
+        #       predict(result$original, newdata = data, na.action = na.pass))
+        # fitted.values <- fitted(result)
+        # result$fitted.values <- ifThen(is.matrix(fitted.values),
+        #        fitted.values[match(row.names, rownames(fitted.values)), ],
+        #        fitted.values[match(row.names, names(fitted.values))])
+        # if (isCount(type))
+        #     result$predicted.values <- floor(exp(result$predicted.values))
+        # else if (type == "Binary Logit")
+        #     result$predicted.values <- factor(as.integer(result$predicted.values >= 0) + 1, labels = levels(outcome.variable))
         result$subset <- row.names %in% rownames(.estimation.data)
         result$sample.description <- processed.data$description
         result$n.predictors <- ncol(.estimation.data) - 1
         result$n.observations <- n
         result$estimation.data <- .estimation.data
+        result$summary <- summary(result$original)
     }
-    result$summary <- summary(result$original)
     result$summary$call <- cl
     result$formula <- .formula
     # Inserting the coefficients from the partial data.
-    if (!is.null(result$partial.coefs)) # Partial data.
-        result$summary$coefficients <- result$partial.coefs
     result$model <- data #over-riding the data that is automatically saved (which has had missing values removed).
     result$robust.se <- robust.se
     class(result) <- "Regression"
@@ -324,9 +333,9 @@ Regression <- function(formula,
     result$missing <- missing
     result$terms <- mt
     result$coef <- result$original$coef
-    if (type != "Multinomial Logit")
-        result$residuals <- unclassIfNecessary(outcome.variable) -
-        unclassIfNecessary(result$predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
+    # if (type != "Multinomial Logit")
+    #     result$residuals <- unclassIfNecessary(outcome.variable) -
+    #     unclassIfNecessary(result$predicted.values)#Note this occurs after summary, to avoid stuffing up summary, but before Breusch Pagan, for the same reason.
     if (robust.se)
         result$summary$coefficients <- result$original$robust.coefficients
     return(result)
@@ -336,6 +345,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
                                              weights = NULL, outcome.variable, outcome.name, ...)
 {
     result <- lm(formula, data, ...)
+    result$summary <- summary(result)
     variable.names <- names(data)
     formula.names <- all.vars(formula)
     indices <- match(formula.names, variable.names)
@@ -346,7 +356,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     if (any(factors))
         stop(paste0("Factors are not permitted when missing is set to 'Use partial data (pairwise)'.
                     Factors: ", paste(variable.names[indices][factors], collapse = ", ")))
-    subset.data <- flipU::IfThen(is.null(subset), data, subset(data, subset))
+    subset.data <- if(is.null(subset)) data else subset(data, subset)
     n.subset <- nrow(subset.data)
     if (n.subset < length(predictors.index) + 1)
         stop(warningSampleSizeTooSmall())
@@ -360,9 +370,9 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     while(as.character(body(.pairwise.regression)[n]) != "setCor.diagram(set.cor, main = main)")
         n <- n - 1
     body(.pairwise.regression)[n] <- NULL
-    .estimation.data <- ifThen(weighted,
-                               flipU::AdjustDataToReflectWeights(subset.data, weights),
-                               subset.data)
+    .estimation.data <- if (weighted)
+            flipU::AdjustDataToReflectWeights(subset.data, weights)
+        else subset.data
     #     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
     #         data = estimation.data, std = FALSE)
     result$lm.cov <- lm.cov <- .pairwise.regression(outcome.index, predictors.index,
@@ -379,17 +389,17 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     fitted <- as.matrix(.estimation.data[, predictors.index]) %*% beta
     intercept <- mean(.estimation.data[, outcome.name], na.rm = TRUE) - mean(fitted, na.rm = TRUE)
     fitted <- as.matrix(data[, predictors.index]) %*% beta
-    result$flip.predicted.values <- result$flip.fitted.values <- fitted + intercept
+    result$predicted.values <- result$fitted.values <- fitted + intercept
     partial.coefs <- partial.coefs[c(1,1:nrow(partial.coefs)),]
     partial.coefs[1,] <- c(intercept, NA, NA, NA)
     rownames(partial.coefs)[1] <- "(Intercept)"
-    result$partial.coefs <- partial.coefs
+    #result$partial.coefs <- partial.coefs
     result$coef <- partial.coefs[, 1]
     result$subset <- !is.na(data[outcome.index]) & !is.na(fitted) & (rownames(data) %in% rownames(.estimation.data))
     # Sample description.
     pairwise.n <- crossprod(!is.na(.estimation.data))
     n.total <- nrow(data)
-    weight.label <- ifThen(weighted <- !is.null(weights), attr(weights, "label"), "")
+    weight.label <- if(weighted <- !is.null(weights)) attr(weights, "label") else  ""
     rng <- range(pairwise.n[lower.tri(pairwise.n)])
     n.min <- rng[1]
     if (n.min == rng[2])
@@ -406,6 +416,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     result$sample.description <- description
     result$n.predictors <- length(predictors.index)
     result$estimation.data <- .estimation.data
+    result$summary$coefs <- partial.coefs
     result
 }
 
@@ -427,7 +438,6 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
 
     }
     # Testing to see if there is multicollinearity.
-    x <- x
     if (ncol(x$model) > 2 & x$type == "Linear" & x$missing != "Use partial data (pairwise correlations)")
     {
         vifs <- vif(x)
@@ -444,9 +454,8 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
         }
     }
     #Testing to see if the variance is non-constant.
-    if (x$type == "Linear" &
-        x$missing != "Use partial data (pairwise correlations)" &
-        !weighted)
+    partial <- x$missing == "Use partial data (pairwise correlations)"
+    if (x$type == "Linear" & !partial & !weighted)
     {
         bp.test <- ncvTest(x)#BreuschPagan(x$original)
         # assign(".estimation.data", x$estimation.data, envir=.GlobalEnv)
@@ -473,7 +482,17 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
             warning(paste0("The outcome variable appears to contain count data (i.e., the values are non-negative integers). A limited dependent variable regression may be more appropriate (e.g., Quasi-Poisson Regression, Ordered Logit)."))
     }
     # Creating a nicely formatted text description of the model.
+    require(formattable)
+    aic <- if(partial) NA else AIC(x)
+    rho.2 <- if(partial | x$type == "Linear") NA else McFaddensRhoSquared(x)
     caption <- x$sample.description
+    if (!partial)
+    caption <- paste0(caption,
+        " R-Squared: ", round(GoodnessOfFit(x)$value, 4),
+        "; Correct predictions: ", percent(Accuracy(x)),
+        if (is.null(rho.2)) "" else paste0("; McFadden's rho-squared: ", round(rho.2, 4)),
+        if (is.na(aic)) "" else paste0("; AIC: ",comma(aic), "."))
+
     # print(caption)
     # caption <- sub("[\\.]$", "", caption)
     # print(caption)
@@ -481,17 +500,16 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     # print(caption)
     # stop()
     # Work out which R^2 / Objective function to add
-    if (!is.null(x$original$lm.cov))
-        extra.caption <- partial.data.r2.message
-    else
-        extra.caption <- paste0("R-Squared: ", formatC(GoodnessOfFit(x)$value), digits = digits)
-    extra.caption <- paste0(extra.caption, "; Correct predictions: ", formatC(Accuracy(x)*100, digits = digits),"%")
-    if (x$type == "Ordered Logit" | x$type == "Multinomial Logit")
-        aic <- paste0(extra.caption, "; AIC: ", formatC(x$summary$deviance, digits = digits))
-    else if (!is.null(x$summary$aic))
-        aic <- paste0(extra.caption, "; AIC: ", formatC(x$summary$aic, digits = digits))
-    if (!is.null(extra.caption) & nchar(extra.caption) > 0)
-        caption <- paste0(caption, "; ", extra.caption)
+    # caption <- paste0(caption, "; R-Squared: ", formatC(GoodnessOfFit(x)$value), digits = digits)
+    #
+    #     extra.caption <- paste0("R-Squared: ", formatC(GoodnessOfFit(x)$value), digits = digits)
+    # extra.caption <- paste0(extra.caption, "; Correct predictions: ", formatC(Accuracy(x)*100, digits = digits),"%")
+    # if (x$type == "Ordered Logit" | x$type == "Multinomial Logit")
+    #     aic <- paste0(extra.caption, "; AIC: ", formatC(x$summary$deviance, digits = digits))
+    # else if (!is.null(x$summary$aic))
+    #     aic <- paste0(extra.caption, "; AIC: ", formatC(x$summary$aic, digits = digits))
+    # if (!is.null(extra.caption) & nchar(extra.caption) > 0)
+    #     caption <- paste0(caption, "; ", extra.caption)
     # When detail is false, print a nicely-formatted table
     if (x$detail)
     {
@@ -511,23 +529,91 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     }
 }
 
+# #' @export
+# resid.Regression <- function(object, ...)
+# {
+#     object$flip.residuals
+# }
+notValidForPartial <- function(object, method)
+{
+    ms <- "Use partial data (pairwise correlations)"
+    if (object$missing == ms)
+        stop(paste0("'", method, "' not available when 'missing' = ",ms, "'." ))
+}
 
 #' @export
-predict.Regression <- function(object, ...)
+residuals.Regression <- function(object, type = "raw", ...)
 {
-    object$predicted.values
+    notValidForPartial(object, "residuals")
+    if (type == "raw" & object$type %in% c("Linear", "Multinomial Logit", "Binary Logit"))
+        return(unclassIfNecessary(Observed(object)) - unclassIfNecessary(predict(object)))
+    resids <- residuals(object$original, ...)
+    fillInMissingRowNames(rownames(object$model), resids)
+}
+
+#' @export
+probabilities <- function(x, ...)
+{
+    notValidForPartial(object, "probabilities")
+    if (type == "Linear")
+        stop("'probabilities' is not applicable to linear regression models.")
+    if (x$type %in% c("Ordered Logit", "Multinomial Logit"))
+        return(suppressWarnings(predict(x$original, newdata = x$model, na.action = na.pass, type = "probs")))
+    if (x$type == "Binary Logit")
+        return(suppressWarnings(predict(x$original, newdata = x$model, na.action = na.pass, type = "response")))[, 2]
+    xs <- 0:max(Observed(x), na.rm = TRUE)
+    if (x$type == "Poisson"){
+        log.lambdas <- suppressWarnings(predict(x$original, newdata = x$model, na.action = na.pass, type = "link"))
+        lambdas <- exp(log.lambdas)
+        return(computePoissonEsqueProbabilities(xs, lambdas, dpois))
+    }
+    stop(paste0("Probabilities are not computed for models of type '", x$type, "."))
+}
+
+computePoissonEsqueProbabilities <- function(xs, lambdas, density)
+{
+    n <- length(lambdas)
+    k <- length(xs)
+    result <- matrix(density(rep(xs[-k], rep(n, k - 1)), lambdas), nrow = n)
+    result <- cbind(result, 1 - apply(result, 1, sum))
+    dimnames(result) <- list(rownames(lambdas), c(xs[-k], paste(">=", xs[k])))
+    result
+}
+
+#' @export
+predict.Regression <- function(object, newdata = object$model, na.action = na.pass, ...)
+{
+    notValidForPartial(object, "predict")
+    predicted <- if (any(class(object$original) == "glm"))
+            suppressWarnings(predict.glm(object$original, newdata = newdata, na.action = na.action, type = "response"))
+        else
+            predict(object$original, newdata = newdata, na.action = na.action)
+    if (isCount(object$type))
+         return(floor(predicted))
+    if (object$type == "Binary Logit")
+        return(factor(as.integer(predicted >= 0.5) + 1, labels = levels(Observed(object))))
+    predicted
 }
 
 #' @export
 fitted.Regression <- function(object, ...)
 {
-    object$fitted.values
+    notValidForPartial(object, "fitted")
+    fitted.values <- fitted(object$original)
+    fillInMissingRowNames(rownames(object$model), fitted.values)
+}
+
+fillInMissingRowNames <- function(row.names, variable)
+{
+    if(is.matrix(variable))
+        return(variable[match(row.names, rownames(variable)), ])
+    variable[match(row.names, names(variable))]
 }
 
 #' @export
 fitted.values.Regression <- function(object, ...)
 {
-    object$fitted.values
+    fitted(object, ...)
 }
 
 #' \code{observed} Observed values used in fitting a model with an outcome variable.
@@ -549,17 +635,6 @@ Observed.Regression <- function(x)
 }
 
 
-# #' @export
-# resid.Regression <- function(object, ...)
-# {
-#     object$flip.residuals
-# }
-
-#' @export
-residuals.Regression <- function(object, ...)
-{
-    object$residuals
-}
 
 # Create an HTML widget data table (package DT) from the coefficients
 # table in a regression summary.
