@@ -81,7 +81,7 @@ EstimationData <- function(formula, data, subset = NULL,
     }
     unfiltered.weights <- weights
     # Filtering the data
-    filter.ewerrfdfdsrew045 <- ifThen(weighted, subset & weights > 0, subset) #Name to avoid bug in subset.data.frame
+    filter.ewerrfdfdsrew045 <- if (weighted) subset & weights > 0 else subset #Name to avoid bug in subset.data.frame
     data.subset <- subset(data, filter.ewerrfdfdsrew045)
     # Selecting the relevant variables from the data frame (unless imputation is being used).
     variable.names <- all.vars(formula)
@@ -169,11 +169,12 @@ SampleDescription <- function(n.total, n.subset, n.estimation, subset.label, wei
     missing.data <- n.estimation < n.subset
     description <- baseDescription(paste0("n = ", n.estimation," cases used in estimation"),
         n.total, n.subset, n.estimation, subset.label, weighted, weight.label)
-    description <- paste(description, ifThen(missing.data | missing == "Imputation (replace missing values with estimates)",
-               switch(missing, "Error if missing data" = "",
-                   "Exclude cases with missing data" = " Cases containing missing values have been excluded;",
+    description <- paste(description, if(missing.data | missing == "Imputation (replace missing values with estimates)")
+        switch(missing, "Error if missing data" = "",
+                   "Exclude cases with missing data" = "Cases containing missing values have been excluded;",
                    "Imputation (replace missing values with estimates)" =
-                       paste0(" Missing values of predictor variables have been imputed using ", imputation.label, "; ")), ""))
+                       paste0(" Missing values of predictor variables have been imputed using ", imputation.label, "; "))
+        else "")
     description
 }
 
@@ -337,8 +338,9 @@ ExcludeCasesWithCompletelyMissingData <- function(data)
 #' @export
 ErrorIfMissingDataFound <- function(data)
 {
-    #tt <- try(suppressWarnings(na.fail(data)))
-    flipU::IfThen(any(is.na(data)), missingDataFail(), data)
+    if (any(is.na(data)))
+        missingDataFail()
+    data
 }
 
 

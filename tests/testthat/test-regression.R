@@ -134,9 +134,11 @@ test_that(missing,
 missing <- "Use partial data (pairwise correlations)"
 test_that(missing,
 {
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)$coef[3])
+    z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing)
+    z <- as.numeric(z$coef[3])
     expect_equal(round(z,4), round(0.2923788,4))
-    z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)$coef[3])
+    z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing)
+    z <- as.numeric(z$coef[3])
     expect_equal(round(z,4), round(0.2991385,4))
 })
 
@@ -177,3 +179,20 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 })
 
 
+for(missing in c("Imputation (replace missing values with estimates)", "Exclude cases with missing data"))
+    for (type in c("Multinomial Logit", "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
+        test_that(paste(type, " save variables"),{
+            z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, missing = missing, weights = wgt / 100, subset = sb)
+            expect_equal(length(predict(z)), 896)
+            # head(predict(z))
+            # head(residuals(z))
+            # head(fitted(z))
+            # head(Observed(z))
+            # if (!(type  %in% c("Linear", "Quasi-Poisson", "NBD")))
+            #     head(probabilities(z))
+            #
+            # weighted and unweighted
+            # expect_equal(round(z,3), round(0.661,3))
+            #   z <- as.numeric(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt / 100, subset = sb, missing = missing)$coef[3])
+            #   expect_equal(round(z,3),round(0.132,3))
+          })

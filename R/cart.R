@@ -348,6 +348,13 @@ treeFrameToList <- function(tree, max.tooltip.length = 150, show.whole.factor = 
 }
 
 #' @export
+
+predict.CART <- function(x)
+{
+    x$predicted
+}
+
+#' @export
 print.CART <- function(x, ...)
 {
     if (x$output == "Sankey")

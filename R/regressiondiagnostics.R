@@ -1,6 +1,7 @@
+
 #' \code{DurbinWatson}
 #'
-#' @param residuals Residuals from a model.
+#' @param model A 'Regression'  model.
 #' @param n.permutations Number of permutations used in computing the p-value.
 #' @details Computes the Durbin-Watson statistic. A permutation test is used for
 #' computing the p-value. Tests to a lag of 1. Two-sided.
@@ -9,7 +10,7 @@
 DurbinWatson <- function(model, n.permutations = 1000)
 {
     set.seed(123)
-    residuals <- model$residuals[model$subset]
+    residuals <- resid(model)[model$subset]
     r <- residuals[!is.na(residuals)]
     n <- length(residuals)
     if (n <= 2)

@@ -7,9 +7,9 @@
 DurbinWatson(model, n.permutations = 1000)
 }
 \arguments{
-\item{n.permutations}{Number of permutations used in computing the p-value.}
+\item{model}{A 'Regression'  model.}
 
-\item{residuals}{Residuals from a model.}
+\item{n.permutations}{Number of permutations used in computing the p-value.}
 }
 \description{
 \code{DurbinWatson}

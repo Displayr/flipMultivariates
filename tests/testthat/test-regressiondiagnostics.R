@@ -8,6 +8,23 @@ wgt[is.na(wgt)] = 0
 attr(wgt, "label") <- "ID"
 
 
+for (type in c("Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD", "Multinomial Logit"))
+    test_that(paste("Goodness of fit statistics are well behaved:", type),
+    {
+        z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type)
+        expect_true(McFaddensRhoSquared(z) > 0.2)
+        expect_true(GoodnessOfFit(z)$value > 0.2)
+        expect_that(AIC(z), not(throws_error()))
+        z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, weights = wgt)
+        expect_true(McFaddensRhoSquared(z) > 0.2)
+        expect_true(GoodnessOfFit(z)$value > 0.2)
+        expect_that(AIC(z), not(throws_error()))
+
+})
+
+
+
+
 # for (type in c("Linear" ,"Poisson", "Quasi-Poisson", "Binary Logit", "NBD"))
 # {
 #     test_that(paste("diagnostic plots works", type),
@@ -135,9 +152,7 @@ test_that("Tests of non-constant variance (Breush-Pagen test)",
     zWLS <- lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100)
     expect_equal(ncvTest(zRegression)$p, ncvTest(zWLS)$p)
     # Weighted.
-    zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)
-    zWLS <- lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)
-    expect_equal(round(ncvTest(zRegression)$p, 1),round(ncvTest(zWLS)$p,1))
+    expect_that(ncvTest(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)), throws_error())
 
 })
 
