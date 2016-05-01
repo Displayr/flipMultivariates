@@ -490,8 +490,8 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     caption <- paste0(caption,
         " R-Squared: ", round(GoodnessOfFit(x)$value, 4),
         "; Correct predictions: ", percent(Accuracy(x)),
-        if (is.null(rho.2)) "" else paste0("; McFadden's rho-squared: ", round(rho.2, 4)),
-        if (is.na(aic)) "" else paste0("; AIC: ",comma(aic), "."))
+        if (is.null(rho.2) | is.na(rho.2)) "" else paste0("; McFadden's rho-squared: ", round(rho.2, 4)),
+        if (is.na(aic)) "" else paste0("; AIC: ",comma(aic), "; "))
 
     # print(caption)
     # caption <- sub("[\\.]$", "", caption)
@@ -554,7 +554,7 @@ residuals.Regression <- function(object, type = "raw", ...)
 #' @export
 probabilities <- function(x, ...)
 {
-    notValidForPartial(object, "probabilities")
+    notValidForPartial(x, "probabilities")
     if (type == "Linear")
         stop("'probabilities' is not applicable to linear regression models.")
     if (x$type %in% c("Ordered Logit", "Multinomial Logit"))
@@ -769,7 +769,7 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL)
     pretty.coefs <- .formatRegressionCoefficientMatrix(coefs)
     pretty.coefs <- as.data.frame(pretty.coefs, stringsAsFactors = FALSE)
 
-    caption <- paste0(caption, "; Results highlighted when p < " , p.cutoff)
+    caption <- paste0(caption, "Results highlighted when p < " , p.cutoff)
 
 
     dt <- flipU::DataTableWithRItemFormat(pretty.coefs,
