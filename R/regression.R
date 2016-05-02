@@ -555,7 +555,7 @@ residuals.Regression <- function(object, type = "raw", ...)
 probabilities <- function(x, ...)
 {
     notValidForPartial(x, "probabilities")
-    if (type == "Linear")
+    if (x$type == "Linear")
         stop("'probabilities' is not applicable to linear regression models.")
     if (x$type %in% c("Ordered Logit", "Multinomial Logit"))
         return(suppressWarnings(predict(x$original, newdata = x$model, na.action = na.pass, type = "probs")))

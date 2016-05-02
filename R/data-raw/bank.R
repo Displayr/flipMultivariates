@@ -18,16 +18,20 @@ write.foreign(bank, "c:/delete/mydata.txt", "c:/delete/mydata.sps",   package="S
 
 # binary logit.
 data(bank)
+missing <- "Use partial data (pairwise correlations)"
+
 missing <- "Imputation (replace missing values with estimates)"
 type = "Binary Logit"
 wgt <- bank$ID
 attr(wgt, "label") <- "Bank ID"
 sb <- bank$ID > 100
 attr(sb, "label") <- "Bank ID greater than 100"
-z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type)
-Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type)
+type = "Linear"
+detail = FALSE
+z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type, detail = detail)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb, missing = missing, type = type, detail = detail)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, missing = missing, type = type, detail = detail)
+Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = wgt, subset = sb, missing = missing, type = type, detail = detail)
 
 type = "Ordered"
 Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, missing = missing, type = type)
