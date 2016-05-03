@@ -20,7 +20,7 @@ how to compute the covariance or correlation matrix.}
 be analyzed.}
 
 \item{missing}{A string specifiying what to do when the \code{data} contains
-missing values. The valid options are \code{"Error if missing data found"},
+missing values. The valid options are \code{"Error if missing data"},
 \code{"Exclude cases with missing data"}, \code{"Use partial data (pairwise
 correlations)"}, and \code{"Imputation (replace missing values with
 estimates)"}.}

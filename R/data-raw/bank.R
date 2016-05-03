@@ -21,7 +21,8 @@ data(bank)
 missing <- "Use partial data (pairwise correlations)"
 
 missing <- "Imputation (replace missing values with estimates)"
-type = "Binary Logit"
+missing = "Error if missing data"
+type = "Ordered Logit"
 wgt <- bank$ID
 attr(wgt, "label") <- "Bank ID"
 sb <- bank$ID > 100

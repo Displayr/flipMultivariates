@@ -529,11 +529,12 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     }
 }
 
-# #' @export
-# resid.Regression <- function(object, ...)
-# {
-#     object$flip.residuals
-# }
+#' @export
+resid.Regression <- function(object, ...)
+{
+     residuals(object, ...)
+}
+
 notValidForPartial <- function(object, method)
 {
     ms <- "Use partial data (pairwise correlations)"
@@ -545,7 +546,7 @@ notValidForPartial <- function(object, method)
 residuals.Regression <- function(object, type = "raw", ...)
 {
     notValidForPartial(object, "residuals")
-    if (type == "raw" & object$type %in% c("Linear", "Multinomial Logit", "Binary Logit"))
+    if (type == "raw" & object$type %in% c("Ordered Logit", "Multinomial Logit", "Binary Logit"))
         return(unclassIfNecessary(Observed(object)) - unclassIfNecessary(predict(object)))
     resids <- residuals(object$original, ...)
     fillInMissingRowNames(rownames(object$model), resids)
