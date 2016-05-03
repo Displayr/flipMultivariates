@@ -589,8 +589,8 @@ predict.Regression <- function(object, newdata = object$model, na.action = na.pa
             suppressWarnings(predict.glm(object$original, newdata = newdata, na.action = na.action, type = "response"))
         else
             predict(object$original, newdata = newdata, na.action = na.action)
-    if (isCount(object$type))
-         return(floor(predicted))
+    # if (isCount(object$type))
+    #      return(floor(predicted))
     if (object$type == "Binary Logit")
         return(factor(as.integer(predicted >= 0.5) + 1, labels = levels(Observed(object))))
     predicted
