@@ -174,7 +174,8 @@ diagnosticTestFromCar<- function(x, diagnostic, ...)
 #' @export
 ConfusionMatrixFromVariables <- function(observed, predicted, subset = NULL, weights = NULL)
 {
-    # if(!is.factor(observed))
+    if(isCount(observed))
+        predicted <- floor(predicted)
     #     observed <- factor(observed)
     # if(!is.factor(observed))
     #     predicted <- factor(predicted)
