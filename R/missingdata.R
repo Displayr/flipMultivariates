@@ -223,11 +223,11 @@ SingleImputation <- function(data, formula = NULL, method = "try mice")
         return(data)
     }
 
-    requireNamespace("mice")
     if(method != "Hot deck")
     {
-        set.seed(12321)
-        imputed.data <- try({mice::complete(mice::mice(data, seed = 12321, m = 1, printFlag = FALSE), 1)}, silent = TRUE)
+        imputed.data <- try({
+            require("mice")
+            mice::complete(mice::mice(data, seed = 12321, m = 1, printFlag = FALSE), 1)}, silent = TRUE)
         attr(imputed.data, "imputation.method") <- "chained equations (predictive mean matching)"
         if (method == "mice" && .errorInImputation(imputed.data, formula))
             stop("Mice imputation failed.")

@@ -421,6 +421,11 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
 }
 
 #' @export
+plot.Regression <- function(x,  ...){
+    plot(x$original)
+}
+
+#' @export
 print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
     weighted <- !is.null(x$weights)

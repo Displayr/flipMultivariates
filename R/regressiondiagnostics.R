@@ -32,7 +32,7 @@ DurbinWatson <- function(model, n.permutations = 1000)
 cooks.distance.Regression <- function(model, ...)
 {
     checkAcceptableModel(model, c("lm", "glm"),"cooks.distance")
-    cooks.distance(model$original)
+    stats::cooks.distance(model$original)
 
     # mod <- model
     # if(!any(c("lm", "glm") %in%  class(mod)))
