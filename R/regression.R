@@ -411,7 +411,7 @@ linearRegressionFromCorrelations <- function(formula, data, subset = NULL,
     description <- baseDescription(description,
                                    n.total, attr(subset, "n.subset"), n.min, attr(subset, "label"), NULL, "")
     if (!is.null(weights))
-        description <- paste0(description, " Data have been resampled with probabilities proportional to the weights(",
+        description <- paste0(description, " Data have been resampled with probabilities proportional to the weights (",
                               weight.label, ").\n")
     result$sample.description <- description
     result$n.predictors <- length(predictors.index)
@@ -613,7 +613,9 @@ fillInMissingRowNames <- function(row.names, variable)
 {
     if(is.matrix(variable))
         return(variable[match(row.names, rownames(variable)), ])
-    variable[match(row.names, names(variable))]
+    result <- variable[match(row.names, names(variable))]
+    names(result) <- row.names
+    result
 }
 
 #' @export

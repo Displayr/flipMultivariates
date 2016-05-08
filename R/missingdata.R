@@ -173,7 +173,7 @@ SampleDescription <- function(n.total, n.subset, n.estimation, subset.label, wei
         switch(missing, "Error if missing data" = "",
                    "Exclude cases with missing data" = "Cases containing missing values have been excluded;",
                    "Imputation (replace missing values with estimates)" =
-                       paste0(" Missing values of predictor variables have been imputed using ", imputation.label, "; "))
+                       paste0("Missing values of predictor variables have been imputed using ", imputation.label, ";"))
         else "")
     description
 }
@@ -187,11 +187,11 @@ baseDescription <- function(description.of.n, n.total, n.subset, n.estimation, s
                         ifelse(n.subset < n.total,
                             paste0(" (", subset.label, ")"),
                             "")), ""),
-                "; ")
+                ";")
 
     paste0(description.of.n,base,
         ifelse(weighted,
-               paste0(" Data has been weighted (", weight.label, "); "),
+               paste0(" Data has been weighted (", weight.label, ");"),
                ""))
 }
 
