@@ -61,7 +61,11 @@ print.CorrespondenceAnalysis <- function(ca.obj, ...)
         print(flipPlots::InteractiveLabeledScatterPlot(coords, column.labels = column.labels, group = groups, fixed.aspect = TRUE, tooltip.text = tooltip.text))
     }
     else if (ca.obj$output == "Moonplot")
+    {
+        if (ca.obj$normalization != "Row principal")
+            warning("It is good practice to set 'Normalization' to 'Row principal' when 'Output' is set to 'Moonplot'.")
         print(rhtmlMoonPlot::moonplot(ca.obj$rowcoord[,1:2], ca.obj$colcoord[,1:2]))
+    }
     else if (ca.obj$output == "ggplot2")
         print(flipPlots::LabeledScatterPlot(coords, column.labels = column.labels, fixed.aspect = TRUE, group = groups))
     else

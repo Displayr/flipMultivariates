@@ -12,12 +12,6 @@ x.with.labels <- x
 dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red Bull","Lift Plus",'Diet.Coke','Fanta','Lift','Pepsi'),
                                        Attribute=c('Kids', 'Teens',    "Enjoy life",   'Picks you up', 'Refreshes',    'Cheers you up',    'Energy',   'Up-to-date',   'Fun',  'When tired',   'Relax'))
 
-z = CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET")
-CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Text")
-CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Moonplot")
-CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "ggplot2")
-CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Scatterplot")
-
 test_that("CorrespondenceAnalysis is OK (mainly GetTidyTwoDimensionalArray)",
           {
     expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET"), not(throws_error()))
@@ -37,5 +31,17 @@ for (output in c("Scatterplot", "Moonplot", "ggplot2", "Text"))
         expect_that(CorrespondenceAnalysis(x,output = output), not(throws_error()))
     })
 
+test_that("Normalization warning",
+{
+    output = "Moonplot"
+    expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",column.names.to.remove = "NET", output = output),
+                gives_warning())
+})
 
+test_that("Normalization warning",
+{
+    output = "Moonplot"
+    expect_that(CorrespondenceAnalysis(x.with.labels, normalization = "Row principal", row.names.to.remove = "NET",column.names.to.remove = "NET", output = output),
+                not(gives_warning("'Normalization'")))
+})
 
