@@ -1,8 +1,5 @@
 globalVariables(c("pcaPhoneTestData"))
 
-library(testthat)
-library(flipMultivariates)
-
 context("Principal Component and Factor Analysis")
 
 # Tests which replicate options available in SPSS

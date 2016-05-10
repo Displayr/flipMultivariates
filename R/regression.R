@@ -180,7 +180,6 @@ Regression <- function(formula,
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
-
     if (type == "Binary Logit")
     {
         data <- CreatingBinaryDependentVariableIfNecessary(.formula, data)
@@ -198,6 +197,8 @@ Regression <- function(formula,
             detail = TRUE
         }
     }
+    else if (isCount(type) & !isCount(outcome.variable))
+        stop(warningNotCountAsNegatives())
     else if (is.factor(outcome.variable))
     {
         WarningFactorToNumeric()

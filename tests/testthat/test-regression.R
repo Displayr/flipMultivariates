@@ -6,6 +6,13 @@ attr(sb, "label") <- "ID greater than 100"
 wgt <- bank$ID
 attr(wgt, "label") <- "ID"
 
+test_that("Counts are required for count models",{
+    bank$dep <- (unclass(bank$Overall) - 1) / 6
+    expect_that(Regression(dep ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = NULL, type= "Poisson"), throws_error())
+    expect_that(Regression(dep ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = NULL, type= "NBD"), throws_error())
+    expect_that(Regression(dep ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, weights = NULL, type= "Quasi-Poisson"), throws_error())
+})
+
 test_that(paste("Alternative ways of passing data in"),
 {
       type = "Linear"

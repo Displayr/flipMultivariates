@@ -20,8 +20,7 @@ warningRobustInappropriate <- function() {"Robust standard errors has been selec
     as due to the use of weights, a survey-weighted model has been estimated, and this method contains a similar
     type of adjustment already"}
 
-warningNotCountAsNegatives <- function() {warning("This analysis assumes that your Outcome variable is a count variable
-                                                  (e.g., number of products purchased per week. Your data is not ")}
+warningNotCountAsNegatives <- function() {warning("This analysis assumes that your Outcome variable is a count variable (e.g., number of products purchased per week). A count variable cannot contained either decimals nor negative variables. Your data is not consistent with this assumption.")}
 
 WarningFactorToNumeric <- function() {warning("Outcome variable is a factor; it has been made numeric.
                                               Consider using another type of regression (e.g., Ordered Logit or Binary Logit).")}
