@@ -9,12 +9,18 @@ x <- matrix(c(0.3004, 0.6864, 0.4975, 0.2908, 0.2781, 0.2642, 0.1916, 0.284,  0.
                            c(  0.06807,    0.1089, 0.06064,    0.0198, 0.1174, 0.04084,    0.01609,    0.01733,    0.03465,    0.01361,    0.03589),
                            c(  0.08168,    0.224,  0.1015, 0.04579,    0.04815,    0.04084,    0.03094,    0.05562,    0.05322,    0.04084,    0.02847)),nrow=8,byrow=TRUE)
 x.with.labels <- x
-dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red\nBull","Lift\nPlus",'Diet.Coke','Fanta','Lift','Pepsi'),
+dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red Bull","Lift Plus",'Diet.Coke','Fanta','Lift','Pepsi'),
                                        Attribute=c('Kids', 'Teens',    "Enjoy life",   'Picks you up', 'Refreshes',    'Cheers you up',    'Energy',   'Up-to-date',   'Fun',  'When tired',   'Relax'))
 
-test_that("CorrespondenceAnalysis (mainly GetTidyTwoDimensionalArray)",
+z = CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET")
+CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Text")
+CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Moonplot")
+CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "ggplot2")
+CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = "Scatterplot")
+
+test_that("CorrespondenceAnalysis is OK (mainly GetTidyTwoDimensionalArray)",
           {
-    expect_that(CorrespondenceAnalysis(x.with.labels, "NET", "NET"), not(throws_error()))
+    expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET"), not(throws_error()))
     expect_that(CorrespondenceAnalysis(x), not(throws_error()))
     # 3D array with no names
     z <- array(NA, c(8,11,2))
@@ -24,7 +30,12 @@ test_that("CorrespondenceAnalysis (mainly GetTidyTwoDimensionalArray)",
     expect_that(suppressWarnings(CorrespondenceAnalysis(z)), not(throws_error()))
 })
 
+for (output in c("Scatterplot", "Moonplot", "ggplot2", "Text"))
+    test_that(paste("CorrespondenceAnalysis prints", output),
+    {
+        expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = output), not(throws_error()))
+        expect_that(CorrespondenceAnalysis(x,output = output), not(throws_error()))
+    })
 
-#
-#
-# x.with.labels[[1]]
+
+

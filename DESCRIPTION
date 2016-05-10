@@ -17,6 +17,7 @@ Suggests:
     curl,
     hash,
     lmtest,
+    flipPlots,
     plotly,
     psych,
     hot.deck,

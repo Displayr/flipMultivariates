@@ -9,7 +9,7 @@
 #'   principal"} plot the standard coordinates of the columns (rows) against the
 #'   principal coordinates. Note that the plotting occurs via
 #'   \code{\link{print.CorrespondenceAnalysis}}.
-#' @param interactive If \code{true}, an
+#'   @param output How the map is displayed: \code{"Scatterplot"}, or \code{"Moonplot"}, \code{"Text"}, or \code{"ggplot2"}.
 #'   \code{\link[flipPlots]{InteractiveLabeledScatterPlot}} is plotted.
 #'   Otherwise, a \code{\link[flipPlots]{LabeledScatterPlot}} is plotted.
 #' @param row.names.to.remove A vector of the row labels to remove.
@@ -20,17 +20,18 @@
 #' @export
 CorrespondenceAnalysis = function(x,
                                   normalization = "Principal",
-                                  interactive = FALSE,
+    #' @param output How the tree is represented: \code{"Sankey"}, \code{"Tree"}, or \code{"Text"}.
+                                  output = c("Scatterplot", "Moonplot", "Text", "ggplot2")[1],
                                   row.names.to.remove = c("NET", "Total", "SUM"),
                                   column.names.to.remove = c("NET", "Total", "SUM"),
                                   ...)
 {
     x <- flipU::GetTidyTwoDimensionalArray(x, row.names.to.remove, column.names.to.remove)
     x.ca <- ca::ca(x, ...)
-    x.ca$interactive <- interactive
     class(x.ca) <- c("CorrespondenceAnalysis", class(x.ca))
     x.ca$normalization <- normalization
     x.ca$x <- x
+    x.ca$output <- output
     x.ca
 }
 
@@ -40,28 +41,31 @@ CorrespondenceAnalysis = function(x,
 #' @param x CorrespondenceAnalysis object.
 #' @param ... further arguments passed to or from other methods.
 #' @export
-print.CorrespondenceAnalysis <- function(x, ...)
+print.CorrespondenceAnalysis <- function(ca.obj, ...)
 {
-    CorrespondenceAnalysis.object <- x
-    normed <- CANormalization(CorrespondenceAnalysis.object, CorrespondenceAnalysis.object$normalization)
-    singular.values <- round(CorrespondenceAnalysis.object$sv^2, 6)
+    normed <- CANormalization(ca.obj, ca.obj$normalization)
+    singular.values <- round(ca.obj$sv^2, 6)
     variance.explained <- paste(as.character(round(100 * prop.table(singular.values), 1)), "%", sep = "")[1:2]
     column.labels <- paste("Dimension", 1:2, paste0("(", variance.explained, ")"))
     row.coordinates <- normed$row.coordinates
     column.coordinates <- normed$column.coordinates
     coords <- rbind(row.coordinates, column.coordinates)
-    x <- CorrespondenceAnalysis.object$x
+    x <- ca.obj$x
     group.names <- names(dimnames(x))
     if (is.null(group.names))
         group.names <- c("Rows", "Columns")
     groups <- rep(group.names, c(nrow(row.coordinates), nrow(column.coordinates)))
-    if (CorrespondenceAnalysis.object$interactive)
+    if (ca.obj$output == "Scatterplot")
     {
         tooltip.text <- c(flipPlots::CreateInteractiveScatterplotTooltips(x), flipPlots::CreateInteractiveScatterplotTooltips(t(x)))
         print(flipPlots::InteractiveLabeledScatterPlot(coords, column.labels = column.labels, group = groups, fixed.aspect = TRUE, tooltip.text = tooltip.text))
     }
-    else
+    else if (ca.obj$output == "Moonplot")
+        print(rhtmlMoonPlot::moonplot(ca.obj$rowcoord[,1:2], ca.obj$colcoord[,1:2]))
+    else if (ca.obj$output == "ggplot2")
         print(flipPlots::LabeledScatterPlot(coords, column.labels = column.labels, fixed.aspect = TRUE, group = groups))
+    else
+        ca:::print.ca(ca.obj, ...)
 }
 
 
