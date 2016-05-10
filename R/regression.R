@@ -688,6 +688,7 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL, coeff.digits 
 
         coefficients <- data.matrix(x)
 
+
         tidied.coefficients <- array("", dim = d, dimnames = dimnames(coefficients))
 
         na.values <- is.na(coefficients)
@@ -707,6 +708,14 @@ createRegressionDataTable <- function(x, p.cutoff, caption = NULL, coeff.digits 
 
     # Make a pretty table with a caption
     coefs <- x$summary$coefficients
+    # Ordered Logit tables don't come with a p-value column
+    # so calculate the p's from the
+    if (x$type == "Ordered Logit")
+    {
+        ps = 2*pt(-abs(coefs[, test.index]), df = x$summary$df.residual)
+        coefs = cbind(coefs, ps)
+    }
+
     pretty.coefs <- .formatRegressionCoefficientMatrix(coefs, coeff.digits,
                                                        p.digits, coefficient.indices,
                                                        test.index, p.index,
