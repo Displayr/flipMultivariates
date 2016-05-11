@@ -84,7 +84,7 @@ Regression <- function(formula,
         }
     }
     else if (isCount(type) & !isCount(outcome.variable))
-        stop(warningNotCountAsNegatives())
+        stopNotCount()
     else if (is.factor(outcome.variable))
     {
         WarningFactorToNumeric()
