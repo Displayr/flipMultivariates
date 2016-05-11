@@ -54,126 +54,12 @@ Regression <- function(formula,
 {
     cl <- match.call()
     .formula <- formula # Hack to work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-
-
-    # expr <- substitute(subset)
-    # pf <- parent.frame()
-    # subset <- eval(expr, data, pf)
-    #subset <- getVector(formula, data, subset)
-
     subset <- eval(substitute(subset), data, parent.frame())
     weights <- eval(substitute(weights), data, parent.frame())
     data <- getData(.formula, data)
-
-
-    # # Extracting and evaluating the weights and subsets.
-    # mf <- match.call(expand.dots = FALSE)
-    # m <- match(c("formula", "data","subset", "weights"), names(mf), 0)
-    # has.subset <- m[3] > 0
-    # if (has.subset)
-    #     subset.name <- mf[[m[1]]]
-    # na.action <- NULL
-    # mf <- mf[m[m > 0]]
-    # mf$drop.unused.levels <- TRUE
-    # mf$na.action <- na.pass#substitute(na.action)
-    # mf[[1]] <- quote(stats::model.frame)
-    # data <- eval.parent(mf)
-    # print(names(data))
-    #
-    #
-    #
-    #
-    #
-    # stop("dog")
-    #
-    #
-
-    # data <- getData(.formula, data)
-    # if (!is.null(subset))
-    # {
-    #     subset <- try(eval(parse(text=subset)))
-    #     if (class(z) == "try-error" & !is.null(data))
-    #     {
-    #         subset <- with(data, eval(parse(text=subset)))
-    #     }
-    # }
-    # if (!is.null(weights))
-    #     eval(parse(text=weights))
-    #
-    #
-
-    # weights <- getVector(.formula, data, weights)
-    # subset <- getVector(.formula, data, subset)
-    #printDetails(subset)
-    #printDetails(weights)
-
-    # Extracting and evaluating the weights and subsets.
-    # mf <- match.call(expand.dots = FALSE)
-    # m <- match(c("formula", "data","subset", "weights"), names(mf), 0)
-    # has.subet <- m[3] > 0
-    # if (has.subet)
-    #     subset.name <- mf[[m[1]]]
-    # na.action <- NULL
-    # mf <- mf[m[m > 0]]
-    # mf$drop.unused.levels <- TRUE
-    # mf$na.action <- na.pass#substitute(na.action)
-    # mf[[1]] <- quote(stats::model.frame)
-    # data <- eval.parent(mf)
-    # print(names(data))
-    # stop("dog")
-    #
-    # #
-    #     #w <- model.weights(mf, na.action = na.pass)
-    #     #data <- model.frame(mf, drop.unused.levels = TRUE, na.action = NULL, )
-    #     #print(mf)
-    #     #mf$drop.unused.levels <- TRUE
-    #     #mf$na.action <- list(NULL)
-    #     #mf[[1]] <- quote(stats::model.frame)
-    #     #print(str(mf))
-    #    data <- eval.parent(mf)
-
-
-
-    #     mf <- match.call(expand.dots = FALSE)
-    #     m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"), names(mf), 0)
-    #     # Removing our own special parameters from the call, so that they do not stuff up other package's functions.
-    #     terms.to.remove <- match(c("type", "detail", "robust.se", "missing"), names(mf), 0)
-    #     terms.to.remove <- terms.to.remove[terms.to.remove > 0]
-    #     if (length(terms.to.remove))
-    #         mf <- mf[-terms.to.remove]
-    #     has.subet <- m[3] > 0
-    #     if (has.subet)
-    #         subset.name <- mf[[m[3]]]
-    #     na.action <- NULL
-    #     mf$drop.unused.levels <- TRUE
-    #     mf$na.action <- na.pass#substitute(na.action)
-    #
-    #     mf[[1]] <- quote(stats::get_all_vars) # was as.name("model.frame"), but
-    # #    mf[[1]] <- quote(stats::model.frame) # was as.name("model.frame"), but
-    #                           ##    need "stats:: ..." for non-standard evaluation
-    #     data <- eval.parent(mf)
-    #
-    #     #w <- model.weights(mf, na.action = na.pass)
-    #     #data <- model.frame(mf, drop.unused.levels = TRUE, na.action = NULL, )
-    #     #print(mf)
-    #     #mf$drop.unused.levels <- TRUE
-    #     #mf$na.action <- list(NULL)
-    #     #mf[[1]] <- quote(stats::model.frame)
-    #     #print(str(mf))
-    #    data <- eval.parent(mf)
     if (method == "model.frame")
          return(data)
     mt <- attr(data, "terms")
-    #weights <- model.weights(data)
-    # if (has.subset)
-    #     subset <- data$"(subset)"
-
-    #     print(m)
-    # print(mf[[4]])
-    # print(names(mf)[[4]])
-    # mf <- mf[c(1, m)]
-    # stop("dog")
-    # subset <- model.subsets(data)
     outcome.name <- outcomeName(.formula)
     outcome.variable <- data[[outcome.name]]
     if (!is.null(weights) & length(weights) != nrow(data))
