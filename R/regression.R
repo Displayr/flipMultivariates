@@ -488,6 +488,7 @@ predict.Regression <- function(object, newdata = object$model, na.action = na.pa
     predicted
 }
 
+
 #' @export
 fitted.Regression <- function(object, ...)
 {

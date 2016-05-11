@@ -10,22 +10,43 @@
 DurbinWatson <- function(model, n.permutations = 1000)
 {
     set.seed(123)
-    residuals <- resid(model)[model$subset]
+    residuals <- resid(model)
+    if("Regression" %in% class(model))
+        residuals <- residuals[model$subset]
     r <- residuals[!is.na(residuals)]
     n <- length(residuals)
     if (n <= 2)
-        return(list(d = NA, p = NA))
-    .dW <- function(x)
     {
-        #        flipMultivariates:::printDetails(x[-n])
-        #       flipMultivariates:::printDetails(x[-1])
-        sum((x[-n] - x[-1]) ^ 2) / sum(x^2)
+        d = NA
+        p = NA
+
     }
-    .permute <- function(x) { .dW(sample(x)) }
-    d <- .dW(r)
-    replicates <- replicate(n.permutations, .permute(r))
-    p = sum(if (d < 2) d > replicates else d < replicates) / n.permutations * 2
-    list(d = d, p = p)}
+    else
+    {
+        .dW <- function(x)
+        {
+            #        flipMultivariates:::printDetails(x[-n])
+            #       flipMultivariates:::printDetails(x[-1])
+            sum((x[-n] - x[-1]) ^ 2) / sum(x^2)
+        }
+        .permute <- function(x) { .dW(sample(x)) }
+        d <- .dW(r)
+        replicates <- replicate(n.permutations, .permute(r))
+        p = sum(if (d < 2) d > replicates else d < replicates) / n.permutations * 2
+        result <- list(data.name = model$call, statistic = c("d" = d), p.value = p, method = "Durbin-Watson statistic")
+        class(result) <- "htest"
+    }
+    result
+}
+
+#' @export
+print.DurbinWatson <- function(x)
+{
+    cat(paste0("Durbin-Watson statistic: ", d, "\n"))
+    cat(paste0("p-value: ", p, "\n"))
+}
+
+
 
 
 #' @export
