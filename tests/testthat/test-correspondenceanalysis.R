@@ -18,21 +18,21 @@ dimnames(x.with.labels) <- list(Brand=c('Coke','V',"Red Bull","Lift Plus",'Diet.
 
 test_that("CorrespondenceAnalysis is OK (mainly GetTidyTwoDimensionalArray)",
           {
-    expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET"), not(throws_error()))
-    expect_that(CorrespondenceAnalysis(x), not(throws_error()))
+    expect_error(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET"), NA)
+    expect_error(CorrespondenceAnalysis(x), NA)
     # 3D array with no names
     z <- array(NA, c(8,11,2))
     z[,,1] <- x
     expect_that(CorrespondenceAnalysis(z), throws_error())
     dimnames(z) <- list(dimnames(x.with.labels)[[1]], dimnames(x.with.labels)[[2]], 1:2)
-    expect_that(suppressWarnings(CorrespondenceAnalysis(z)), not(throws_error()))
+    expect_error(suppressWarnings(CorrespondenceAnalysis(z)), NA)
 })
 
 for (output in c("Scatterplot", "Moonplot", "ggplot2", "Text"))
     test_that(paste("CorrespondenceAnalysis prints", output),
     {
-        expect_that(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = output), not(throws_error()))
-        expect_that(CorrespondenceAnalysis(x,output = output), not(throws_error()))
+        expect_error(CorrespondenceAnalysis(x.with.labels, row.names.to.remove = "NET",  column.names.to.remove = "NET", output = output), NA)
+        expect_error(CorrespondenceAnalysis(x,output = output), NA)
     })
 #
 # test_that("Normalization warning",

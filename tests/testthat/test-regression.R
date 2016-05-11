@@ -55,8 +55,8 @@ test_that(paste("Robust se does something"),
       z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, subset = TRUE,  weights = NULL, type = type)
       zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
       expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
-      expect_that(capture.output(print(z)), not(throws_error()))
-      expect_that(capture.output(print(zs)), not(throws_error()))
+      expect_error(capture.output(print(z)), NA)
+      expect_error(capture.output(print(zs)), NA)
 
       type = "Poisson"
       # no weight, no filter
@@ -66,8 +66,8 @@ test_that(paste("Robust se does something"),
       z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, subset = TRUE,  weights = NULL, type = type)
       zs = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, detail = FALSE, robust.se = TRUE, subset = TRUE,  weights = NULL, type = type)
       expect_false(isTRUE(all.equal(z$summary$coefficients[,2], zs$summary$coefficients[,2])))
-      expect_that(capture.output(print(z)), not(throws_error()))
-      expect_that(capture.output(print(zs)), not(throws_error()))
+      expect_error(capture.output(print(z)), NA)
+      expect_error(capture.output(print(zs)), NA)
 })
 
 
@@ -78,12 +78,12 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
           # no weight, no filter
           z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = NULL, type = type)
           # weight
-          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = NULL, type = type), not(throws_error()))
+          expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = NULL, type = type), NA)
           # weight, filter
-          expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), not(throws_error()))
+          expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE,  weights = wgt, type = type), NA)
           # weight, filter
-          expect_that(z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), not(throws_error()))
-          expect_that(capture.output(print(z)), not(throws_error()))
+          expect_error(z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, type = type), NA)
+          expect_error(capture.output(print(z)),NA)
       })
 
 
@@ -176,13 +176,13 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
             test_that(paste("No error", missing, type, "detail =", detail),
 {
      # no weight, no filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = NULL, type = type), not(throws_error()))
+     expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = NULL, type = type), NA)
      # weight
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb, detail = detail, weights = NULL, type = type), not(throws_error()))
+     expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb, detail = detail, weights = NULL, type = type), NA)
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = wgt, type = type), not(throws_error()))
+     expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = TRUE, detail = detail, weights = wgt, type = type), NA)
      # weight, filter
-     expect_that(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, detail = detail, type = type), not(throws_error()))
+     expect_error(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, data = bank, subset = sb,  weights = wgt, detail = detail, type = type), NA)
 })
 
 
@@ -197,5 +197,5 @@ for(missing in c("Imputation (replace missing values with estimates)", "Exclude 
 for (type in c("Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
     test_that(paste(type, "does not have an error when producing non-detailed outputs"),{
             z <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, missing = missing, weights = wgt / 100, subset = sb, detail = FALSE)
-            expect_that(capture.output(print(z)), not(throws_error()))
+            expect_error(capture.output(print(z)), NA)
           })

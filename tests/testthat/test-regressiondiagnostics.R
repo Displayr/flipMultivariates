@@ -14,37 +14,15 @@ for (type in c("Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"
         z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type)
         expect_true(McFaddensRhoSquared(z) > 0.2)
         expect_true(GoodnessOfFit(z)$value > 0.2)
-        expect_that(AIC(z), not(throws_error()))
+        expect_error(AIC(z), NA)
         z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, weights = wgt)
         expect_true(McFaddensRhoSquared(z) > 0.2)
         expect_true(GoodnessOfFit(z)$value > 0.2)
-        expect_that(AIC(z), not(throws_error()))
+        expect_error(AIC(z), NA)
 
 })
 
 
-
-
-# for (type in c("Linear" ,"Poisson", "Quasi-Poisson", "Binary Logit", "NBD"))
-# {
-#     test_that(paste("diagnostic plots works", type),
-#     {
-#          z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = wgt, data = bank, missing = missing, detail = FALSE, type = type)
-#         expect_that(residualPlots(z), not(throws_error()))
-#     })
-# }
-#
-#
-# for (type in c("Ordered Logit",  "Multinomial Logit"))
-# {
-#     test_that(paste("diagnostic plots failed when not apropriate",type),
-# {
-#       z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, weights = wgt, data = bank, missing = missing, detail = FALSE, type = type)
-#       expect_that(car::residualPlots(z), throws_error())
-#  #     expect_that(car::marginalModelPlots(z), throws_error())
-# })
-# }
-#
 test_that("Durbin Watson",
 {
     # Negative auto correlation
@@ -53,39 +31,39 @@ test_that("Durbin Watson",
     y = x + rep(1:2,50)
     dat = data.frame(x, y)
     z = DurbinWatson((Regression(y ~ x, data = dat, type = "Binary Logit")))
-    expect_equal(z$statistic, 2.62, tolerance = 1.0e-3)
+    expect_equal(z$statistic, c(d = 2.62), tolerance = 1.0e-3)
     expect_equal(z$p, 0, tolerance = 1.0e-5)
     z = DurbinWatson((Regression(y ~ x, data = dat)))
-    expect_equal(z$statistic, 3.94, tolerance = 1.0e-3)
+    expect_equal(z$statistic, c(d = 3.94), tolerance = 1.0e-3)
     expect_equal(z$p, 0, tolerance = 1.0e-3)
     # Positive autocorrelation
     y = x + c(rep(0,50),rep(1,50))
     dat = data.frame(x, y)
     z = DurbinWatson((Regression(y ~ x, data = dat, type = "Binary Logit")))
-    expect_equal(z$statistic, 1.49, tolerance = 1.0e-2)
+    expect_equal(z$statistic, c(d = 1.49), tolerance = 1.0e-2)
     expect_equal(z$p, 0.004, tolerance = 1.0e-2)
     z = DurbinWatson((Regression(y ~ x, data = dat)))
-    expect_equal(z$statistic, 0.0444, tolerance = 1.0e-3)
+    expect_equal(z$statistic, c(d = 0.0444), tolerance = 1.0e-3)
     expect_equal(z$p, 0, tolerance = 1.0e-3)
     # Random (no autocorrelation)
     y = x + rnorm(100)
     dat = data.frame(x, y)
     z = DurbinWatson((Regression(y ~ x, data = dat, type = "Binary Logit")))
-    expect_equal(z$statistic, 2.06, tolerance = 1.0e-2)
+    expect_equal(z$statistic, c(d = 2.06), tolerance = 1.0e-2)
     expect_equal(z$p, 0.712, tolerance = 1.0e-3)
     z = DurbinWatson((Regression(y ~ x, data = dat)))
-    expect_equal(z$statistic, 2.08, tolerance = 1.0e-3)
+    expect_equal(z$statistic, c(d = 2.08), tolerance = 1.0e-3)
     expect_equal(z$p, 0.646, tolerance = 1.0e-3)
     # Comparing with car package
     z = car::durbinWatsonTest(lm(y ~ x, data = dat), simulate = TRUE, reps = 100000, alternative = "two.sided")
     z1 <- DurbinWatson((Regression(y ~ x, data = dat)), n.permutations = 100000)
-    expect_equal(z$dw, z1$statistic, tolerance = 1.0e-3)
+    expect_equal(as.numeric(z$dw), as.numeric(z1$statistic), tolerance = 1.0e-3)
     expect_equal(z$p, z1$p, tolerance = 1.0e-2)
     missing <- missing <- "Exclude cases with missing data"
     for (type in c( "Linear","Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"))
     {
         z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, detail = FALSE, data = bank, type = type)
-        expect_that(DurbinWatson(z), not(throws_error()))
+        expect_error(DurbinWatson(z), NA)
     }
 })
 
@@ -94,7 +72,7 @@ for (type in c("Linear", "Linear","Poisson", "Quasi-Poisson", "Binary Logit", "N
     {
         missing = "Exclude cases with missing data"
         z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, detail = FALSE, data = bank, type = type)
-        expect_that((cooks.distance(z)), not(throws_error()))
+        expect_error((cooks.distance(z)), NA)
     })
 
 for (type in c("Ordered Logit",  "Multinomial Logit"))
@@ -168,7 +146,7 @@ test_that("VIF",
      zR <- vif(lm(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100))
      expect_equal(zRegression, zR)
      # Weighted.
-     expect_that(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)), not(throws_error()))
+     expect_error(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = bank$ID > 100, weights = bank$ID)), NA)
      # Logit (used as a proxy for all the glms)
      type = "Binary Logit"
      zRegression <- Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type)
@@ -188,7 +166,7 @@ test_that("VIF",
      expect_equal(vif(zRegression), vif(zR))
      # Checking for no errors
      for (type in c("Poisson","NBD", "Quasi-Poisson"))
-        expect_that(capture.output(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100, weights = bank$ID))), not(throws_error()))
+        expect_error(capture.output(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100, weights = bank$ID))), NA)
      # Checking for errors in other types of models
      for (type in c( "Ordered Logit",  "Multinomial Logit"))
         expect_that(capture.output(vif(Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = bank$ID > 100, weights = bank$ID))), (throws_error()))
