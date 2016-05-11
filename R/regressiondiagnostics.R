@@ -33,7 +33,7 @@ DurbinWatson <- function(model, n.permutations = 1000)
         d <- .dW(r)
         replicates <- replicate(n.permutations, .permute(r))
         p = sum(if (d < 2) d > replicates else d < replicates) / n.permutations * 2
-        result <- list(data.name = model$call, statistic = c("d" = d), p.value = p, method = "Durbin-Watson statistic")
+        result <- list(data.name = paste(as.character(model$call)), statistic = c("d" = d), p.value = p, method = "Durbin-Watson statistic")
         class(result) <- "htest"
     }
     result
@@ -45,8 +45,6 @@ print.DurbinWatson <- function(x)
     cat(paste0("Durbin-Watson statistic: ", d, "\n"))
     cat(paste0("p-value: ", p, "\n"))
 }
-
-
 
 
 #' @export
