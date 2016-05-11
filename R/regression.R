@@ -340,7 +340,7 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
             {
                 pref <- if(x$type == "Linear") "" else "Generalized "
                 nms <- rownames(x$summary$coefficients)[-1]
-                VIFs <- paste0(nms,": ", round(vifs, 1), c(rep("; ", length(nms) - 1), ""), collapse = "")
+                VIFs <- paste0(nms,": ", round(vifs, 2), c(rep("; ", length(nms) - 1), ""), collapse = "")
                 warning(paste0("The ",pref, "Variance Inflation Factor of the coefficients are: ", VIFs,". A value of 4 or more indicates the confidence interval for the coefficient is twice as wide as they would be for uncorrelated predictors. A value of 10 or more indicates high multicollinearity."))
             }
         }
