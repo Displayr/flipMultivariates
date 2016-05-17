@@ -4,12 +4,12 @@
 \alias{print.CorrespondenceAnalysis}
 \title{\code{print.CorrespondenceAnalysis}}
 \usage{
-\method{print}{CorrespondenceAnalysis}(x, ...)
+\method{print}{CorrespondenceAnalysis}(ca.obj, ...)
 }
 \arguments{
-\item{x}{CorrespondenceAnalysis object.}
-
 \item{...}{further arguments passed to or from other methods.}
+
+\item{x}{CorrespondenceAnalysis object.}
 }
 \description{
 Creates a plot displaying the correspondence analysis results.
