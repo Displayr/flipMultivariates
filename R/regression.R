@@ -316,18 +316,12 @@ plot.Regression <- function(x,  ...){
 print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
     weighted <- !is.null(x$weights)
-    # Cook's distance.
-    if (!is.null(x$cooks.distance))
+    # Checking for unusual observations.
+    if (x$type != "Ordered Logit" & x$type != "Multinomial Logit")
     {
-        k <- x$n.predictors + 1
-        n <- x$n.observations
-        cutoff <- qf(0.5, k, n - k)
-        max.d <- max(x$cooks.distance)
-        if (any(max.d > cutoff))
-            warning(paste0("Influential observations detected. The largest Cook's distance is ",
-                           round(max.d,2), ". The threshhold is ", round(cutoff, 2), " (the median of the F(k = ",
-                           k, ",  n - k  = ", n - k, ") distribution)."))
-
+        unusual <- UnusualObservations(x)
+        if (!is.null(unusual))
+            warning(unusual)
     }
     # Testing to see if there is multicollinearity.
     if (ncol(x$model) > 2 & x$type == "Linear" & x$missing != "Use partial data (pairwise correlations)")
