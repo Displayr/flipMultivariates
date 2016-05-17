@@ -15,31 +15,6 @@ getData <- function(formula, data)
     data
 }
 
-
-# Extracts a vector from data, or, from the environment of the formula.
-getVector = function(formula, data, x)
-{
-    # eval(substitute(x), data, environment(formula))
-
-    # if (!hasArg(x))
-    #     return(NULL)
-    # x.name <- deparse(substitute(x))
-    # if (missing(data) & x.name %in% names(data))
-    #
-    # print(x.name)
-    # print(names(environment(formula)))
-    # is.data <- x.name %in% names(environment(formula))
-    # if (is.data)
-    #     return(x)
-    # if (hasArg(data) & !is.null(data) & x.name %in% names(data))
-    #     return(data[[x.name]])
-    # if (x.name %in% names(environment(formula)))
-    #     return(get(x.name, environment(formula)))
-    # NULL#stop(paste0("'", x.name, "' does not exist."))
-}
-# getVector(Overall ~ Fees, data = bank, wgt > 30000)
-
-
 # Properties of data.
 outcomeName <- function(formula.object)
 {

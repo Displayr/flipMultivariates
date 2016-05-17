@@ -23,8 +23,9 @@
 #' @export
 
 CART <- function(formula,
-                 data,
-                 weights, subset,
+                 data = NULL,
+                 subset = NULL,
+                 weights = NULL,
                  output = "Sankey",
                  missing = "Use partial data",
                  method = "recursive.partition",...)
@@ -32,17 +33,15 @@ CART <- function(formula,
     if (method == "model.frame")
         return(data)
     cl <- match.call()
+    subset <- eval(substitute(subset), data, parent.frame())
+    weights <- eval(substitute(weights), data, parent.frame())
     data <- getData(formula, data)
-    weights <- getVector(formula, data, weights)
-    subset <- getVector(formula, data, subset)
     processed.data <- EstimationData(formula, data, subset, weights, missing)
     unfiltered.weights <- processed.data$unfiltered.weights
     estimation.data <- processed.data$estimation.data
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     estimation.subset  <- processed.data$estimation.subset
     subset <-  processed.data$subset
-    #print(summary(estimation.data))
-    #print(dim(estimation.data))
     if (is.null(weights))
         result <- tree::tree(formula, data = estimation.data, model = TRUE, ...)
     else
