@@ -1,3 +1,18 @@
+numberParameters <- function(x)
+{
+    if("Regression" %in% class(x))
+        return(x$n.predictors + 1)
+    length(x$coefficients)
+}
+
+numberObservations <- function(x)
+{
+    if("Regression" %in% class(x))
+        return(x$n.observations)
+    attr(logLik(x), "nobs")
+}
+
+
 
 #' \code{DurbinWatson}
 #'
@@ -39,6 +54,9 @@ DurbinWatson <- function(model, n.permutations = 1000)
     result
 }
 
+
+
+
 #' @export
 print.DurbinWatson <- function(x)
 {
@@ -52,19 +70,88 @@ cooks.distance.Regression <- function(model, ...)
 {
     checkAcceptableModel(model, c("lm", "glm"),"cooks.distance")
     stats::cooks.distance(model$original)
-
-    # mod <- model
-    # if(!any(c("lm", "glm") %in%  class(mod)))
-    # {
-    #     cat("Cooks distance has been computed using a linear regression model.\n")
-    #     mod <- Regression(as.formula(mod$call$formula),
-    #         weights = mod$weights, subset = mod$subset,
-    #         robust.se = mod$robust.se, data = mod$model)
-    # }
-    # model$cooks.distance
-    #
-    #diagnosticTest(model, "cooks.distance", ...)
 }
+
+#' \code{CooksDistance}
+#'
+#' @param model A 'Regression'  model.
+#' @details Computes Cook's distance and a threshold value.
+#' @export
+CooksDistance <- function(model)
+{
+    cat("Cook's distance:\n")
+    d <- cooks.distance(model)
+    print(structure(zapsmall(quantile(d), 3), names = c("Min", "1Q", "Median", "3Q", "Max")), digits = 3)
+    k <- numberParameters(model)
+    n <- numberObservations(model)
+    cutoff <- qf(0.5, k, n - k)
+    max.d <- max(d)
+    max.is.high <- max.d > cutoff
+    description = paste0("The largest Cook's distance is ",
+        round(max.d, 3), ", which is ",
+        if(max.is.high) "" else "not ",
+        "higher than the threshhold of ",
+        round(cutoff, 3), " (the median of the F(k=",
+        k,",n-k=", n - k, ") distribution).")
+    cat(description)
+    cat("\n")
+    invisible(list(max.is.high = max.is.high, d = d, cutoff = cutoff, description = description))
+}
+
+#' \code{HatValues}
+#'
+#' @param model A 'Regression'  model.
+#' @details Computes hat values and a threshold value.
+#' @export
+HatValues <- function(model)
+{
+    cat("Hat values:\n")
+    d <- hatvalues(model)
+    print(structure(zapsmall(quantile(d), 3), names = c("Min", "1Q", "Median", "3Q", "Max")), digits = 3)
+    k <- numberParameters(model)
+    n <- numberObservations(model)
+    cutoff <- 2 * (k + 1) / n
+    max.d <- max(d)
+    max.is.high <- max.d > cutoff
+    description = paste0("The largest hat value is ",
+        round(max.d, 3), ", which is ",
+        if(max.is.high) "" else "not ",
+        "higher than the threshhold of ",
+        round(cutoff, 3), " (2 * (k + 1) / n).")
+    cat(description)
+    cat("\n")
+    invisible(list(max.is.high = max.is.high, d = d, cutoff = cutoff, description = description))
+}
+
+#' \code{UnusualObservations}
+#'
+#' @param model A 'Regression'  model.
+#' @details Computes studentized residuals, Cook's distance, and hat values, and reports if any are above the threshhold values.
+#' @export
+UnusualObservations <- function(model)
+{
+    bonf <- car::outlierTest(model)
+    message <- "";
+    if (bonf$bonf.p  <= 0.05)
+        message <- paste0(
+            "The largest studentized residual is ",
+            round(bonf$rstudent, 1),", with a bonferroni-adjusted p-value of ",
+            round(bonf$p, 5), ".")
+    # Hat values.
+    h <- HatValues(model)
+    if (h$max.is.high)
+        message <- paste0(message, (if(message == "") "" else " "), h$description)
+    # Cook's distance
+    d <- CooksDistance(model)
+    if (d$max.is.high)
+        message <- paste0(message, (if(message == "") "" else " "), d$description)
+    if (message == ""){
+        cat("No outliers have been identified.\n")
+        return(invisible(NULL))
+    }
+    paste("Unusual observations detected.", message)
+}
+
 
 checkAcceptableModel <- function(x, classes, diagnostic, exclude.partial.data = TRUE)
 {
@@ -79,22 +166,6 @@ vif.Regression <- function (mod, ...)
 {
     checkAcceptableModel(mod, c("lm", "glm"), "vif")
     diagnosticTestFromCar(mod, "vif", ...)
-    # if (mod$missing == "Use partial data (pairwise correlations)")
-    #     stop(paste0("Variance Inflation Factor (VIF) is not computed for model that are computed using 'Use partial data (pairwise correlations)'"))
-    # if(any(c("lm", "glm") %in%  class(mod$original)))
-    #     model <- mod$original
-    # {
-    #     cat("The Variance Inflation Factor (VIF) has been computed using a linear regression model.\n")
-    #     model <- Regression(as.formula(mod$original$call$formula),
-    #         weights = mod$weights, subset = mod$subset,
-    #             robust.se = mod$robust.se, data = mod$model)
-    # }
-    # assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
-    # assign(".formula", model$formula, envir=.GlobalEnv)
-    # v <- car::vif(model$original, ...)#BreuschPagan(x$original)
-    # remove(".formula", envir=.GlobalEnv)
-    # remove(".estimation.data", envir=.GlobalEnv)
-    #v
 }
 
 #' @export
@@ -105,20 +176,29 @@ ncvTest.Regression <- function(model, ...)
 
     checkAcceptableModel(model, "lm", "ncvTest")
     diagnosticTestFromCar(model, "ncvTest", ...)
-    # diagnosticTest(mod, "cooks.distance", ...)
-    # assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
-    # assign(".formula", model$formula, envir=.GlobalEnv)
-    # bp.test <- car::ncvTest(model$original, ...)#BreuschPagan(x$original)
-    # remove(".formula", envir=.GlobalEnv)
-    # remove(".estimation.data", envir=.GlobalEnv)
-    # bp.test
+}
+
+#' @export
+outlierTest.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "outlierTest")
+    diagnosticTestFromCar(model, "outlierTest", ...)
 }
 
 #' @export
 residualPlots.Regression <- function(model, ...)
 {
     checkAcceptableModel(model, c("glm","lm"), "residualPlots")
-    diagnosticTestFromCar(model, "residualPlots", ...)
+    assign(".estimation.data", model$estimation.data, envir=.GlobalEnv)
+    assign(".formula", model$formula, envir=.GlobalEnv)
+    assign("weights", model$weights, envir=.GlobalEnv)
+    #txt <- paste0("car::", diagnostic, "(model)")
+    t <- residualPlots(model$original)
+    remove("weights", envir=.GlobalEnv)
+    remove(".formula", envir=.GlobalEnv)
+    remove(".estimation.data", envir=.GlobalEnv)
+    t
+    #diagnosticTestFromCar(model, "residualPlots", ...)
 }
 
 
@@ -127,6 +207,12 @@ influenceIndexPlot.Regression <- function(model, ...)
 {
     checkAcceptableModel(model, c("glm","lm"), "influenceIndexPlot")
     diagnosticTestFromCar(model, "influenceIndexPlot", ...)
+}
+
+#' @export
+hatvalues.Regression <- function(model, ...)
+{
+    hatvalues(model$original)
 }
 
 #' @export
@@ -141,7 +227,12 @@ influencePlot.Regression <- function(model, ...)
 infIndexPlot.Regression <- function(model, ...)
 {
     checkAcceptableModel(model, c("glm","lm"), "influenceIndexPlot")
-    diagnosticTestFromCar(model, "influenceIndexPlot", ...)
+    model <- model$original
+  #  assign(".estimation.data", x$estimation.data, envir=.GlobalEnv)
+   # assign(".formula", model$formula, envir=.GlobalEnv)
+    car::infIndexPlot(model, ...)
+ #   remove(".formula", envir=.GlobalEnv)
+#    remove(".estimation.data", envir=.GlobalEnv)
 }
 
 
@@ -160,19 +251,6 @@ diagnosticTestFromCar<- function(x, diagnostic, ...)
     assign(".formula", model$formula, envir=.GlobalEnv)
     txt <- paste0("car::", diagnostic, "(model)")
     t <- eval(parse(text = txt))
-    # require(car)
-    # t <- switch("vif" = vif(model, ...),
-    #             "ncvTest"car::ncvTest(model, ...)#BreuschPagan(x$original)
-    #     # remove(".formula", envir=.GlobalEnv)
-    #     # remove(".estimation.data", envir=.GlobalEnv)
-    # #     bp.test
-    # #
-    # #
-    # # }
-    #     # t <- car::ncvTest(model, ...)
-    # }
-    # else
-    #     stop(paste0("'", diagnostic, "' is not a known diagnostic for 'Regression' objects."))
     remove(".formula", envir=.GlobalEnv)
     remove(".estimation.data", envir=.GlobalEnv)
     t
@@ -251,6 +329,7 @@ ConfusionMatrixFromVariablesLinear <- function(observed, predicted, subset = NUL
 
 
 
+
 #' \code{ConfusionMatrix}
 #'
 #' @param obj A model with an outcome variable.
@@ -308,6 +387,8 @@ allEffects.Regression <- function(model, ...)
     remove(".estimation.data", envir=.GlobalEnv)
     effects
 }
+
+
 
 
 
