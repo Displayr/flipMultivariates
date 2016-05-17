@@ -8,6 +8,35 @@ wgt[is.na(wgt)] = 0
 attr(wgt, "label") <- "ID"
 
 
+x <- runif(100)
+y <- x + rnorm(100) / 10
+y[1] <- 10
+z <- Regression(y~x)
+# OutlierTest(z)
+#
+# outlierTest(z)
+# HatValues(z)
+# CooksDistance(z)
+#
+
+for (type in c("Linear", "Poisson", "Quasi-Poisson","Binary Logit",  "NBD"))#, "Multinomial Logit")) #"Ordered Logit",
+    test_that(paste("Testing outliers:", type),
+    {
+        z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, type = type, subset = sb, weights = wgt)
+        expect_error(outlierTest(z), NA)
+        expect_error(capture.output(HatValues(z)), NA)
+        expect_error(capture.output(CooksDistance(z)), NA)
+
+})
+
+for (type in c("Linear", "Linear","Poisson", "Quasi-Poisson", "Binary Logit", "NBD"))
+    test_that(paste("Cooks distance works:",type),
+              {
+                  missing = "Exclude cases with missing data"
+                  z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, detail = FALSE, data = bank, weights = wgt, type = type)
+                  expect_error((cooks.distance(z)), NA)
+              })
+
 for (type in c("Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD", "Multinomial Logit"))
     test_that(paste("Goodness of fit statistics are well behaved:", type),
     {
@@ -19,7 +48,6 @@ for (type in c("Poisson", "Quasi-Poisson","Binary Logit", "Ordered Logit", "NBD"
         expect_true(McFaddensRhoSquared(z) > 0.2)
         expect_true(GoodnessOfFit(z)$value > 0.2)
         expect_error(AIC(z), NA)
-
 })
 
 
@@ -74,6 +102,7 @@ for (type in c("Linear", "Linear","Poisson", "Quasi-Poisson", "Binary Logit", "N
         z = Regression(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, missing = missing, detail = FALSE, data = bank, type = type)
         expect_error((cooks.distance(z)), NA)
     })
+
 
 for (type in c("Ordered Logit",  "Multinomial Logit"))
     test_that(paste("Cooks distance does not works:",type),
