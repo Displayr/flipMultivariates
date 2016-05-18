@@ -7,7 +7,7 @@
 HatValues(model)
 }
 \arguments{
-\item{model}{A 'Regression'  model.}
+\item{model}{A 'Regression' model.}
 }
 \description{
 \code{HatValues}

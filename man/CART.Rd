@@ -4,8 +4,9 @@
 \alias{CART}
 \title{\code{CART} Creats a classification or regression tree.}
 \usage{
-CART(formula, data, weights, subset, output = "Sankey",
-  missing = "Use partial data", method = "recursive.partition", ...)
+CART(formula, data = NULL, subset = NULL, weights = NULL,
+  output = "Sankey", missing = "Use partial data",
+  method = "recursive.partition", ...)
 }
 \arguments{
 \item{formula}{A formula expression. The left-hand-side (response) should
@@ -17,12 +18,12 @@ offset terms}
 
 \item{data}{A data frame in which to preferentially interpret formula, weights and subset}
 
-\item{weights}{An optional vector of sampling weights, or, the name or,
-the name of a variable in \code{data}. It may not be an expression.}
-
 \item{subset}{An optional vector specifying a subset of observations to be used in the fitting process, or,
 the name of a variable in \code{data}. It may not be an expression.
 \code{subset} may not}
+
+\item{weights}{An optional vector of sampling weights, or, the name or,
+the name of a variable in \code{data}. It may not be an expression.}
 
 \item{output}{How the tree is represented: \code{"Sankey"}, \code{"Tree"}, or \code{"Text"}.}
 
