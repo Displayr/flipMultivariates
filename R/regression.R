@@ -319,7 +319,7 @@ print.Regression <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("dig
     # Checking for unusual observations.
     if (x$type != "Ordered Logit" & x$type != "Multinomial Logit")
     {
-        unusual <- UnusualObservations(x)
+        capture.output(unusual <- UnusualObservations(x))
         if (!is.null(unusual))
             warning(unusual)
     }
