@@ -74,7 +74,7 @@ cooks.distance.Regression <- function(model, ...)
 
 #' \code{CooksDistance}
 #'
-#' @param model A 'Regression'  model.
+#' @param model A 'Regression' model.
 #' @details Computes Cook's distance and a threshold value.
 #' @export
 CooksDistance <- function(model)
@@ -92,7 +92,7 @@ CooksDistance <- function(model)
         if(max.is.high) "" else "not ",
         "higher than the threshhold of ",
         round(cutoff, 3), " (the median of the F(k=",
-        k,",n-k=", n - k, ") distribution).")
+        k,",n-k=", n - k, ") distribution).\n")
     cat(description)
     cat("\n")
     invisible(list(max.is.high = max.is.high, d = d, cutoff = cutoff, description = description))
@@ -100,7 +100,7 @@ CooksDistance <- function(model)
 
 #' \code{HatValues}
 #'
-#' @param model A 'Regression'  model.
+#' @param model A 'Regression' model.
 #' @details Computes hat values and a threshold value.
 #' @export
 HatValues <- function(model)
@@ -117,11 +117,45 @@ HatValues <- function(model)
         round(max.d, 3), ", which is ",
         if(max.is.high) "" else "not ",
         "higher than the threshhold of ",
-        round(cutoff, 3), " (2 * (k + 1) / n).")
+        round(cutoff, 3), " = 2 * (k + 1) / n.\n")
     cat(description)
     cat("\n")
     invisible(list(max.is.high = max.is.high, d = d, cutoff = cutoff, description = description))
 }
+
+#' \code{OutlierTest}
+#'
+#' @param model A 'Regression' model.
+#' @details Computes studentized residuals.
+#' @export
+OutlierTest <- function(model)
+{
+    cat("Studentized residuals:\n")
+    st <- car::outlierTest(model, cutoff = Inf, n.max = Inf)
+    qs <- quantile(st$rstudent)
+    print(structure(zapsmall(qs, 3), names = c("Min", "1Q", "Median", "3Q", "Max")), digits = 3)
+    min.p <- min(st$bonf.p)
+    max.is.high <- min.p <= 0.05
+    mx <- if(abs(qs[1]) < qs[5]) qs[5] else qs[1]
+    description = paste0("The largest studentized residual is ",
+        round(mx, 3), ", which is ",
+        if(max.is.high) "" else "not ",
+        "significant, with a Bonferroni-corrected p-value of ",
+        round(min.p, 5), ".\n")
+    cat(description)
+    cat("\n")
+    invisible(list(max.is.high = max.is.high, outlierTest = ts, description = description))
+}
+
+
+#' @export
+outlierTest.Regression <- function(model, ...)
+{
+    checkAcceptableModel(model, c("glm","lm"), "outlierTest")
+    diagnosticTestFromCar(model, "outlierTest", ...)
+}
+
+
 
 #' \code{UnusualObservations}
 #'
@@ -130,21 +164,18 @@ HatValues <- function(model)
 #' @export
 UnusualObservations <- function(model)
 {
-    bonf <- car::outlierTest(model)
     message <- "";
-    if (bonf$bonf.p  <= 0.05)
-        message <- paste0(
-            "The largest studentized residual is ",
-            round(bonf$rstudent, 1),", with a bonferroni-adjusted p-value of ",
-            round(bonf$p, 5), ".")
+    o <- OutlierTest(model)
+    if (o$max.is.high)
+        message <- o$description
     # Hat values.
     h <- HatValues(model)
     if (h$max.is.high)
-        message <- paste0(message, (if(message == "") "" else " "), h$description)
+        message <- paste0(message, (if(message == "") "" else "\n"), h$description)
     # Cook's distance
     d <- CooksDistance(model)
     if (d$max.is.high)
-        message <- paste0(message, (if(message == "") "" else " "), d$description)
+        message <- paste0(message, (if(message == "") "" else "\n"), d$description)
     if (message == ""){
         cat("No outliers have been identified.\n")
         return(invisible(NULL))
@@ -178,12 +209,6 @@ ncvTest.Regression <- function(model, ...)
     diagnosticTestFromCar(model, "ncvTest", ...)
 }
 
-#' @export
-outlierTest.Regression <- function(model, ...)
-{
-    checkAcceptableModel(model, c("glm","lm"), "outlierTest")
-    diagnosticTestFromCar(model, "outlierTest", ...)
-}
 
 #' @export
 residualPlots.Regression <- function(model, ...)
@@ -236,20 +261,13 @@ infIndexPlot.Regression <- function(model, ...)
 }
 
 
-#' #' @export
-#' marginalModelPlots.Regression <- function(model, ...)
-#' {
-#'     checkAcceptableModel(model, c("glm","lm"), "residualPlots")
-#'     diagnosticTestFromCar(model, "marginalModelPlots", ...)
-#' }
-#'
 
 diagnosticTestFromCar<- function(x, diagnostic, ...)
 {
     model <- x$original
     assign(".estimation.data", x$estimation.data, envir=.GlobalEnv)
     assign(".formula", model$formula, envir=.GlobalEnv)
-    txt <- paste0("car::", diagnostic, "(model)")
+    txt <- paste0("car::", diagnostic, "(model, ...)")
     t <- eval(parse(text = txt))
     remove(".formula", envir=.GlobalEnv)
     remove(".estimation.data", envir=.GlobalEnv)
