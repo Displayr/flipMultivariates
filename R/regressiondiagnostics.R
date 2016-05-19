@@ -204,7 +204,6 @@ ncvTest.Regression <- function(model, ...)
 {
     if (any("svyglm" %in% class(model$original)))
         stop(paste0("'ncvTest is not applicable for models with sampling weights."))
-
     checkAcceptableModel(model, "lm", "ncvTest")
     diagnosticTestFromCar(model, "ncvTest", ...)
 }
@@ -266,7 +265,7 @@ diagnosticTestFromCar<- function(x, diagnostic, ...)
 {
     model <- x$original
     assign(".estimation.data", x$estimation.data, envir=.GlobalEnv)
-    assign(".formula", model$formula, envir=.GlobalEnv)
+    assign(".formula", formula(model), envir=.GlobalEnv)
     txt <- paste0("car::", diagnostic, "(model, ...)")
     t <- eval(parse(text = txt))
     remove(".formula", envir=.GlobalEnv)
