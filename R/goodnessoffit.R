@@ -82,31 +82,6 @@ GoodnessOfFit.default = function(object, digits = max(3L, getOption("digits") - 
 }
 
 
-#' @describeIn GoodnessOfFit  Goodness-of-fit for a Regression object. Computed as the \eqn{R^2} statistic.
-#' With factors, the index value of the factor is used. With unordered factors, this will often be
-#' grieviously-downward biased.
-#' @export
-GoodnessOfFit.Regression = function(object, digits = max(3L, getOption("digits") - 3L), ...) {
-    if (object$missing == "Use partial data (pairwise correlations)")
-        r2 <- object$original$lm.cov$R2
-    else if (object$type == "Linear" & is.null(object$weights))
-        r2 <- object$summary$r.square
-    else
-    {
-        predicted <- unclassIfNecessary(predict(object)[object$subset])
-        observed <- unclassIfNecessary(Observed(object)[object$subset])
-        if (is.null(object$weights))
-            r2 <- cor(observed, predicted, use = "complete.obs") ^ 2
-        else
-            r2 <- summary(lm(predicted ~ observed, weights = object$weights[object$subset]))$r.square
-    }
-    names(r2) <- "R-squared"
-    description <- list("Variance explained: ",
-                        formatC(100 * r2, digits = digits),
-                        "%\n(R-squared * 100)")
-    GoodnessOfFitInternal(r2, description, object$call)
-}
-
 
 
 #' @describeIn GoodnessOfFit  Goodness-of-fit for a smacof object with square data (i.e., dissimilarities/distance)
@@ -132,45 +107,4 @@ GoodnessOfFit.smacofR = function(object, digits = max(3L, getOption("digits") - 
 }
 
 
-nullDeviance <- function(x)
-{
-    null.d <- x$original$null.deviance
-    if (!is.null(null.d))
-        return(null.d)
-    observed <- if (x$type %in% c("Ordered Logit", "Multinomial Logit") & !is.null(x$weights))
-        as.vector(by(x$weights[x$subset], Observed(x)[x$subset], sum))
-    else
-        table(Observed(x)[x$subset])
-    observed <- observed[observed > 0 & !is.na(observed)]
-    ll <- sum(observed * log(prop.table(observed)))
-    -2 * ll
-}
-
-#' \code{McFaddensRhoSquared}
-#'
-#' @param model A 'Regression' model.
-#' @param n.permutations Number of permutations used in computing the p-value.
-#' @details 1 - the deviance divided by the null deviance.
-#'  McFadden, D. (1974) “Conditional logit analysis of qualitative choice behavior.” Pp. 105-142 in P. Zarembka (ed.), Frontiers in Econometrics
-#' @export
-McFaddensRhoSquared <- function(x)
-{
-    if (x$type == "Linear")
-        stop("McFadden's rho-squared statistic is not computed for models of type 'Linear'.")
-    1 - deviance(x$original) / nullDeviance(x)
-}
-
-#' @export
-logLik.Regression <- function(x)
-{
-    logLik(x$original)
-}
-
-#' @export
-AIC.Regression <- function(x)
-{
-    if (is.null(x$original$aic))
-        return(AIC(x$original))
-    x$original$aic
-}
 
