@@ -2,7 +2,6 @@
 % Please edit documentation in R/goodnessoffit.R
 \name{GoodnessOfFit}
 \alias{GoodnessOfFit}
-\alias{GoodnessOfFit.Regression}
 \alias{GoodnessOfFit.default}
 \alias{GoodnessOfFit.smacof}
 \alias{GoodnessOfFit.smacofR}
@@ -15,9 +14,6 @@ GoodnessOfFit(object, digits = max(3L, getOption("digits") - 3L), ...)
 
 \method{GoodnessOfFit}{default}(object, digits = max(3L, getOption("digits") -
   3L), ...)
-
-\method{GoodnessOfFit}{Regression}(object, digits = max(3L,
-  getOption("digits") - 3L), ...)
 
 \method{GoodnessOfFit}{smacof}(object, digits = max(3L, getOption("digits") -
   3L), ...)
@@ -55,10 +51,6 @@ reports the goodness-of-fit of an object.
 \section{Methods (by class)}{
 \itemize{
 \item \code{default}: Default goodness-of-fit \eqn{R^2}.
-
-\item \code{Regression}: Goodness-of-fit for a Regression object. Computed as the \eqn{R^2} statistic.
-With factors, the index value of the factor is used. With unordered factors, this will often be
-grieviously-downward biased.
 
 \item \code{smacof}: Goodness-of-fit for a smacof object with square data (i.e., dissimilarities/distance)
 
