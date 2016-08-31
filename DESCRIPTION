@@ -9,26 +9,17 @@ Depends:
     R (>= 3.1.1)
 License: MIT + file LICENSE
 Imports:
-    car,
-    flipU
-Suggests:
-    mice,
-    survey,
-    curl,
-    hash,
-    lmtest,
-    flipPlots,
-    plotly,
-    psych,
-    hot.deck,
-    colorspace,
+    flipAnalysisOfVariance,
+    flipData,
+    flipFormat,
+    flipRegression,
+    flipStatistics,
+    flipTransformations,
+    flipU,
+    formattable,
+    htmltools,
     MASS,
-    nnet,
-    rhtmlSankeyTree,
-    rpart,
-    tree,
-    ca,
-    DAAG,
-    effects,
+    rmarkdown
+Suggests:
     testthat
 RoxygenNote: 5.0.1
