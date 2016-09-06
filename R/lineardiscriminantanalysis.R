@@ -73,19 +73,23 @@ LDA <- function(formula,
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
     cl <- match.call()
+    if(!missing(statistical.assumptions))
+        stop("'statistical.assumptions' objects are not yet supported.")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
     subset.description <- if (is.null(substitute(subset))) NULL else deparse(substitute(subset))
     subset <- eval(substitute(subset), data, parent.frame())
-    if(!missing(statistical.assumptions))
-        stop("'statistical.assumptions' objects are not yet supported.")
     if (!is.null(subset.description))
         attr(subset, "description") <- subset.description
+    if(!is.null(weights))
+        if (is.null(attr(weights, "name")))
+            attr(weights, "name") <- deparse(substitute(weights))
     weights <- eval(substitute(weights), data, parent.frame())
     data <- GetData(input.formula, data, auxiliary.data)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
     data <- CreatingFactorDependentVariableIfNecessary(formula, data)
-    outcome.variable <- data[[outcome.name]]
+    outcome.variable <- data[, outcome.name]
+    outcome.label <- Labels(data[, outcome.name])
     if (!is.null(weights) & length(weights) != nrow(data))
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
@@ -149,15 +153,16 @@ LDA <- function(formula,
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$outcome.label <- result$outcome.name <- outcome.name
-    confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
-    result$confusion <- confusion / sum(confusion) * 100
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
     {
-        result$outcome.label <- Labels(outcome.variable)
-        result$variable.labels <- variable.names <- Labels(data)
-        colnames(result$original$means) <- variable.names
-        row.names(result$original$scores) <- variable.names
+        result$outcome.label <- outcome.label
+        variable.labels <- Labels(data)
+        # Removing the outcome variable
+        result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
+        colnames(result$original$means) <- variable.labels
+        row.names(result$original$scaling) <- variable.labels
     }
     # 4.Saving parameters
     result$formula <- input.formula
@@ -257,11 +262,7 @@ LDA.fit = function (x,
     if (method == "moment")
         var.weighted = var.weighted * weights.sum / (weights.sum - ng)
     X <- sqrt(fac) * (x - group.means[g, ]) %*% scaling
-#    print(cbind(x,X,g, weights))
     X.s <- WeightedSVD(X, weights, nu = 0L)
-    #print(X.s)
-    #stop("dog")
-    #print(X.s)
     rank <- sum(X.s$d > tol)
     if (rank == 0L)
         stop("rank = 0: variables are numerically constant")
@@ -301,16 +302,10 @@ LDA.fit = function (x,
     #     return(list(class = cl, posterior = posterior))
     # }
     xbar <- colSums(prior %*% group.means)
-#    print(x)
     fac <- if (method == "mle") 1/ng  else 1/(ng - 1)
     X <- sqrt((n * prior) * fac) * scale(group.means, center = xbar,
                                        scale = FALSE) %*% scaling
     X.s <- svd(X, nu = 0L)
-    #print(X.s$d)
-    #X.s <- WeightedSVD(X, weights, nu = 0L, nv = nv)
-    #print(X.s$d)
-
-    #print(X.s)
     rank <- sum(X.s$d > tol * X.s$d[1L])
     if (rank == 0L)
         stop("group means are numerically identical")
@@ -326,8 +321,6 @@ LDA.fit = function (x,
     }
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
-    print(rownames(x))
-    print(colnames(x))
     result <- list(prior = prior, counts = counts, means = group.means,
                  scaling = scaling, lev = lev, svd = X.s$d[1L:rank], N = n,
                  call = cl)
@@ -342,15 +335,15 @@ LDA.fit = function (x,
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
     dependent.name <- x$outcome.name
-    data <- x$model
+    data <- x$estimation.data
     dependent <- data[, dependent.name]
     show.labels <- x$show.labels
     column.names <- levels(dependent)
 
     output <- x$output
-    if (output == "Confusion Matrix")
+    if (output == "Confusion matrix")
     {
-        return(print(x$confusion))
+        print(x$confusion)
 
     }
     else if (output == "Means")
@@ -359,29 +352,28 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         subset <- x$subset
         weights <- x$weights[subset]
         warnings("Weights not hooked up")
-        compare.means <- CompareMultipleMeans(independents, dependent)#, weights = wgt)
+        compare.means <- CompareMultipleMeans(independents, dependent, weights = weights)
         m <- MeansTables(compare.means)
-        confusion <- x$confusion / 100
+        confusion <- x$confusion
+        confusion <- confusion / sum(confusion)
         accuracy <- sum(diag(confusion))
-        accuracy <- FormatAsPercent(accuracy)
-        print(accuracy)
-        accuracy.by.group <- FormatAsPercent(diag(confusion) / apply(confusion, 1, sum))
-        print(accuracy.by.group)
+        accuracy <- FormatAsPercent(accuracy, 4)
+        accuracy.by.group <- FormatAsPercent(diag(confusion) / apply(confusion, 1, sum), 4)
         #return(print(x$confusion))
-        subtitle = paste0("Correct predictions: ", accuracy, "(",
-                          paste0(column.names, accuracy.by.group, collapse = "; "),
+        subtitle = paste0("Correct predictions: ", accuracy, " (",
+                          paste0(column.names, " " , accuracy.by.group, collapse = "; "),
                           ")" )
-
-        result <- MeanComparisonsTable(m$means, m$zs, m$ps, m$r.squared, m$overall.p,
+        means <- m$means
+        rownames(means) = x$variable.labels
+        result <- MeanComparisonsTable(means, m$zs, m$ps, m$r.squared, m$overall.p,
                                        m$column.names,
-                                       result$sample.description,
-                                       title = paste0("Linear Discriminant Analysis: ", dependent.name),
+                                       x$sample.description,
+                                       title = paste0("Linear Discriminant Analysis: ", x$outcome.label),
                                        subtitle = subtitle)
         print(result)
-
-
     }
-    print(x$original, ...)
-
+    else
+        print(x$original, ...)
+    invisible(x)
 }
 

@@ -1,6 +1,5 @@
-library(foreign)
 context("LDA")
-dat.original = read.spss("http://www.ats.ucla.edu/stat/spss/output/discrim.sav", to.data.frame = TRUE)
+dat.original = foreign::read.spss("http://www.ats.ucla.edu/stat/spss/output/discrim.sav", to.data.frame = TRUE)
 dat <- dat.original[sample(1:nrow(dat.original),91),]
 wgt1 <- c(10,rep(1,90))
 dat1 <- dat[c(rep(1,10),2:91),]
@@ -96,5 +95,27 @@ test_that(paste("Predict works"),
           expect_error(z <- suppressWarnings(LDA(Overall ~ Fees + Interest + Phone + Branch + Online + ATM, data = bank, subset = sb,  weights = wgt)), NA)
           expect_error(flipRegression::Accuracy(z, sb, wgt), NA)
           expect_error(flipRegression::ConfusionMatrix(z, sb, wgt), NA)
+      })
+
+
+
+
+test_that(paste("Replicating SPSS and hair"),
+      {
+
+          hair = foreign::read.spss("Q:/Testing/Regression Testing/trunk/Standard R Tests/HBAT_with splits.sav", to.data.frame = TRUE)
+          hair <- flipExampleData::TidySPSS(hair)
+          hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
+          hair1$x1 <- hair$x1
+          hair1$split60 <- hair$split60
+          hair1$id <- hair$id
+          # no weight, filtered
+          z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE)
+          z
+          expect_equal(as.numeric(z$confusion), c(12,0,0,1,11,0,0,2,25))
+          # noweight, filtered
+          z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, weights = hair1$id,subset = split60 == "Estimation Sample", show.labels = TRUE)
+          z
+          expect_equal(as.numeric(z$confusion), c(12,0,0,1,11,0,0,2,25))
       })
 
