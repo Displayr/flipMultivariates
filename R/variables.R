@@ -1,5 +1,5 @@
 #' @export
-#' @importFrom stats predict.glm
+#' @importFrom stats predict na.pass
 predict.LDA <- function(object, newdata = object$model, na.action = na.pass, ...)
 {
     ldaExtractVariables(object, "class", newdata, na.action, ...)

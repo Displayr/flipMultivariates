@@ -201,6 +201,7 @@ LDA <- function(formula,
 #'   \url{http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm}
 #' @importFrom flipStatistics WeightedCounts
 #' @importFrom flipTransformations WeightedSVD
+#' @importFrom stats cov.wt cor
 #' @export
 
 LDA.fit = function (x,
