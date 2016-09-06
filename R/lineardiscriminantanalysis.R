@@ -51,7 +51,7 @@
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipData CalibrateWeight
-#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary
+#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric
 #' @importFrom flipU OutcomeName
 #' @importFrom flipRegression ConfusionMatrix
 #' @export
@@ -88,6 +88,13 @@ LDA <- function(formula,
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
     data <- CreatingFactorDependentVariableIfNecessary(formula, data)
+    # Making categorical variables numeric.
+    for (nm in names(data))
+    {
+        if (nm != outcome.name)
+            if (is.factor(data[, nm]))
+                data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
+    }
     outcome.variable <- data[, outcome.name]
     outcome.label <- Labels(data[, outcome.name])
     if (!is.null(weights) & length(weights) != nrow(data))

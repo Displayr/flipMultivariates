@@ -112,10 +112,17 @@ test_that(paste("Replicating SPSS and hair"),
           # no weight, filtered
           z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE)
           z
-          expect_equal(as.numeric(z$confusion), c(12,0,0,1,11,0,0,2,25))
+          expect_equal(as.numeric(z$confusion), c(21,0,0,1,11,0,0,2,25))
           # noweight, filtered
           z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, weights = hair1$id,subset = split60 == "Estimation Sample", show.labels = TRUE)
           z
-          expect_equal(as.numeric(z$confusion), c(12,0,0,1,11,0,0,2,25))
+          expect_equal(as.numeric(z$confusion), c(1023,0,0,43,501,0,0,43,1107))
+          # Factor
+          hair2 <- hair1
+          hair2$x6 <- flipTransformations::Factor(hair1$x6)
+          LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair2, weights = hair1$id,subset = split60 == "Estimation Sample", show.labels = TRUE)
+          LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair2, weights = hair1$id,subset = split60 == "Estimation Sample", show.labels = TRUE, binary = TRUE)
+
+
       })
 
