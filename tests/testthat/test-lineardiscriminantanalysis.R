@@ -100,15 +100,16 @@ test_that(paste("Predict works"),
 
 
 
+hair = foreign::read.spss("Q:/Testing/Regression Testing/trunk/Standard R Tests/HBAT_with splits.sav", to.data.frame = TRUE)
+hair <- flipExampleData::TidySPSS(hair)
+hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
+hair1$x1 <- hair$x1
+hair1$split60 <- hair$split60
+hair1$id <- hair$id
+
 test_that(paste("Replicating SPSS and hair"),
       {
 
-          hair = foreign::read.spss("Q:/Testing/Regression Testing/trunk/Standard R Tests/HBAT_with splits.sav", to.data.frame = TRUE)
-          hair <- flipExampleData::TidySPSS(hair)
-          hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
-          hair1$x1 <- hair$x1
-          hair1$split60 <- hair$split60
-          hair1$id <- hair$id
           # no weight, filtered
           z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE)
           z
@@ -126,3 +127,12 @@ test_that(paste("Replicating SPSS and hair"),
 
       })
 
+test_that("LDA variables",
+          {
+              z <- LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE)
+
+              expect_error(predict(z), NA)
+              expect_error(flipData::Observed(z), NA)
+              expect_sum(flipData::Probabilities(z), nrow(DiscriminantVariables(z)))
+          }
+)

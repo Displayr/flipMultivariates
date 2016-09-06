@@ -7,8 +7,7 @@
 LDA(formula, data = NULL, subset = NULL, weights = NULL,
   prior = "Equal", missing = "Exclude cases with missing data",
   output = "Means", variance = "moment", seed = 12321,
-  statistical.assumptions, auxiliary.data = NULL, show.labels = FALSE,
-  binary = FALSE, ...)
+  statistical.assumptions, auxiliary.data = NULL, show.labels = FALSE, ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
