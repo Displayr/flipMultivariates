@@ -389,7 +389,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
                                        x$sample.description,
                                        title = paste0("Linear Discriminant Analysis: ", x$outcome.label),
                                        subtitle = subtitle)
-        print(result)
+        return(print(result))
     }
     else
         print(x$original, ...)
