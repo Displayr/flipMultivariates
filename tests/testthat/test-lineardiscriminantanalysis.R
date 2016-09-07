@@ -83,7 +83,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
               zLDA.probs <- flipData::Probabilities(zLDA)
               head(zLDA.probs)
               expect_equal(0.89292, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
-              expect_equal(as.numeric(zLDA$confusion), c(1023,0,0,43,501,0,0,43,1107))
+              expect_equal(as.numeric(zLDA$confusion), c(21,0,0,1,10,0,0,3,25))
           }
 )
 
@@ -98,7 +98,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
               zLDA.probs <- flipData::Probabilities(zLDA)
               head(zLDA.probs)
               expect_equal(0.92946, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
-              expect_equal(as.numeric(zLDA$confusion), c(1023,0,0,43,501,0,0,43,1107))
+              expect_equal(as.numeric(zLDA$confusion), c(1056,8,0,10,493,0,0,43,1107))
           }
 )
 
