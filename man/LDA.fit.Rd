@@ -36,7 +36,6 @@ vector of probabilities can be provided.}
 }
 \details{
 This is a wrapper for MASS::lda and MASS::qda.
-
   #### Linear discriminant analysis #####
   \url{http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/lineardiscriminantanalysis.R
 \name{LDA}
 \alias{LDA}
-\title{\code{LDA} Linear Discriminant Analysis.}
+\title{\code{LDA}}
 \usage{
 LDA(formula, data = NULL, subset = NULL, weights = NULL,
   prior = "Equal", missing = "Exclude cases with missing data",
@@ -58,7 +58,7 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 \item{...}{Additional argments to be past to  \code{\link{LDA.formula}}.}
 }
 \description{
-\code{LDA} Linear Discriminant Analysis.
+Linear Discriminant Analysis
 }
 \details{
 "Imputation (replace missing values with estimates): All selected

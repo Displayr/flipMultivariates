@@ -1,5 +1,6 @@
-#' \code{LDA} Linear Discriminant Analysis.
+#' \code{LDA}
 #'
+#' Linear Discriminant Analysis
 #' @param formula A formula of the form \code{groups ~ x1 + x2 + ...}
 #' That is, the response is the grouping factor and the right hand side
 #' specifies the (non-factor) discriminators, and any transformations, interactions,
@@ -97,6 +98,8 @@ LDA <- function(formula,
     }
     outcome.variable <- data[, outcome.name]
     outcome.label <- Labels(data[, outcome.name])
+    if (outcome.label == "data[, outcome.name]")
+        outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
@@ -110,22 +113,23 @@ LDA <- function(formula,
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
-    subset <-  processed.data$subset
     .formula <- DataFormula(input.formula)
-    .estimation.data <- processed.data$estimation.data
-    ####################################################################
-    ##### Fitting the model. Ideally, this should be a call to     #####
-    ##### another function, with the output of that function       #####
-    ##### called 'original'.                                       #####
-    ####################################################################
-    n.levels <- nlevels(outcome.variable)
-    if (is.character(prior))
+    # Computing and checking the prior.
+    filtered.outcome.variable <- .estimation.data[,outcome.name]
+    if (is.null(weights))
+        observed.prior <- as.numeric(prop.table(table(filtered.outcome.variable)))
+    else
     {
-        outcome.variable <- factor(factor(outcome.variable))
-        prior <- switch(prior,
-            "Observed" = prop.table(table(outcome.variable)),
-            "Equal" = rep(1 / n.levels, n.levels))
+        df <- data.frame(x = filtered.outcome.variable, w = .weights)
+        observed.prior <- aggregate(w ~ x, data = df, FUN = sum)
+        observed.prior <- as.numeric(prop.table(observed.prior[, 2]))
     }
+    n.levels <- nlevels(outcome.variable)
+    equal.prior <- rep(1 / n.levels, n.levels)
+    if (is.character(prior))
+        prior <- switch(prior,
+            "Observed" = observed.prior,
+            "Equal" = equal.prior)
     error <- paste0("The 'prior' must be one of: (1) 'Equal', ",
                     "(2) 'Observed', ",
                     "(3) or a vector of length ", n.levels, " containing values greater than 0 and less than 1 which sum to 1.")
@@ -137,11 +141,16 @@ LDA <- function(formula,
         stop(error)
     else if (sum(prior) != 1 | min(prior) <= 0 | max(prior) >= 1)
         stop(error)
+    ####################################################################
+    ##### Fitting the model. Ideally, this should be a call to     #####
+    ##### another function, with the output of that function       #####
+    ##### called 'original'.                                       #####
+    ####################################################################
     x <- .estimation.data[, -match(outcome.name, names(.estimation.data))]
     result <- list(call = cl,
                    original = LDA.fit(x,
                                       grouping = .estimation.data[, outcome.name],
-                                      prior = prior,
+                                      prior = observed.prior,
                                       method = variance,
                                       weights = .weights))
     ####################################################################
@@ -153,13 +162,16 @@ LDA <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+    result$observed.prior <- observed.prior
+    result$equal.prior <- equal.prior
+    result$prior <- prior
     # 2. Saving descriptive information.
     class(result) <- "LDA"
+    result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.predictors <- ncol(.estimation.data) - 1
     result$n.observations <- n
     result$estimation.data <- .estimation.data
-    result$outcome.label <- result$outcome.name <- outcome.name
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
@@ -196,14 +208,12 @@ LDA <- function(formula,
 #' @param nu TODO
 #' @param ... Additional arguments.
 #' @details This is a wrapper for MASS::lda and MASS::qda.
-#'
 #'   #### Linear discriminant analysis #####
 #'   \url{http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm}
 #' @importFrom flipStatistics WeightedCounts
 #' @importFrom flipTransformations WeightedSVD
 #' @importFrom stats cov.wt cor
 #' @export
-
 LDA.fit = function (x,
                    grouping,
                    prior = proportions,
@@ -335,6 +345,7 @@ LDA.fit = function (x,
     class(result) <- "lda"
     result
 }
+
 
 #' @importFrom MASS lda
 #' @importFrom flipFormat FormatAsPercent MeanComparisonsTable Labels
