@@ -52,7 +52,7 @@
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipData CalibrateWeight
-#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric
+#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor
 #' @importFrom flipU OutcomeName
 #' @importFrom flipRegression ConfusionMatrix
 #' @export
@@ -115,7 +115,7 @@ LDA <- function(formula,
     .weights <- processed.data$weights
     .formula <- DataFormula(input.formula)
     # Computing and checking the prior.
-    filtered.outcome.variable <- .estimation.data[,outcome.name]
+    filtered.outcome.variable <- Factor(.estimation.data[,outcome.name])
     if (is.null(weights))
         observed.prior <- as.numeric(prop.table(table(filtered.outcome.variable)))
     else
@@ -124,7 +124,7 @@ LDA <- function(formula,
         observed.prior <- aggregate(w ~ x, data = df, FUN = sum)
         observed.prior <- as.numeric(prop.table(observed.prior[, 2]))
     }
-    n.levels <- nlevels(outcome.variable)
+    n.levels <- nlevels(filtered.outcome.variable)
     equal.prior <- rep(1 / n.levels, n.levels)
     if (is.character(prior))
         prior <- switch(prior,

@@ -107,26 +107,26 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
 
 
 
-# dat.original = foreign::read.spss("http://www.ats.ucla.edu/stat/spss/output/discrim.sav", to.data.frame = TRUE)
-# dat <- dat.original[sample(1:nrow(dat.original),91),]
-# wgt1 <- c(10,rep(1,90))
-# dat1 <- dat[c(rep(1,10),2:91),]
-# data(bank, package = "flipExampleData")
-# zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
-# sb <- bank$ID > 100
-# attr(sb, "label") <- "ID greater than 500"
-# wgt <- bank$ID / 100
-# attr(wgt, "label") <- "ID"
-# bank$dep <- (unclass(bank$Overall) - 1) / 6
-# attr(bank$Fees, "label") = "Bank Fees"
-# attr(bank$Overall, "label") = "Overall satisfaction"
+dat.original = foreign::read.spss("http://www.ats.ucla.edu/stat/spss/output/discrim.sav", to.data.frame = TRUE)
+dat <- dat.original[sample(1:nrow(dat.original),91),]
+wgt1 <- c(10,rep(1,90))
+dat1 <- dat[c(rep(1,10),2:91),]
+data(bank, package = "flipExampleData")
+zformula <- formula("Overall ~ Fees + Interest + Phone + Branch + Online + ATM")
+sb <- bank$ID > 100
+attr(sb, "label") <- "ID greater than 500"
+wgt <- bank$ID / 100
+attr(wgt, "label") <- "ID"
+bank$dep <- (unclass(bank$Overall) - 1) / 6
+attr(bank$Fees, "label") = "Bank Fees"
+attr(bank$Overall, "label") = "Overall satisfaction"
 
-# LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Means", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
-# LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Confusion Matrix", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
-# LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Detail", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
-# LDA(job ~ outdoor + social + conservative, output = "Means", data = dat, prior = rep(1/3,3), weights = wgt1)
-# LDA(job ~ outdoor + social + conservative, output = "Confusion Matrix", data = dat, prior = rep(1/3,3), weights = wgt1)
-# LDA(job ~ outdoor + social + conservative, output = "Detail", data = dat, prior = rep(1/3,3), weights = wgt1)
+LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Means", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
+LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Confusion Matrix", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
+LDA(Overall ~ Interest + Fees + Phone + Branch + Online + ATM, output = "Detail", data = bank, subset = sb, weights = wgt, show.labels = TRUE)
+LDA(job ~ outdoor + social + conservative, output = "Means", data = dat, prior = rep(1/3,3), weights = wgt1)
+LDA(job ~ outdoor + social + conservative, output = "Confusion Matrix", data = dat, prior = rep(1/3,3), weights = wgt1)
+LDA(job ~ outdoor + social + conservative, output = "Detail", data = dat, prior = rep(1/3,3), weights = wgt1)
 #
 #
 #
