@@ -8,6 +8,8 @@ hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
 
+LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = FALSE)
+
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
 test_that("Replicating SPSS defaults using MASS:LDA",
           {

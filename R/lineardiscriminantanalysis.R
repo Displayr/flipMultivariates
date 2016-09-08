@@ -383,11 +383,13 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
                           paste0(column.names, " " , accuracy.by.group, collapse = "; "),
                           ")" )
         means <- m$means
-        rownames(means) = x$variable.labels
+        if (x$show.labels)
+            rownames(means) = x$variable.labels
+        title <- paste0("Linear Discriminant Analysis: ", if (x$show.labels) x$outcome.label else x$outcome.name)
         result <- MeanComparisonsTable(means, m$zs, m$ps, m$r.squared, m$overall.p,
                                        m$column.names,
                                        x$sample.description,
-                                       title = paste0("Linear Discriminant Analysis: ", x$outcome.label),
+                                       title = title,
                                        subtitle = subtitle)
         return(print(result))
     }
