@@ -56,7 +56,6 @@ RandomForest <- function(formula,
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
-    data <- CreatingFactorDependentVariableIfNecessary(formula, data)
     # Making categorical variables numeric.
     for (nm in names(data))
     {
@@ -65,6 +64,7 @@ RandomForest <- function(formula,
                 data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
     }
     outcome.variable <- data[, outcome.name]
+    numeric.outcome <- !is.factor(outcome.variable)
     outcome.label <- Labels(data[, outcome.name])
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
@@ -119,7 +119,10 @@ RandomForest <- function(formula,
         # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
         rownames(result$original$importance) <- variable.labels
-        rownames(result$original$importanceSD) <- variable.labels
+        if (numeric.outcome)
+            names(result$original$importanceSD) <- variable.labels
+        else
+            rownames(result$original$importanceSD) <- variable.labels
     }
     # 4.Saving parameters
     result$formula <- input.formula

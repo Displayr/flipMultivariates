@@ -7,6 +7,8 @@ hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALS
 hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
+    hair1$num <- flipTransformations::AsNumeric(hair1$x1, binary = FALSE)
+
 
 library(flipRegression)
 test_that("Random forests",{
@@ -30,4 +32,25 @@ test_that("Random forests",{
     expect_error(z <- RandomForest(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE), NA)
     Accuracy(z)
     ConfusionMatrix(z)
-})
+
+    ## numeric dependent variable
+ # no weight, no filte
+    expect_error(z <- RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, show.labels = TRUE), NA)
+    Accuracy(z)
+    ConfusionMatrix(z)
+
+    # Filtered
+    expect_error(z <- RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE), NA)
+    Accuracy(z)
+    ConfusionMatrix(z)
+
+    # Weighted and filtered
+    expect_error(z <- RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE), NA)
+    Accuracy(z)
+    ConfusionMatrix(z)
+
+    # Filtered
+    expect_error(z <- RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE), NA)
+    Accuracy(z)
+    ConfusionMatrix(z)
+    })
