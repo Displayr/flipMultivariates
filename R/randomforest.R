@@ -56,13 +56,6 @@ RandomForest <- function(formula,
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
-    # Making categorical variables numeric.
-    for (nm in names(data))
-    {
-        if (nm != outcome.name)
-            if (is.factor(data[, nm]))
-                data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
-    }
     outcome.variable <- data[, outcome.name]
     numeric.outcome <- !is.factor(outcome.variable)
     outcome.label <- Labels(data[, outcome.name])
