@@ -24,7 +24,7 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 {
     outcome.i <- match(object$outcome.name, names(newdata))
     newdata <- newdata[, -outcome.i]
-    suppressWarnings(predict(object$original, prior , newdata = newdata, na.action = na.action)[[type]])
+    suppressWarnings(predict(object$original,prior = prior , newdata = newdata, na.action = na.action)[[type]])
 }
 
 #' @export

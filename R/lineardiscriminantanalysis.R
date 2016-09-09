@@ -125,6 +125,15 @@ LDA <- function(formula,
         observed.prior <- as.numeric(prop.table(observed.prior[, 2]))
     }
     n.levels <- nlevels(filtered.outcome.variable)
+    if (n.levels > 10)
+        warning(paste("The outcome variable contains", n.levels, "categories. Consider either merging categories, or, using a model more appropriate for such data (e.g., Linear Regression)."))
+    if ((min.o <- min(observed.prior)) < 0.1)
+    {
+        n.smallest <- round(min.o * n)
+        smallest.category <- levels(outcome.variable)[match(min.o, observed.prior)[1]]
+        warning(paste0("The smallest category of the outcome variable (", smallest.category, ") contains ",
+                       n.smallest, " observations; a robust model is unlikely."))
+    }
     equal.prior <- rep(1 / n.levels, n.levels)
     if (is.character(prior))
         prior <- switch(prior,

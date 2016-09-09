@@ -8,7 +8,6 @@ hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
 
-LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = FALSE)
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
 test_that("Replicating SPSS defaults using MASS:LDA",
@@ -86,8 +85,34 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
 )
 
 
+test_that("Replicating colas example in SPSS - default", {
+            library(colas, package = "flipExampleData")
+              zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Equal"))
+              variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
+              expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
+              zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
+              head(zLDA.discriminant.variables)
+              expect_equal(.3144915587291, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
+              zLDA.probs <- flipData::Probabilities(zLDA)
+              head(zLDA.probs)
+              expect_equal(.12683, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
+              # Not that confusion does not match, due to multiple groups with equivalent probabilities.
+})
 
 
+test_that("Replicating colas example in SPSS - compute from group sizes", {
+            library(colas, package = "flipExampleData")
+              zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"))
+              variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
+              expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
+              zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
+              head(zLDA.discriminant.variables)
+              expect_equal(.3144915587291, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
+              zLDA.probs <- flipData::Probabilities(zLDA)
+              head(zLDA.probs)
+              expect_equal(.19651, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
+              expect_equal(as.numeric(zLDA$confusion[, 1]), c(141, 37, 61, 25, 9, 43, 2, 3))
+})
 
 
 dat.original = foreign::read.spss("http://www.ats.ucla.edu/stat/spss/output/discrim.sav", to.data.frame = TRUE)
