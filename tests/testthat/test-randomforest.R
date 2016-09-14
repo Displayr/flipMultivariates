@@ -54,3 +54,4 @@ test_that("Random forests",{
     Accuracy(z)
     ConfusionMatrix(z)
     })
+

@@ -132,7 +132,7 @@ print.RandomForest <- function(x, ...)
     if (x$output == "Importance")
         print(x$original$importance)
     else
-        print.randomForest(x$original)
+        print(x$original)
     invisible(x)
 }
 
