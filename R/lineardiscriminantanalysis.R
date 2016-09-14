@@ -23,8 +23,8 @@
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
-#' @param variance The method used to estimate the variance; either \code{\link{"moment"}} for
-#' the method of moments or \code{\link{"mle"}} for maximum likelihood estimaion.
+#' @param variance The method used to estimate the variance; either \code{"moment"} for
+#' the method of moments or \code{"mle"} for maximum likelihood estimaion.
 #' @param seed The random number seed used in imputation.
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param auxiliary.data A \code{\link{data.frame}} containing additional variables
@@ -34,7 +34,7 @@
 #'  as they will both slow down the data and are unlikely to be useful
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param ... Additional argments to be past to  \code{\link{LDA.formula}}.
+#' @param ... Additional argments to be past to  \code{LDA.formula}.
 #' @details "Imputation (replace missing values with estimates): All selected
 #'   outcome and predictor variables are included in the imputation, along with
 #'   all \code{auxiliary.data}, excluding cases that are excluded via subset or
@@ -54,6 +54,7 @@
 #' @importFrom flipData CalibrateWeight
 #' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor
 #' @importFrom flipU OutcomeName
+#' @importFrom stats aggregate
 #' @importFrom flipRegression ConfusionMatrix
 #' @export
 LDA <- function(formula,
@@ -105,7 +106,7 @@ LDA <- function(formula,
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
     # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, m = m, seed = seed)
+    processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
     unfiltered.weights <- processed.data$unfiltered.weights
     .estimation.data <- processed.data$estimation.data
     n <- nrow(.estimation.data)

@@ -39,8 +39,8 @@ vector of probabilities can be provided.}
 
 \item{output}{One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.}
 
-\item{variance}{The method used to estimate the variance; either \code{\link{"moment"}} for
-the method of moments or \code{\link{"mle"}} for maximum likelihood estimaion.}
+\item{variance}{The method used to estimate the variance; either \code{"moment"} for
+the method of moments or \code{"mle"} for maximum likelihood estimaion.}
 
 \item{seed}{The random number seed used in imputation.}
 
@@ -55,7 +55,7 @@ as they will both slow down the data and are unlikely to be useful}
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
 
-\item{...}{Additional argments to be past to  \code{\link{LDA.formula}}.}
+\item{...}{Additional argments to be past to  \code{LDA.formula}.}
 }
 \description{
 Linear Discriminant Analysis

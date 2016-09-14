@@ -37,6 +37,8 @@ name of a variable in \code{data}. It may not be an expression.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
+
+\item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
 }
 \description{
 RandomForest

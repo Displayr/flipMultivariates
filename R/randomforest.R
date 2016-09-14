@@ -22,6 +22,7 @@
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
+#' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom randomForest randomForest
@@ -124,7 +125,7 @@ RandomForest <- function(formula,
     result
 }
 
-#' @importFrom randomForest randomForest
+#' @import randomForest
 #' @export
 print.RandomForest <- function(x, ...)
 {

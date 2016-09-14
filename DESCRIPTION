@@ -16,10 +16,8 @@ Imports:
     flipStatistics,
     flipTransformations,
     flipU,
-    formattable,
-    htmltools,
     MASS,
-    rmarkdown
+    randomForest
 Suggests:
     testthat
 RoxygenNote: 5.0.1
