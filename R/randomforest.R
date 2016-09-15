@@ -131,7 +131,8 @@ RandomForest <- function(formula,
 #' @export
 print.RandomForest <- function(x, ...)
 {
-    rownames(result$original$importance) <- x$variable.labels
+    if (x$show.labels)
+        rownames(x$original$importance) <- x$variable.labels
     if (x$output == "Importance")
         print(x$original$importance)
     else
