@@ -91,6 +91,7 @@ RandomForest <- function(formula,
     ####################################################################
     result <- list(original = randomForest(.formula,
         importance = TRUE, data = .estimation.data.1))
+    result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################

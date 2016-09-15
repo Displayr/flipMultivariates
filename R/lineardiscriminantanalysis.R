@@ -163,6 +163,7 @@ LDA <- function(formula,
                                       prior = observed.prior,
                                       method = variance,
                                       weights = .weights))
+    result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
