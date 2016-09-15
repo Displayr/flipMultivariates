@@ -9,6 +9,14 @@
 }
 \arguments{
 \item{object}{A \code{RandomForest} object.}
+
+\item{newdata}{Optionally, a data frame in which to look for variables with which to predict.
+If omitted, the data used to fit the model is used.}
+
+\item{na.action}{Function determining what should be done with missing values in \code{newdata}.
+The default is to predict \code{NA}.}
+
+\item{...}{Additional arguments to pass to predict.randomForest.}
 }
 \description{
 Predicts values for numeric outcomes and group membership for categories, for the entire sample passed into the original analysis (including missing and filtered values).

@@ -67,7 +67,7 @@ RandomForest <- function(formula,
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
     # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, m = m, seed = seed)
+    processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
     unfiltered.weights <- processed.data$unfiltered.weights
     .estimation.data <- processed.data$estimation.data
     n.predictors <- ncol(.estimation.data)
@@ -105,6 +105,7 @@ RandomForest <- function(formula,
     result$sample.description <- processed.data$description
     result$n.observations <- n
     result$estimation.data <- .estimation.data
+    result$numeric.outcome <- numeric.outcome
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
@@ -113,11 +114,11 @@ RandomForest <- function(formula,
         variable.labels <- Labels(data)
         # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
-        rownames(result$original$importance) <- variable.labels
         if (numeric.outcome)
             names(result$original$importanceSD) <- variable.labels
         else
             rownames(result$original$importanceSD) <- variable.labels
+        # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
     }
     # 4.Saving parameters
     result$formula <- input.formula
@@ -130,6 +131,7 @@ RandomForest <- function(formula,
 #' @export
 print.RandomForest <- function(x, ...)
 {
+    rownames(result$original$importance) <- x$variable.labels
     if (x$output == "Importance")
         print(x$original$importance)
     else
@@ -138,6 +140,31 @@ print.RandomForest <- function(x, ...)
 }
 
 
+#' \code{ConfusionMatrix}
+#'
+#' @param obj A model with an outcome variable.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression.
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @details The proportion of observed values that take the same values as the predicted values.
+#' Where the outcome
+#' variable in the model is not a factor and not a count, predicted values are assigned to the closest observed
+#' value.
+#' @importFrom stats predict
+#' @importFrom methods is
+#' @importFrom flipData Observed
+#' @importFrom flipRegression ConfusionMatrixFromVariables ConfusionMatrixFromVariables
+#' @export
+ConfusionMatrix.RandomForest <- function(obj, subset = NULL, weights = NULL)
+{
+    observed <- Observed(obj)
+    predicted <- predict(obj)
+    if(obj$numeric.outcome)
+        return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
+    return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
+}
 
 
 
