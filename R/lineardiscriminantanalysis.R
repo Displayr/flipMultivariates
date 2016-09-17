@@ -90,6 +90,9 @@ LDA <- function(formula,
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
     data <- CreatingFactorDependentVariableIfNecessary(formula, data)
+    ####################################################################
+    ##### Data manipulation specific to LDA                        #####
+    ####################################################################
     # Making categorical variables numeric.
     for (nm in names(data))
     {
@@ -163,28 +166,29 @@ LDA <- function(formula,
                                       prior = observed.prior,
                                       method = variance,
                                       weights = .weights))
-    result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
-    # 1. Saving data.
+    # 1. Setting the class and call.
+    result$original$call <- cl
+    class(result) <- "LDA"
+    # 2. Saving data - generally applicable.
     if (missing == "Imputation (replace missing values with estimates)")
         data <- processed.data$data
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+    # 3. Saving data - applicable only to LDA
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
     result$prior <- prior
-    # 2. Saving descriptive information.
-    class(result) <- "LDA"
+    # 4. Saving descriptive information.
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.predictors <- ncol(.estimation.data) - 1
     result$n.observations <- n
     result$estimation.data <- .estimation.data
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
-    # 3. Replacing names with labels
+    # 5. Replacing names with labels
     if (result$show.labels <- show.labels)
     {
         result$outcome.label <- outcome.label
@@ -194,7 +198,9 @@ LDA <- function(formula,
         colnames(result$original$means) <- variable.labels
         row.names(result$original$scaling) <- variable.labels
     }
-    # 4.Saving parameters
+    # 6. Analysis specified to predictive methods.
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    # 7.Saving parameters
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
