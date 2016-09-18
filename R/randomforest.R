@@ -82,13 +82,12 @@ RandomForest <- function(formula,
         .estimation.data
     else
         AdjustDataToReflectWeights(.estimation.data, .weights)
-
-
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
+    set.seed(seed)
     result <- list(original = randomForest(.formula,
         importance = TRUE, data = .estimation.data.1))
     result$original$call <- cl
