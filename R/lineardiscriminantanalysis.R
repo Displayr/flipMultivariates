@@ -388,27 +388,34 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         subset <- x$subset
         weights <- x$weights[subset]
         warnings("Weights not hooked up")
-        compare.means <- CompareMultipleMeans(independents, dependent, weights = weights)
-        m <- MeansTables(compare.means)
         confusion <- x$confusion
         confusion <- confusion / sum(confusion)
         accuracy <- sum(diag(confusion))
         accuracy <- FormatAsPercent(accuracy, 4)
         accuracy.by.group <- FormatAsPercent(diag(confusion) / apply(confusion, 1, sum), 4)
-        #return(print(x$confusion))
+
+
+
         subtitle = paste0("Correct predictions: ", accuracy, " (",
                           paste0(column.names, " " , accuracy.by.group, collapse = "; "),
                           ")" )
-        means <- m$means
-        if (x$show.labels)
-            rownames(means) = x$variable.labels
+
+        #m <- MeansTables(compare.means)
+
+        #means <- m$means
+      #  if (x$show.labels)
+      #      rownames(means) = x$variable.labels
         title <- paste0("Linear Discriminant Analysis: ", if (x$show.labels) x$outcome.label else x$outcome.name)
-        result <- MeanComparisonsTable(means, m$zs, m$ps, m$r.squared, m$overall.p,
-                                       m$column.names,
-                                       x$sample.description,
-                                       title = title,
-                                       subtitle = subtitle)
-        return(print(result))
+        # result <- MeanComparisonsTable(means, m$zs, m$ps, m$r.squared, m$overall.p,
+        #                                m$column.names,
+        #                                ,
+        #                                title = title,
+        #                                subtitle = subtitle)
+        CompareMultipleMeans(independents, dependent, weights = weights,
+                             title = title,
+                             subtitle = subtitle,
+                             footer = x$sample.description)
+
     }
     else
         print(x$original, ...)

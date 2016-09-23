@@ -8,6 +8,12 @@ hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
 
+# test_that("CE-626 System is computationally singular)",
+#           {
+#                 data(colas, package = "flipExampleData")
+#                 expect_error(print(LDA(q3 ~ Q5_5_1 + Q5_7_1, weights = unclass(colas$q7), data = colas)), NA)
+#           })
+
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
 test_that("Replicating SPSS defaults using MASS:LDA",
