@@ -419,6 +419,5 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     }
     else
         print(x$original, ...)
-    invisible(x)
 }
 
