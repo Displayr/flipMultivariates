@@ -363,10 +363,11 @@ LDA.fit = function (x,
     result
 }
 
-
+#' print.LDA
+#'
 #' @importFrom MASS lda
-#' @importFrom flipFormat FormatAsPercent MeanComparisonsTable Labels
-#' @importFrom flipAnalysisOfVariance CompareMultipleMeans MeansTables
+#' @importFrom flipFormat FormatAsPercent Labels
+#' @importFrom flipAnalysisOfVariance FormattableANOVAs CompareMultipleMeans
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -393,29 +394,19 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         accuracy <- sum(diag(confusion))
         accuracy <- FormatAsPercent(accuracy, 4)
         accuracy.by.group <- FormatAsPercent(diag(confusion) / apply(confusion, 1, sum), 4)
-
-
-
         subtitle = paste0("Correct predictions: ", accuracy, " (",
                           paste0(column.names, " " , accuracy.by.group, collapse = "; "),
                           ")" )
-
-        #m <- MeansTables(compare.means)
-
-        #means <- m$means
-      #  if (x$show.labels)
-      #      rownames(means) = x$variable.labels
         title <- paste0("Linear Discriminant Analysis: ", if (x$show.labels) x$outcome.label else x$outcome.name)
-        # result <- MeanComparisonsTable(means, m$zs, m$ps, m$r.squared, m$overall.p,
-        #                                m$column.names,
-        #                                ,
-        #                                title = title,
-        #                                subtitle = subtitle)
-        print(CompareMultipleMeans(independents, dependent, weights = weights,
-                             title = title,
-                             subtitle = subtitle,
-                             footer = x$sample.description))
+        m <- CompareMultipleMeans(independents,
+                                   dependent,
+                                   weights = weights,
+                                   title = title,
+                                   subtitle = subtitle,
+                                   footer = x$sample.description)
 
+        p <- FormattableANOVAs(m$anovas, m$title, m$subtitle, m$footer)
+        print(p)
     }
     else
         print(x$original, ...)
