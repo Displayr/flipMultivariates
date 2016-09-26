@@ -411,10 +411,10 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         #                                ,
         #                                title = title,
         #                                subtitle = subtitle)
-        CompareMultipleMeans(independents, dependent, weights = weights,
+        print(CompareMultipleMeans(independents, dependent, weights = weights,
                              title = title,
                              subtitle = subtitle,
-                             footer = x$sample.description)
+                             footer = x$sample.description))
 
     }
     else
