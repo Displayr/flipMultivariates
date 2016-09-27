@@ -1,5 +1,10 @@
 context("Random Forest")
 
+test_that("CE-676 Incorrect error about missing values",{
+    data(colas, package = "flipExampleData")
+    expect_error(RandomForest(d1 ~ q2d, data = colas), NA)
+})
+
 data(hbatwithsplits, package = "flipExampleData")
 hair <- hbatwithsplits
 
