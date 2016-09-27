@@ -94,12 +94,15 @@ LDA <- function(formula,
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
     # Making categorical variables numeric.
-    for (nm in names(data))
-    {
-        if (nm != outcome.name)
-            if (is.factor(data[, nm]))
-                data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
-    }
+    # for (nm in names(data))
+    # {
+    #     if (nm != outcome.name)
+    #         if (is.factor(data[, nm]))
+    # data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
+    # }
+    labels <- Labels(data)
+    i.outcome <- match(outcome.name, names(data))
+    data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
     outcome.label <- Labels(data[, outcome.name])
     if (outcome.label == "data[, outcome.name]")
@@ -131,9 +134,9 @@ LDA <- function(formula,
     n.levels <- nlevels(filtered.outcome.variable)
     if (n.levels > 10)
         warning(paste("The outcome variable contains", n.levels, "categories. Consider either merging categories, or, using a model more appropriate for such data (e.g., Linear Regression)."))
-    if ((min.o <- min(observed.prior)) < 0.1)
+    n.smallest <- round((min.o <- min(observed.prior)) * n)
+    if (n.smallest < 30)
     {
-        n.smallest <- round(min.o * n)
         smallest.category <- levels(outcome.variable)[match(min.o, observed.prior)[1]]
         warning(paste0("The smallest category of the outcome variable (", smallest.category, ") contains ",
                        n.smallest, " observations; a robust model is unlikely."))
@@ -159,13 +162,16 @@ LDA <- function(formula,
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
-    x <- .estimation.data[, -match(outcome.name, names(.estimation.data))]
+    x <- .estimation.data[, -i.outcome]
+    labels <- labels[match(names(x), names(labels))]
     result <- list(call = cl,
                    original = LDA.fit(x,
                                       grouping = .estimation.data[, outcome.name],
                                       prior = observed.prior,
                                       method = variance,
-                                      weights = .weights))
+                                      weights = .weights),
+                variable.labels = labels)
+#                                      outcome.label = outcome.label))
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
@@ -192,11 +198,10 @@ LDA <- function(formula,
     if (result$show.labels <- show.labels)
     {
         result$outcome.label <- outcome.label
-        variable.labels <- Labels(data)
         # Removing the outcome variable
-        result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
-        colnames(result$original$means) <- variable.labels
-        row.names(result$original$scaling) <- variable.labels
+        #result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
+        colnames(result$original$means) <- labels
+        row.names(result$original$scaling) <- labels
     }
     # 6. Analysis specified to predictive methods.
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
@@ -367,7 +372,7 @@ LDA.fit = function (x,
 #'
 #' @importFrom MASS lda
 #' @importFrom flipFormat FormatAsPercent Labels
-#' @importFrom flipAnalysisOfVariance FormattableANOVAs CompareMultipleMeans
+#' @importFrom flipAnalysisOfVariance FormattableANOVAs MultipleANOVAs
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -385,7 +390,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     }
     else if (output == "Means")
     {
-        independents <- as.list(data[, -match(dependent.name, names(data))])
+        independents <- data[, -match(dependent.name, names(data))]
         subset <- x$subset
         weights <- x$weights[subset]
         warnings("Weights not hooked up")
@@ -397,16 +402,29 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         subtitle = paste0("Correct predictions: ", accuracy, " (",
                           paste0(column.names, " " , accuracy.by.group, collapse = "; "),
                           ")" )
-        title <- paste0("Linear Discriminant Analysis: ", if (x$show.labels) x$outcome.label else x$outcome.name)
-        m <- CompareMultipleMeans(independents,
-                                   dependent,
-                                   weights = weights,
-                                   title = title,
-                                   subtitle = subtitle,
-                                   footer = x$sample.description)
+        title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
+        for (i in 1:ncol(independents))
+            attr(independents[, i], "label") <- x$variable.labels[i]
+        m <- MultipleANOVAs(independents,
+                           dependent,
+                           weights = weights,
+                           compare = "To mean",
+                           correction = "Tukey Range",
+                           robust.se = TRUE,
+                           alternative = "Two-sided",
+                           show.labels = x$show.labels,
+                           seed = x$seed,
+                           p.cutoff = 0.05)
+        # m <- CompareMultipleMeans(independents,
+        #                            dependent,
+        #                            weights = weights,
+        #                            title = title,
+        #                            subtitle = subtitle,
+        #                            footer = x$sample.description,
+        #                           show.labels = x$show.labels,
+        #                           p.cutoff = 0.05)
 
-        p <- FormattableANOVAs(m$anovas, m$title, m$subtitle, m$footer)
-        print(p)
+        print(FormattableANOVAs(m, title, subtitle, x$sample.description))
     }
     else
         print(x$original, ...)
