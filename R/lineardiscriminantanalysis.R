@@ -49,9 +49,8 @@
 #'   Econometrica, 48, 817-838. Long, J. S. and Ervin, L. H. (2000). Using
 #'   heteroscedasticity consistent standard errors in the linear regression
 #'   model. The American Statistician, 54(3): 217-224.
-#' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
-#' @importFrom flipFormat Labels
-#' @importFrom flipData CalibrateWeight
+#' @importFrom flipData CalibrateWeight GetData CleanSubset CleanWeights EstimationData DataFormula
+#' @importFrom flipFormat Labels Names
 #' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor
 #' @importFrom flipU OutcomeName
 #' @importFrom stats aggregate
@@ -78,12 +77,12 @@ LDA <- function(formula,
     if(!missing(statistical.assumptions))
         stop("'statistical.assumptions' objects are not yet supported.")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(OriginalName(subset), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
     if (!is.null(subset))
     {
-        if (is.null(subset.description))
-            subset.description <- OriginalName(subset)
+        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
+            subset.description <- Labels(subset)
         if (is.null(attr(subset, "name")))
             attr(subset, "name") <- subset.description
     }
@@ -109,7 +108,7 @@ LDA <- function(formula,
     i.outcome <- match(outcome.name, names(data))
     data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
-    outcome.label <- labels(i.outcome)
+    outcome.label <- labels[i.outcome]
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
