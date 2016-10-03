@@ -78,10 +78,15 @@ LDA <- function(formula,
     if(!missing(statistical.assumptions))
         stop("'statistical.assumptions' objects are not yet supported.")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- if (is.null(substitute(subset))) NULL else deparse(substitute(subset))
+    subset.description <- try(OriginalName(subset), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset.description))
-        attr(subset, "description") <- subset.description
+    if (!is.null(subset))
+    {
+        if (is.null(subset.description))
+            subset.description <- OriginalName(subset)
+        if (is.null(attr(subset, "name")))
+            attr(subset, "name") <- subset.description
+    }
     if(!is.null(weights))
         if (is.null(attr(weights, "name")))
             attr(weights, "name") <- deparse(substitute(weights))
@@ -104,7 +109,7 @@ LDA <- function(formula,
     i.outcome <- match(outcome.name, names(data))
     data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
-    outcome.label <- Labels(data[, outcome.name])
+    outcome.label <- labels(i.outcome)
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
