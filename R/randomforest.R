@@ -46,12 +46,12 @@ RandomForest <- function(formula,
     if(!missing(statistical.assumptions))
         stop("'statistical.assumptions' objects are not yet supported.")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(OriginalName(subset), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
     if (!is.null(subset))
     {
-        if (is.null(subset.description))
-            subset.description <- OriginalName(subset)
+        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
+            subset.description <- Labels(subset)
         if (is.null(attr(subset, "name")))
             attr(subset, "name") <- subset.description
     }

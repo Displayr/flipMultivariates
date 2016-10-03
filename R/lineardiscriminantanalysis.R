@@ -374,6 +374,10 @@ LDA.fit = function (x,
 
 #' print.LDA
 #'
+#' @param x The \link{LDA} object.
+#' @param p.cutoff The alpha value to use when highlighting results.
+#' @param digits The number of digits when printing the \code{"detail"} output.
+#' @param ... Generic print arguments.
 #' @importFrom MASS lda
 #' @importFrom flipFormat FormatAsPercent Labels
 #' @importFrom flipAnalysisOfVariance FormattableANOVAs MultipleANOVAs

@@ -8,6 +8,7 @@ hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
 
+
 # test_that("CE-626 System is computationally singular)",
 #           {
 #                 data(colas, package = "flipExampleData")

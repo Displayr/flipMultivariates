@@ -17,6 +17,7 @@ Imports:
     flipTransformations,
     flipU,
     MASS,
+    methods,
     randomForest
 Suggests:
     testthat
