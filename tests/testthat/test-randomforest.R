@@ -2,7 +2,7 @@ context("Random Forest")
 
 test_that("CE-676 Incorrect error about missing values",{
     data(colas, package = "flipExampleData")
-    expect_error(RandomForest(d1 ~ q2d, data = colas), NA)
+    expect_error(suppressWarnings(RandomForest(d1 ~ q2d, data = colas)))
 })
 
 data(hbatwithsplits, package = "flipExampleData")

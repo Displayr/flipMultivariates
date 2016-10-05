@@ -62,9 +62,11 @@ RandomForest <- function(formula,
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
-    outcome.variable <- data[, outcome.name]
+    outcome.i <- match(outcome.name, names(data))
+    outcome.variable <- data[, outcome.i]
     numeric.outcome <- !is.factor(outcome.variable)
-    outcome.label <- Labels(data[, outcome.name])
+    variable.labels <- Labels(data)
+    outcome.label <- variable.labels[outcome.i]
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
@@ -115,9 +117,8 @@ RandomForest <- function(formula,
     if (result$show.labels <- show.labels)
     {
         result$outcome.label <- outcome.label
-        variable.labels <- Labels(data)
         # Removing the outcome variable
-        result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
+        result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
         if (numeric.outcome)
             names(result$original$importanceSD) <- variable.labels
         else
