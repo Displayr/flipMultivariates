@@ -166,8 +166,10 @@ print.RandomForest <- function(x, ...)
         print(tbl)
     }
     else
+    {
         print(x$original)
-    invisible(x)
+        invisible(x)
+    }
 }
 
 
