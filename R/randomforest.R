@@ -23,6 +23,7 @@
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
+#' @importFrom stats pnorm
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom randomForest randomForest
@@ -125,21 +126,45 @@ RandomForest <- function(formula,
             rownames(result$original$importanceSD) <- variable.labels
         # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
     }
+    else
+        result$outcome.label <- outcome.name
     # 4.Saving parameters
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
+    # 5. Statistics
+    result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD
+    result$p.values <- 2 * (1 - pnorm(abs(result$z.statistics)))
     result
 }
 
 #' @import randomForest
+#' @importFrom flipFormat RandomForestTable FormatWithDecimals RandomForestTable
 #' @export
 print.RandomForest <- function(x, ...)
 {
     if (x$show.labels)
         rownames(x$original$importance) <- x$variable.labels
     if (x$output == "Importance")
-        print(x$original$importance)
+    {
+        title <- paste0("Random Forest: ", x$outcome.label)
+        subtitle <- if (x$numeric.outcome)
+            paste("R-squared:", FormatWithDecimals(x$original$rsq[length(x$original$rsq)], 3))
+        else
+        {
+            err <- x$original$err.rate
+            accuracies <- 1 - err[nrow(err), ]
+            k <- length(accuracies)
+            correctPredictionsText(accuracies[1], colnames(err)[2:k], accuracies[2:k])
+        }
+        tbl <- RandomForestTable(x$original$importance,
+                                 x$z.statistics,
+                                 x$p.values,
+                                 title = title,
+                                 subtitle = subtitle,
+                                 footer = x$sample.description)
+        print(tbl)
+    }
     else
         print(x$original)
     invisible(x)

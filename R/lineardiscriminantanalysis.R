@@ -207,6 +207,8 @@ LDA <- function(formula,
         colnames(result$original$means) <- labels
         row.names(result$original$scaling) <- labels
     }
+    else
+        result$outcome.label <- outcome.name
     # 6. Analysis specified to predictive methods.
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     # 7.Saving parameters
@@ -379,7 +381,7 @@ LDA.fit = function (x,
 #' @param digits The number of digits when printing the \code{"detail"} output.
 #' @param ... Generic print arguments.
 #' @importFrom MASS lda
-#' @importFrom flipFormat FormatAsPercent Labels
+#' @importFrom flipFormat Labels
 #' @importFrom flipAnalysisOfVariance FormattableANOVAs MultipleANOVAs
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
@@ -404,12 +406,8 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         warnings("Weights not hooked up")
         confusion <- x$confusion
         confusion <- confusion / sum(confusion)
-        accuracy <- sum(diag(confusion))
-        accuracy <- FormatAsPercent(accuracy, 4)
-        accuracy.by.group <- FormatAsPercent(diag(confusion) / apply(confusion, 1, sum), 4)
-        subtitle = paste0("Correct predictions: ", accuracy, " (",
-                          paste0(column.names, " " , accuracy.by.group, collapse = "; "),
-                          ")" )
+        subtitle = correctPredictionsText(sum(diag(confusion)), column.names,
+                                          diag(confusion) / apply(confusion, 1, sum))
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
         for (i in 1:ncol(independents))
             attr(independents[, i], "label") <- x$variable.labels[i]
