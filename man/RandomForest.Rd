@@ -6,7 +6,8 @@
 \usage{
 RandomForest(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Importance", missing = "Exclude cases with missing data",
-  seed = 12321, statistical.assumptions, show.labels = FALSE, ...)
+  seed = 12321, statistical.assumptions, show.labels = FALSE,
+  sort.by.importance = TRUE, ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -37,6 +38,9 @@ name of a variable in \code{data}. It may not be an expression.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
+
+\item{sort.by.importance}{Sort the last column of the importance table
+in descending order.}
 
 \item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
 }

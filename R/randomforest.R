@@ -21,8 +21,10 @@
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
+#' @param sort.by.importance Sort the last column of the importance table
+#' in descending order.
 #' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
+#' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom stats pnorm
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
@@ -38,6 +40,7 @@ RandomForest <- function(formula,
                 seed = 12321,
                 statistical.assumptions,
                 show.labels = FALSE,
+                sort.by.importance = TRUE,
                 ...)
 {
     ####################################################################
@@ -132,6 +135,7 @@ RandomForest <- function(formula,
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
+    result$sort.by.importance <- sort.by.importance
     # 5. Statistics
     result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD
     result$p.values <- 2 * (1 - pnorm(abs(result$z.statistics)))
@@ -160,6 +164,7 @@ print.RandomForest <- function(x, ...)
         tbl <- RandomForestTable(x$original$importance,
                                  x$z.statistics,
                                  x$p.values,
+                                 x$sort.by.importance,
                                  title = title,
                                  subtitle = subtitle,
                                  footer = x$sample.description)
