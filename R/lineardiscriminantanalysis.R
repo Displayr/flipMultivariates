@@ -124,7 +124,6 @@ LDA <- function(formula,
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula)
     # Computing and checking the prior.
     filtered.outcome.variable <- Factor(.estimation.data[,outcome.name])
     if (is.null(weights))
