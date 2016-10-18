@@ -78,8 +78,7 @@ RandomForest <- function(formula,
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
     # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed,
-                                     error.if.insufficient.obs = FALSE)
+    processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
     unfiltered.weights <- processed.data$unfiltered.weights
     .estimation.data <- processed.data$estimation.data
     n.predictors <- ncol(.estimation.data)
