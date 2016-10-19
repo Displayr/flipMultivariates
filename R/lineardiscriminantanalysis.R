@@ -381,7 +381,7 @@ LDA.fit = function (x,
 #' @param ... Generic print arguments.
 #' @importFrom MASS lda
 #' @importFrom flipFormat Labels
-#' @importFrom flipAnalysisOfVariance FormattableANOVAs MultipleANOVAs
+#' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -410,16 +410,6 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
         for (i in 1:ncol(independents))
             attr(independents[, i], "label") <- x$variable.labels[i]
-        m <- MultipleANOVAs(independents,
-                           dependent,
-                           weights = weights,
-                           compare = "To mean",
-                           correction = "Tukey Range",
-                           robust.se = TRUE,
-                           alternative = "Two-sided",
-                           show.labels = x$show.labels,
-                           seed = x$seed,
-                           p.cutoff = 0.05)
         # m <- CompareMultipleMeans(independents,
         #                            dependent,
         #                            weights = weights,
@@ -429,7 +419,14 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         #                           show.labels = x$show.labels,
         #                           p.cutoff = 0.05)
 
-        print(FormattableANOVAs(m, title, subtitle, x$sample.description))
+        table <- CompareMultipleMeans(independents,
+                    dependent,
+                    weights = weights,
+                    show.labels = x$show.labels,
+                    title = title,
+                    subtitle = subtitle,
+                    footer = x$sample.description)
+        print(table)
     }
     else
         print(x$original, ...)
