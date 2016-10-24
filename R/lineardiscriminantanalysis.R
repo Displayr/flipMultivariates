@@ -380,7 +380,7 @@ LDA.fit = function (x,
 #' @param digits The number of digits when printing the \code{"detail"} output.
 #' @param ... Generic print arguments.
 #' @importFrom MASS lda
-#' @importFrom flipFormat Labels
+#' @importFrom flipFormat Labels ExtractCommonPrefix
 #' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
@@ -407,9 +407,21 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         confusion <- confusion / sum(confusion)
         subtitle = correctPredictionsText(sum(diag(confusion)), column.names,
                                           diag(confusion) / apply(confusion, 1, sum))
+
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
-        for (i in 1:ncol(independents))
-            attr(independents[, i], "label") <- x$variable.labels[i]
+        if (show.labels)
+        {
+            extracted <- ExtractCommonPrefix(x$variable.labels)
+            if (!is.na(extracted$common.prefix))
+            {
+                title <- paste0(title, " by ", extracted$common.prefix)
+                for (i in 1:ncol(independents))
+                    attr(independents[, i], "label") <- extracted$shortened.labels
+            }
+            else
+                attr(independents[, i], "label") <- x$variable.labels
+        }
+
         # m <- CompareMultipleMeans(independents,
         #                            dependent,
         #                            weights = weights,
@@ -422,7 +434,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         table <- CompareMultipleMeans(independents,
                     dependent,
                     weights = weights,
-                    show.labels = x$show.labels,
+                    show.labels = show.labels,
                     title = title,
                     subtitle = subtitle,
                     footer = x$sample.description)
