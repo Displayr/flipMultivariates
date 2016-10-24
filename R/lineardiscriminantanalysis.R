@@ -416,10 +416,13 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
             {
                 title <- paste0(title, " by ", extracted$common.prefix)
                 for (i in 1:ncol(independents))
-                    attr(independents[, i], "label") <- extracted$shortened.labels
+                    attr(independents[, i], "label") <- extracted$shortened.labels[i]
             }
             else
-                attr(independents[, i], "label") <- x$variable.labels
+            {
+                for (i in 1:ncol(independents))
+                    attr(independents[, i], "label") <- x$variable.labels[i]
+            }
         }
 
         # m <- CompareMultipleMeans(independents,
