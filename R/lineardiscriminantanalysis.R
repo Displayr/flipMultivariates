@@ -105,11 +105,14 @@ LDA <- function(formula,
     #         if (is.factor(data[, nm]))
     # data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
     # }
-    labels <- Labels(data)
+
+    extracted <- ExtractCommonPrefix(Labels(data))
+    by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
+    labels <- extracted$shortened.labels
     i.outcome <- match(outcome.name, names(data))
     data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
-    outcome.label <- labels[i.outcome]
+    outcome.label <- paste0(labels[i.outcome], by.label)
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
@@ -387,11 +390,11 @@ LDA.fit = function (x,
 #' @param p.cutoff The alpha value to use when highlighting results.
 #' @param digits The number of digits when printing the \code{"detail"} output.
 #' @param ... Generic print arguments.
-#' @importFrom flipFormat Labels
-#' @importFrom rhtmlMoonPlot moonplot
+#' @importFrom flipFormat Labels Labels ExtractCommonPrefix
+#' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
-#' @importFrom flipAnalysisOfVariance CompareMultipleMeans
+#' @importFrom rhtmlMoonPlot moonplot
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -417,13 +420,15 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         confusion <- confusion / sum(confusion)
         subtitle = correctPredictionsText(sum(diag(confusion)), column.names,
                                           diag(confusion) / apply(confusion, 1, sum))
+
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
-        for (i in 1:ncol(independents))
-            attr(independents[, i], "label") <- x$variable.labels[i]
+        if (show.labels)
+                for (i in 1:ncol(independents))
+                    attr(independents[, i], "label") <- x$variable.labels[i]
         table <- CompareMultipleMeans(independents,
                     dependent,
                     weights = weights,
-                    show.labels = x$show.labels,
+                    show.labels = show.labels,
                     title = title,
                     subtitle = subtitle,
                     footer = x$sample.description)
