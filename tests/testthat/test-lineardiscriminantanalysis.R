@@ -9,6 +9,15 @@ hair1$split60 <- hair$split60
 hair1$id <- hair$id
 
 
+test_that("plots",
+          {
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Scatterplot"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Scatterplot"))
+              expect_error(print(zLDA), NA)
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Moonplot"))
+              expect_error(print(zLDA), NA)
+          })
+
 # test_that("CE-626 System is computationally singular)",
 #           {
 #                 data(colas, package = "flipExampleData")

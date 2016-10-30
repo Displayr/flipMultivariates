@@ -51,7 +51,8 @@
 #'   model. The American Statistician, 54(3): 217-224.
 #' @importFrom flipData CalibrateWeight GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom flipFormat Labels Names
-#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor
+#' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor StandardizeData
+#' @importFrom flipStatistics Correlation MeanByGroup
 #' @importFrom flipU OutcomeName
 #' @importFrom stats aggregate
 #' @importFrom flipRegression ConfusionMatrix
@@ -166,15 +167,16 @@ LDA <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     x <- .estimation.data[, -i.outcome]
+    group <- .estimation.data[, outcome.name]
     labels <- labels[match(names(x), names(labels))]
     result <- list(call = cl,
                    original = LDA.fit(x,
-                                      grouping = .estimation.data[, outcome.name],
+                                      grouping = group,
                                       prior = observed.prior,
                                       method = variance,
                                       weights = .weights),
-                variable.labels = labels)
-#                                      outcome.label = outcome.label))
+                                      variable.labels = labels,
+                                      outcome.label = outcome.label)
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
@@ -191,6 +193,10 @@ LDA <- function(formula,
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
     result$prior <- prior
+    dv <- predict(result$original,prior = observed.prior, newdata = x, na.action = na.pass)[["x"]]
+    result$centroids <- MeanByGroup(dv, group, .weights)
+    result$correlations <- Correlation(x, dv)
+    rownames(result$correlations) <- labels
     # 4. Saving descriptive information.
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
@@ -373,14 +379,18 @@ LDA.fit = function (x,
     result
 }
 
+
+
 #' print.LDA
 #'
 #' @param x The \link{LDA} object.
 #' @param p.cutoff The alpha value to use when highlighting results.
 #' @param digits The number of digits when printing the \code{"detail"} output.
 #' @param ... Generic print arguments.
-#' @importFrom MASS lda
 #' @importFrom flipFormat Labels
+#' @importFrom rhtmlMoonPlot moonplot
+#' @importFrom MASS lda
+#' @importFrom rhtmlLabeledScatter LabeledScatter
 #' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
@@ -410,15 +420,6 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
         for (i in 1:ncol(independents))
             attr(independents[, i], "label") <- x$variable.labels[i]
-        # m <- CompareMultipleMeans(independents,
-        #                            dependent,
-        #                            weights = weights,
-        #                            title = title,
-        #                            subtitle = subtitle,
-        #                            footer = x$sample.description,
-        #                           show.labels = x$show.labels,
-        #                           p.cutoff = 0.05)
-
         table <- CompareMultipleMeans(independents,
                     dependent,
                     weights = weights,
@@ -427,6 +428,30 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
                     subtitle = subtitle,
                     footer = x$sample.description)
         print(table)
+    } else if (output == "Scatterplot" | output == "Moonplot")
+    {
+        scale <- apply(abs(x$centroids), 2, mean) / apply(abs(x$correlations), 2, mean)
+        correlations <- sweep(x$correlations, 2, scale, "*")
+        if (output == "Moonplot")
+            print(moonplot(scale, correlations))
+        else
+        {
+            coords <- rbind(x$centroids, correlations)
+            groups <- c(rep("Groups", nrow(x$centroids)), rep(x$outcome.label, nrow(correlations)))
+             print(LabeledScatter(X = coords[, 1],
+                                             Y = coords[, 2],
+                                             label = rownames(coords),
+                                             group = groups,
+                                             fixed.aspect = TRUE,
+                                             title = "Linear Discriminant Analysis",
+                                             #x.title = ""#column.labels[1],
+                                             #y.title = ""#column.labels[2],
+                                             axis.font.size = 8,
+                                             labels.font.size = 12,
+                                             title.font.size = 20,
+                                             y.title.font.size = 16,
+                                             x.title.font.size = 16))
+        }
     }
     else
         print(x$original, ...)

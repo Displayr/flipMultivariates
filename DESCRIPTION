@@ -18,7 +18,9 @@ Imports:
     flipU,
     MASS,
     methods,
-    randomForest
+    randomForest,
+    rhtmlLabeledScatter,
+    rhtmlMoonPlot
 Suggests:
     testthat
 RoxygenNote: 5.0.1
