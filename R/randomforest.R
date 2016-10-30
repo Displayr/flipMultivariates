@@ -143,7 +143,7 @@ RandomForest <- function(formula,
 }
 
 #' @import randomForest
-#' @importFrom flipFormat RandomForestTable FormatWithDecimals RandomForestTable
+#' @importFrom flipFormat RandomForestTable FormatWithDecimals RandomForestTable ExtractCommonPrefix
 #' @export
 print.RandomForest <- function(x, ...)
 {
@@ -152,6 +152,13 @@ print.RandomForest <- function(x, ...)
     if (x$output == "Importance")
     {
         title <- paste0("Random Forest: ", x$outcome.label)
+        imp <- x$original$importance
+        extracted <- ExtractCommonPrefix(rownames(imp))
+        if (!is.na(extracted$common.prefix))
+        {
+            title <- paste0(title, " by ", extracted$common.prefix)
+            rownames(imp) <- extracted$shortened.labels
+        }
         subtitle <- if (x$numeric.outcome)
             paste("R-squared:", FormatWithDecimals(x$original$rsq[length(x$original$rsq)], 3))
         else
@@ -161,7 +168,7 @@ print.RandomForest <- function(x, ...)
             k <- length(accuracies)
             correctPredictionsText(accuracies[1], colnames(err)[2:k], accuracies[2:k])
         }
-        tbl <- RandomForestTable(x$original$importance,
+        tbl <- RandomForestTable(imp,
                                  x$z.statistics,
                                  x$p.values,
                                  x$sort.by.importance,
