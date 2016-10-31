@@ -98,14 +98,6 @@ LDA <- function(formula,
     ####################################################################
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
-    # Making categorical variables numeric.
-    # for (nm in names(data))
-    # {
-    #     if (nm != outcome.name)
-    #         if (is.factor(data[, nm]))
-    # data[, nm] <- AsNumeric(data[, nm], binary = FALSE)
-    # }
-
     extracted <- ExtractCommonPrefix(Labels(data))
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
     labels <- extracted$shortened.labels

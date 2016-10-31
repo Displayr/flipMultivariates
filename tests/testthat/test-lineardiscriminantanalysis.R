@@ -1,5 +1,15 @@
 context("LDA")
 
+# x1 <- runif(100)
+# x2 <- runif(100) * 3
+# flipFormat::Labels(x1) <- "Predictors x1"
+# flipFormat::Labels(x2) <- "Predictors x2"
+# y <- x1 + x2
+# y <- round(y / max(y) * 2)
+# LDA(y ~ x1 + x2)
+# dat <- data.frame(x1, x2)
+# flipFormat::ExtractCommonPrefix(flipFormat::Labels(dat))
+
 data(hbatwithsplits, package = "flipExampleData")
 hair <- hbatwithsplits
 
