@@ -98,13 +98,15 @@ LDA <- function(formula,
     ####################################################################
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
-    extracted <- ExtractCommonPrefix(Labels(data))
+    i.outcome <- match(outcome.name, names(data))
+    data.labels <- Labels(data)
+    extracted <- ExtractCommonPrefix(data.labels[-i.outcome])
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
     labels <- extracted$shortened.labels
-    i.outcome <- match(outcome.name, names(data))
     data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
-    outcome.label <- paste0(labels[i.outcome], by.label)
+    outcome.label <- paste0(data.labels[i.outcome], by.label)
+
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
