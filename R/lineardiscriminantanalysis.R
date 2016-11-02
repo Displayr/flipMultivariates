@@ -407,7 +407,6 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         independents <- data[, -match(dependent.name, names(data))]
         subset <- x$subset
         weights <- x$weights[subset]
-        warnings("Weights not hooked up")
         confusion <- x$confusion
         confusion <- confusion / sum(confusion)
         subtitle = correctPredictionsText(sum(diag(confusion)), column.names,
