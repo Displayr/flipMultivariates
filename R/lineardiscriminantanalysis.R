@@ -14,15 +14,16 @@
 #' @param weights An optional vector of sampling weights, or, the name or, the
 #'   name of a variable in \code{data}. It may not be an expression.
 #' @param missing How missing data is to be treated in the regression. Options:
-#'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"},
-#'   \code{"Imputation (replace missing values with estimates)"}.
+#'   \code{"Error if missing data"}
+#'   \code{"Exclude cases with missing data"}
+#'   \code{"Imputation (replace missing values with estimates)"}
 #' @param prior The assumed probability of each value of y occurring in the
 #'   population.  By default this is set to "observed" and the value is computed
 #'   based on the observed data.  If set to "equal" the prior will be set to
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
+#' \code{"Scatterplot"}, and \code{"Moonplot"}.
 #' @param variance The method used to estimate the variance; either \code{"moment"} for
 #' the method of moments or \code{"mle"} for maximum likelihood estimaion.
 #' @param seed The random number seed used in imputation.
@@ -431,7 +432,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         scale <- apply(abs(x$centroids), 2, mean) / apply(abs(x$correlations), 2, mean)
         correlations <- sweep(x$correlations, 2, scale, "*")
         if (output == "Moonplot")
-            print(moonplot(scale, correlations))
+            print(moonplot(x$centroids, correlations))
         else
         {
             coords <- rbind(x$centroids, correlations)

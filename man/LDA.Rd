@@ -33,11 +33,12 @@ be equal for each group (this is the default in SPSS).  Alternatively, a
 vector of probabilities can be provided.}
 
 \item{missing}{How missing data is to be treated in the regression. Options:
-\code{"Error if missing data"},
-\code{"Exclude cases with missing data"},
-\code{"Imputation (replace missing values with estimates)"}.}
+\code{"Error if missing data"}
+\code{"Exclude cases with missing data"}
+\code{"Imputation (replace missing values with estimates)"}}
 
-\item{output}{One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.}
+\item{output}{One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
+\code{"Scatterplot"}, and \code{"Moonplot"}.}
 
 \item{variance}{The method used to estimate the variance; either \code{"moment"} for
 the method of moments or \code{"mle"} for maximum likelihood estimaion.}
