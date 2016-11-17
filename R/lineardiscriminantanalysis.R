@@ -103,11 +103,11 @@ LDA <- function(formula,
     data.labels <- Labels(data)
     extracted <- ExtractCommonPrefix(data.labels[-i.outcome])
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
+    predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
     labels <- extracted$shortened.labels
     data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
     outcome.variable <- data[, outcome.name]
-    outcome.label <- paste0(data.labels[i.outcome], by.label)
-
+    outcome.label <- paste0(data.labels[i.outcome], if (output == "Scatterplot") "" else by.label)
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) & length(weights) != nrow(data))
@@ -169,12 +169,13 @@ LDA <- function(formula,
     labels <- labels[match(names(x), names(labels))]
     result <- list(call = cl,
                    original = LDA.fit(x,
-                                      grouping = group,
-                                      prior = observed.prior,
-                                      method = variance,
-                                      weights = .weights),
-                                      variable.labels = labels,
-                                      outcome.label = outcome.label)
+                   grouping = group,
+                   prior = observed.prior,
+                   method = variance,
+                   weights = .weights),
+                   variable.labels = labels,
+                   outcome.label = outcome.label,
+                   predictors.label = predictors.label)
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
@@ -436,7 +437,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         else
         {
             coords <- rbind(x$centroids, correlations)
-            groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep("Predictors", nrow(correlations)))
+            groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
             print(LabeledScatter(X = coords[, 1],
                                              Y = coords[, 2],
                                              label = rownames(coords),
