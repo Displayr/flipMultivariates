@@ -436,8 +436,8 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         else
         {
             coords <- rbind(x$centroids, correlations)
-            groups <- c(rep("Groups", nrow(x$centroids)), rep(x$outcome.label, nrow(correlations)))
-             print(LabeledScatter(X = coords[, 1],
+            groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep("Predictors", nrow(correlations)))
+            print(LabeledScatter(X = coords[, 1],
                                              Y = coords[, 2],
                                              label = rownames(coords),
                                              group = groups,
