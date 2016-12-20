@@ -24,7 +24,7 @@
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom flipTransformations AdjustDataToReflectWeights
-#' @importFrom h2o h2o.init as.h2o h2o.deeplearning
+#' @import darch
 #' @export
 DeepLearning <- function(formula,
                 data = NULL,
@@ -95,17 +95,25 @@ DeepLearning <- function(formula,
     #result <- list(original = randomForest(.formula,
     #    importance = TRUE, data = .estimation.data.1))
 
+    require(darch)
     result <- list()
-    h2o.init()
-    train.h2o <- as.h2o(as.data.frame(lapply(.estimation.data.1, as.numeric)),
-                    destination_frame="train.h2o")
-    obj <- h2o.deeplearning(x=(2:ncol(train.h2o)), y=1,
-                            training_frame=train.h2o,
-                            epochs = 50,
-                            missing_values_handling = "Skip",
-                            variable_importances = T,
-                            max_confusion_matrix_size = 20,
-                            diagnostics = T)
+    nlev <- nlevels(.estimation.data.1[,1])
+    if (is.null(nlev) || nlev == 0)
+        nlev <- 1
+    cat("nlev", nlev, "\n")
+    obj <- darch(formula, data=.estimation.data.1,
+                     layers=c(ncol(.estimation.data.1),50,100,50,nlev),
+                     preProc.params = list(method=c("center","scale")),
+                     preProc.targets = T,
+                     normalizeWeights=T,
+                     bootstrap = T,
+                     bootstrap.num = round(0.2*nrow(.estimation.data.1)),
+                     darch.isClass = !numeric.outcome,
+                     darch.unitFunction = ifelse(numeric.outcome, "linearUnit", "rectifiedLinearUnit"),
+                     bp.learnRate = ifelse(numeric.outcome, 0.01, 0.1),
+                     darch.returnBestModel = T,
+                     logLevel = "WARN",
+                     ...)
     result <- list()
     result$original <- obj
     result$call <- cl
@@ -132,17 +140,17 @@ DeepLearning <- function(formula,
         result$outcome.label <- outcome.label
         # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-        if (numeric.outcome)
-            names(result$original$importanceSD) <- variable.labels
-        else
-            rownames(result$original$importanceSD) <- variable.labels
+        #if (numeric.outcome)
+        #    names(result$original$importanceSD) <- variable.labels
+        #else
+        #    rownames(result$original$importanceSD) <- variable.labels
         # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
     }
     else
         result$outcome.label <- outcome.name
     # 4.Saving parameters
     if (missing == "Imputation (replace missing values with estimates)")
-            data <- processed.data$data
+        data <- processed.data$data
     result$model <- data
     result$formula <- input.formula
     result$output <- output
@@ -157,15 +165,69 @@ DeepLearning <- function(formula,
 #' @param object Object of class \code{"DeepLearning"}.
 #' @param newdata Data to which to apply the prediction
 #' @param ... Not used
-#' @importFrom h2o as.h2o h2o.deeplearning
+#' @importFrom flipTransformations RemoveMissingLevelsFromFactors
 #' @export
 predict.DeepLearning <- function(object, newdata = NULL)
 {
     if (is.null(newdata))
-        newdata <- object$estimation.data
+        newdata <- object$model
 
-    h2o.init(startH2O = FALSE)
-    nd.h2o <- as.h2o(as.data.frame(lapply(newdata, as.numeric)),
-                    destination_frame="nd.h2o")
-    return(as.data.frame(predict(object$original, newdata=nd.h2o)))
+    # predict.DArch will stop if any previously unobserved data is seen
+    # we do some rough data cleaning to avoid stopping if possible
+    any.missing <- apply(newdata, 1, function(x){any(is.na(x))})
+    if (sum(any.missing) > 0)
+        newdata[any.missing,] <- NA
+    newdata <- RemoveMissingLevelsFromFactors(newdata)
+
+    return(predict(object$original, newdata=newdata))
+}
+
+#' \code{VariableImportance}
+#' @description Computes relative importance of input variable to the neural network
+#' as the sum of the product of raw input-hidden, hidden-output connection weights
+#' as proposed by Olden et al. 2004.
+#' @param object Object of class \code{"DeepLearning"}
+#' @importFrom NeuralNetTools olden
+#' @export
+VariableImportance <- function(object)
+{
+    if (class(object) != "DeepLearning")
+        stop("Object should be of class \"DeepLearning\"\n")
+
+    xx <- object$original
+    mod_in <- c()
+    struct <- c()
+    for (i in 1:length(xx@layers))
+    {
+        mod_in <- c(mod_in, xx@layers[[i]][["weights"]])
+        struct <- c(struct, nrow(xx@layers[[i]][["weights"]]) - 1)
+    }
+    struct <- c(struct, ncol(xx@layers[[length(xx@layers)]][["weights"]]))
+    varImp <- suppressWarnings(olden(mod_in, struct=struct, bar_plot=FALSE))
+    rownames(varImp) <- colnames(object$estimation.data)
+    return(varImp)
+}
+
+#' \code{ConfusionMatrix}
+#'
+#' @param obj A model with an categorical outcome variable.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression.
+#' @param weights An optional vector of sampling weights, or, the name or, the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @details The proportion of observed values that take the same values as the predicted values.
+#' Where the outcome
+#' variable in the model is not a factor and not a count, predicted values are assigned to the closest observed
+#' value.
+#' @importFrom methods is
+#' @importFrom flipRegression ConfusionMatrixFromVariables
+#' @export
+ConfusionMatrix.DeepLearning <- function(obj, subset = NULL, weights = NULL)
+{
+    observed <- obj$estimation.data[,1]
+    predicted <- predict(obj)
+    if(obj$numeric.outcome)
+        stop("ConfusionMatrix only defined for categorical outcome variables\n")
+    return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
 }

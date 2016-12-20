@@ -19,6 +19,8 @@ Imports:
     MASS,
     methods,
     randomForest,
+    NeuralNetTools,
+    darch,
     rhtmlLabeledScatter,
     rhtmlMoonPlot
 Suggests:
