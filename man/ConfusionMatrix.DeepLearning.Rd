@@ -2,7 +2,7 @@
 % Please edit documentation in R/deeplearning.R
 \name{ConfusionMatrix.DeepLearning}
 \alias{ConfusionMatrix.DeepLearning}
-\title{\code{ConfusionMatrix}}
+\title{\code{ConfusionMatrix.DeepLearning}}
 \usage{
 \method{ConfusionMatrix}{DeepLearning}(obj, subset = NULL, weights = NULL)
 }
@@ -17,7 +17,7 @@ may not be an expression.}
 name of a variable in \code{data}. It may not be an expression.}
 }
 \description{
-\code{ConfusionMatrix}
+\code{ConfusionMatrix.DeepLearning}
 }
 \details{
 The proportion of observed values that take the same values as the predicted values.

@@ -19,7 +19,7 @@
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
+#' @param ... Other arguments to be supplied to \code{\link{darch}}.
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
@@ -30,7 +30,7 @@ DeepLearning <- function(formula,
                 data = NULL,
                 subset = NULL,
                 weights = NULL,
-                output = "Importance",
+                output = "Summary",
                 missing  = "Exclude cases with missing data",
                 seed = 12321,
                 show.labels = FALSE,
@@ -91,18 +91,26 @@ DeepLearning <- function(formula,
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
-    #set.seed(seed)
-    #result <- list(original = randomForest(.formula,
-    #    importance = TRUE, data = .estimation.data.1))
+    cnames <- if (show.labels) Labels(data)
+              else colnames(data)
+    vnames <- c()
+    for (i in 2:ncol(data))
+    {
+        tmp <- c()
+        if (is.factor(data[,i]))
+            tmp <- paste0(":", levels(.estimation.data[,i])[-1])
+        vnames <- c(vnames, paste0(cnames[i], tmp))
+    }
 
+    # Not sure why, but it seems necessary to load darch library in this way
+    # Using @import in the header or requireNamespace() both do not work
     require(darch)
     result <- list()
     nlev <- nlevels(.estimation.data.1[,1])
     if (is.null(nlev) || nlev == 0)
         nlev <- 1
-    cat("nlev", nlev, "\n")
     obj <- darch(formula, data=.estimation.data.1,
-                     layers=c(ncol(.estimation.data.1),50,100,50,nlev),
+                     layers=c(length(vnames),50,100,50,nlev),
                      preProc.params = list(method=c("center","scale")),
                      preProc.targets = T,
                      normalizeWeights=T,
@@ -113,6 +121,7 @@ DeepLearning <- function(formula,
                      bp.learnRate = ifelse(numeric.outcome, 0.01, 0.1),
                      darch.returnBestModel = T,
                      logLevel = "WARN",
+                     seed = seed,
                      ...)
     result <- list()
     result$original <- obj
@@ -133,22 +142,14 @@ DeepLearning <- function(formula,
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
-    #result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+
     # 3. Replacing names with labels
-    if (result$show.labels <- show.labels)
-    {
-        result$outcome.label <- outcome.label
-        # Removing the outcome variable
-        result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-        #if (numeric.outcome)
-        #    names(result$original$importanceSD) <- variable.labels
-        #else
-        #    rownames(result$original$importanceSD) <- variable.labels
-        # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
-    }
-    else
-        result$outcome.label <- outcome.name
+
+    result$variablenames <- vnames
+
     # 4.Saving parameters
+    result$variablenames <- vnames
     if (missing == "Imputation (replace missing values with estimates)")
         data <- processed.data$data
     result$model <- data
@@ -159,27 +160,6 @@ DeepLearning <- function(formula,
     #result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD
     #result$p.values <- 2 * (1 - pnorm(abs(result$z.statistics)))
     result
-}
-
-#' \code{predict.DeepLearning}
-#' @param object Object of class \code{"DeepLearning"}.
-#' @param newdata Data to which to apply the prediction
-#' @param ... Not used
-#' @importFrom flipTransformations RemoveMissingLevelsFromFactors
-#' @export
-predict.DeepLearning <- function(object, newdata = NULL)
-{
-    if (is.null(newdata))
-        newdata <- object$model
-
-    # predict.DArch will stop if any previously unobserved data is seen
-    # we do some rough data cleaning to avoid stopping if possible
-    any.missing <- apply(newdata, 1, function(x){any(is.na(x))})
-    if (sum(any.missing) > 0)
-        newdata[any.missing,] <- NA
-    newdata <- RemoveMissingLevelsFromFactors(newdata)
-
-    return(predict(object$original, newdata=newdata))
 }
 
 #' \code{VariableImportance}
@@ -204,12 +184,11 @@ VariableImportance <- function(object)
     }
     struct <- c(struct, ncol(xx@layers[[length(xx@layers)]][["weights"]]))
     varImp <- suppressWarnings(olden(mod_in, struct=struct, bar_plot=FALSE))
-    rownames(varImp) <- colnames(object$estimation.data)
+    rownames(varImp) <- object$variablenames
     return(varImp)
 }
 
-#' \code{ConfusionMatrix}
-#'
+#' \code{ConfusionMatrix.DeepLearning}
 #' @param obj A model with an categorical outcome variable.
 #' @param subset An optional vector specifying a subset of observations to be
 #'   used in the fitting process, or, the name of a variable in \code{data}. It
@@ -225,9 +204,37 @@ VariableImportance <- function(object)
 #' @export
 ConfusionMatrix.DeepLearning <- function(obj, subset = NULL, weights = NULL)
 {
-    observed <- obj$estimation.data[,1]
+    observed <- obj$model[,1]
     predicted <- predict(obj)
-    if(obj$numeric.outcome)
-        stop("ConfusionMatrix only defined for categorical outcome variables\n")
+    #if(obj$numeric.outcome)
+    #    stop("ConfusionMatrix only defined for categorical outcome variables\n")
     return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
 }
+
+#' \code{print.DeepLearning}
+#' @export
+print.DeepLearning <- function(x, ...)
+{
+    if (x$output == "Training error")
+    {
+        plot(x$original)
+    }
+    else
+    {
+        print(x$call)
+        cat(x$sample.description, "\n")
+
+        if (!x$numeric.outcome)
+        {
+            cat("\nConfusion matrix:\n")
+            print(ConfusionMatrix.DeepLearning(x))
+            cat("\n")
+        }
+
+        vImp <- VariableImportance(x)
+        cat("\nVariable importance (Olden)\n")
+        print(vImp[order(vImp[,1], decreasing=T),,drop=FALSE])
+    }
+}
+
+

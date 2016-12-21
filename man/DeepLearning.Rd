@@ -5,7 +5,7 @@
 \title{\code{DeepLearning}}
 \usage{
 DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
-  output = "Importance", missing = "Exclude cases with missing data",
+  output = "Summary", missing = "Exclude cases with missing data",
   seed = 12321, show.labels = FALSE, ...)
 }
 \arguments{
