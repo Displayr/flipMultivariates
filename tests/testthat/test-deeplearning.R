@@ -1,9 +1,12 @@
 context("Deep learning")
 data("cola", package="flipExampleData")
 data(BostonHousing, package="mlbench")
+data(BreastCancer, package="mlbench")
 
 test_that("Categorical predictor", {
-    mod1 <- DeepLearning(Q17~Q12+Q13+Q14+Q15, data=cola)
+    #mod1 <- DeepLearning(Q17~Q12+Q13+Q14+Q15, data=cola)
+    mod1 <- DeepLearning(Class~Cl.thickness+Cell.size+Cell.shape+Marg.adhesion+Epith.c.size+Bare.nuclei+Bl.cromatin+Normal.nucleoli+Mitoses,
+                         data=BreastCancer)
     pb1 <- Probabilities.DeepLearning(mod1)
     expect_equal(ncol(pb1), 2)
 })

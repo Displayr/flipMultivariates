@@ -27,6 +27,13 @@
 #' @import darch
 #' @export
 DeepLearning <- function(formula,
+                hidden = c(20, 20),
+                unit.function = "rectifiedLinearUnit",
+                dropout.input = 0,
+                dropout.hidden = 0.5,
+                dither = F,
+                epochs = 100,
+                bootstrap = T,
                 data = NULL,
                 subset = NULL,
                 weights = NULL,
@@ -98,7 +105,7 @@ DeepLearning <- function(formula,
     {
         tmp <- c()
         if (is.factor(data[,i]))
-            tmp <- paste0(":", levels(.estimation.data[,i])[-1])
+            tmp <- paste0(":", levels(.estimation.data[,i]))
         vnames <- c(vnames, paste0(cnames[i], tmp))
     }
 
@@ -110,15 +117,19 @@ DeepLearning <- function(formula,
     if (is.null(nlev) || nlev == 0)
         nlev <- 1
     obj <- darch(formula, data=.estimation.data.1,
-                     layers=c(length(vnames),50,100,50,nlev),
-                     preProc.params = list(method=c("center","scale")),
-                     preProc.targets = T,
+                     layers=c(length(vnames),hidden,nlev),
+                     preProc.params = if(numeric.outcome) list(method=c("center","scale")) else NULL,
+                     preProc.targets = numeric.outcome,
+                     preProc.fullRank = F,
                      normalizeWeights=T,
-                     bootstrap = T,
-                     bootstrap.num = round(0.2*nrow(.estimation.data.1)),
+                     bootstrap = bootstrap,
                      darch.isClass = !numeric.outcome,
-                     darch.unitFunction = ifelse(numeric.outcome, "linearUnit", "rectifiedLinearUnit"),
+                     darch.unitFunction = c(rep(unit.function, length(hidden)),
+                                            ifelse(numeric.outcome, "linearUnit", "softmaxUnit")),
+                     darch.dither = dither,
+                     darch.dropout = c(dropout.input, rep(dropout.hidden, length(hidden))),
                      bp.learnRate = ifelse(numeric.outcome, 0.01, 0.1),
+                     darch.numEpochs = epochs,
                      darch.returnBestModel = T,
                      logLevel = "WARN",
                      seed = seed,
@@ -131,11 +142,9 @@ DeepLearning <- function(formula,
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
-    # 1. Saving data.
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
-    # 2. Saving descriptive information.
     class(result) <- "DeepLearning"
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
@@ -143,13 +152,8 @@ DeepLearning <- function(formula,
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
-
-    # 3. Replacing names with labels
-
     result$variablenames <- vnames
 
-    # 4.Saving parameters
-    result$variablenames <- vnames
     if (missing == "Imputation (replace missing values with estimates)")
         data <- processed.data$data
     result$model <- data
