@@ -27,13 +27,17 @@
 #' @import darch
 #' @export
 DeepLearning <- function(formula,
-                hidden = c(20, 20),
+                hidden = c(50, 50),
                 unit.function = "rectifiedLinearUnit",
+                learning.rate = 0.01,
+                learning.decay = 0,
                 dropout.input = 0,
                 dropout.hidden = 0.5,
                 dither = F,
                 epochs = 100,
+                batch.size = 1,
                 bootstrap = T,
+                pretrain.epoch = 0,
                 data = NULL,
                 subset = NULL,
                 weights = NULL,
@@ -43,6 +47,17 @@ DeepLearning <- function(formula,
                 show.labels = FALSE,
                 ...)
 {
+    if (is.character(hidden))
+    {
+        h.str <- unlist(strsplit(split=",", hidden))
+        hidden <- gsub(" ", "", h.str)
+    }
+    hidden <- suppressWarnings(as.numeric(hidden))
+    if (any(is.na(hidden)))
+        stop("'hidden' should be a comma-separated list specifying the number of units in each layer\n")
+    if (any(hidden != round(hidden)))
+        stop("'hidden' should be a list of integers\n")
+
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
@@ -128,8 +143,12 @@ DeepLearning <- function(formula,
                                             ifelse(numeric.outcome, "linearUnit", "softmaxUnit")),
                      darch.dither = dither,
                      darch.dropout = c(dropout.input, rep(dropout.hidden, length(hidden))),
-                     bp.learnRate = ifelse(numeric.outcome, 0.01, 0.1),
+                     bp.learnRate = learning.rate,
+                     bp.learnRateScale = 1 - learning.decay,
                      darch.numEpochs = epochs,
+                     darch.batchSize = batch.size,
+                     rbm.numEpochs = pretrain.epoch,
+                     rbm.lastLayer = -1,
                      darch.returnBestModel = T,
                      logLevel = "WARN",
                      seed = seed,
