@@ -241,8 +241,7 @@ print.DeepLearning <- function(x, ...)
     if (x$output == "Training error")
     {
         plot(x$original)
-    }
-    else
+    } else
     {
         print(x$call)
         cat(x$sample.description, "\n")
