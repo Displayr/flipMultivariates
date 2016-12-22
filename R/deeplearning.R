@@ -240,7 +240,7 @@ print.DeepLearning <- function(x, ...)
 {
     if (x$output == "Training error")
     {
-        plot(x$original)
+        print(plot(x$original))
     } else
     {
         print(x$call)
