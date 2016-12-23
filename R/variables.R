@@ -113,7 +113,7 @@ Probabilities.DeepLearning <- function(x)
 {
     if(x$numeric.outcome)
         stop("Probabilities are only applicable to models with categorical outcome variables.")
-    deepLearningExtractVariables(x, type="raw", newdata = x$model)
+    deepLearningExtractVariables(x, type="raw", newdata = x$model, na.action = na.pass)
 }
 
 

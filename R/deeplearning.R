@@ -119,8 +119,13 @@ DeepLearning <- function(formula,
     for (i in 2:ncol(data))
     {
         tmp <- c()
-        if (is.factor(data[,i]))
+        if (is.ordered(data[,i]))
+        {
+            tmp <- paste0(":", levels(.estimation.data[,i])[-1])
+        } else if (is.factor(data[,i]))
+        {
             tmp <- paste0(":", levels(.estimation.data[,i]))
+        }
         vnames <- c(vnames, paste0(cnames[i], tmp))
     }
 
@@ -235,13 +240,53 @@ ConfusionMatrix.DeepLearning <- function(obj, subset = NULL, weights = NULL)
 }
 
 #' \code{print.DeepLearning}
+#' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @export
 print.DeepLearning <- function(x, ...)
 {
+    # Check about using label/names
+    # Also, perhaps stats should be computed by predicting on the estimation data
+
+
     if (x$output == "Training error")
     {
         print(plot(x$original))
-    } else
+    } else if (x$output == "Summary")
+    {
+        title <- paste0("Deep Learning: ", x$outcome.name)  # doesn't handle show labels
+        imp <- VariableImportance(x)
+        extracted <- ExtractCommonPrefix(rownames(imp))
+        if (!is.na(extracted$common.prefix))
+        {
+            title <- paste0(title, " by ", extracted$common.prefix)
+            rownames(imp) <- extracted$shortened.labels
+        }
+        subtitle <- ""
+        if (!x$numeric.outcome)
+        {
+            confM <- ConfusionMatrix(x)
+            tot.cor <- sum(diag(confM))/sum(confM)
+            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
+            tmp.text <- paste(paste0(rownames(confM), ":"),
+                              paste0(FormatWithDecimals(class.cor*100, 2), "%"),
+                              collapse=", ")
+            subtitle <- sprintf("Correct predictions: %.2f%% (%s)",
+                                tot.cor*100, tmp.text)
+        } else
+        {
+            pred <- predict(x)
+            rmse <- sqrt(mean((pred - x$model[,1])^2))
+            rsq <- (cor(pred, x$model[,1]))^2
+            subtitle <- sprintf("R-sq: %.2f, RMSE: %.2f", rsq, rmse)
+        }
+        tbl <- DeepLearningTable(imp,
+                                 order.values = TRUE,
+                                 title = title,
+                                 subtitle = subtitle,
+                                 footer = x$sample.description)
+        print(tbl)
+    }
+    else
     {
         print(x$call)
         cat(x$sample.description, "\n")

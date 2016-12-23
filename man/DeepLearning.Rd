@@ -4,7 +4,11 @@
 \alias{DeepLearning}
 \title{\code{DeepLearning}}
 \usage{
-DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
+DeepLearning(formula, hidden = c(50, 50),
+  unit.function = "rectifiedLinearUnit", learning.rate = 0.01,
+  learning.decay = 0, dropout.input = 0, dropout.hidden = 0.5,
+  dither = F, epochs = 100, batch.size = 1, bootstrap = T,
+  pretrain.epoch = 0, data = NULL, subset = NULL, weights = NULL,
   output = "Summary", missing = "Exclude cases with missing data",
   seed = 12321, show.labels = FALSE, ...)
 }
@@ -36,7 +40,7 @@ name of a variable in \code{data}. It may not be an expression.}
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
 
-\item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
+\item{...}{Other arguments to be supplied to \code{\link{darch}}.}
 }
 \description{
 \code{DeepLearning}
