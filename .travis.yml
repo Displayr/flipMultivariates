@@ -1,0 +1,27 @@
+
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+warnings_are_errors: false
+
+before_install:
+  Rscript -e 'update.packages(ask = FALSE)'
+
+r_github_packages: hadley/devtools#1263
+
+# This is only needed if we need tests take a long time to run
+# If so, you need to check the name of the gzipped file in the job log
+# script:
+#  - R CMD build .
+#  - travis_wait 60 R CMD check flipData_0.1.0.tar.gz
+ 
+#notifications:
+#  slack:
+#    rooms: 
+#        - numbers:FTgSTNHC2rpanhJMGTKMwZXM#github-notifications
+#    template:
+#      - "Build <%{build_url}|#%{build_number}> %{result} in %{repository}@%{branch} by %{author}: <%{compare_url}|%{commit_message}>"
+#    on_success: change
+#    on_failure: always
