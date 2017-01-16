@@ -25,4 +25,14 @@ Imports:
     rhtmlMoonPlot
 Suggests:
     testthat
+Remotes:
+    NumbersInternational/flipAnalysisOfVariance,
+    NumbersInternational/flipData,
+    NumbersInternational/flipFormat,
+    NumbersInternational/flipRegression,
+    NumbersInternational/flipStatistics,
+    NumbersInternational/flipTransformations,
+    NumbersInternational/flipU,
+    NumbersInternational/rhtmlLabeledScatter,
+    NumbersInternational/rhtmlMoonPlot
 RoxygenNote: 5.0.1
