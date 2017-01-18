@@ -21,6 +21,6 @@ notifications:
     on_failure: always
 
 after_success: >-
-  if [ $TRAVIS_EVENT_TYPE == "push"] ; then
+  if [ $TRAVIS_EVENT_TYPE == "push" ] ; then
     curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $ACCESS_TOKEN" -d '{"request":{"message":"Build triggered by flipMultivariates", "branch":"master"}}' "https://api.travis-ci.org/repo/NumbersInternational%2FflipCluster/requests";
   fi
