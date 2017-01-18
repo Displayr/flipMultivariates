@@ -209,7 +209,10 @@ VariableImportance <- function(object)
     {
         mod_in <- c(mod_in, xx@layers[[i]][["weights"]])
         struct <- c(struct, nrow(xx@layers[[i]][["weights"]]) - 1)
+        cat("i:", dim(xx@layers[[i]][["weights"]]), "\n")
     }
+    cat(str(mod_in), "\n")
+    cat("struct:", struct, "\n")
     struct <- c(struct, ncol(xx@layers[[length(xx@layers)]][["weights"]]))
     varImp <- suppressWarnings(olden(mod_in, struct=struct, bar_plot=FALSE))
     rownames(varImp) <- object$variablenames

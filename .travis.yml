@@ -1,29 +1,26 @@
-
-# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-
 language: R
-dist: trusty
+dist: trusty  # ubuntu 14.04 has additional libraries available
 sudo: false
 cache: packages
 warnings_are_errors: false
 
+# update pre-installed packages to latest versions
 before_install:
   Rscript -e 'update.packages(ask = FALSE)'
 
+# last stable version of devtools does not support private depositories
 r_github_packages: hadley/devtools#1263
 
-# This is only needed if we need tests take a long time to run
-# If so, you need to check the name of the gzipped file in the job log
-# script:
-#  - R CMD build .
-#  - travis_wait 60 R CMD check flipData_0.1.0.tar.gz
- 
-# Should be redirected to github-notifications channel
 notifications:
   slack:
-    rooms: 
-        - numbers:FTgSTNHC2rpanhJMGTKMwZXM
+    rooms:
+      - numbers:FTgSTNHC2rpanhJMGTKMwZXM#github-notifications
     template:
-      - "Build <%{build_url}|#%{build_number}> %{result} in %{repository}@%{branch} by %{author}: <%{compare_url}|%{commit_message}>"
+      - "Build <%{build_url}|#%{build_number}> %{result} in %{repository_name}@%{branch} by %{author}: <%{compare_url}|%{commit_message}>"
     on_success: change
     on_failure: always
+
+after_success: >-
+  if [ $TRAVIS_EVENT_TYPE == "push"] ; then
+    curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $ACCESS_TOKEN" -d '{"request":{"message":"Build triggered by flipMultivariates", "branch":"master"}}' "https://api.travis-ci.org/repo/NumbersInternational%2FflipCluster/requests";
+  fi
