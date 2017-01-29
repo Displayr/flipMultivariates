@@ -25,7 +25,8 @@ Imports:
     rhtmlLabeledScatter,
     rhtmlMoonPlot
 Suggests:
-    testthat
+    testthat,
+    mlbench
 Remotes:
     NumbersInternational/flipAnalysisOfVariance,
     NumbersInternational/flipData,
