@@ -243,6 +243,8 @@ ConfusionMatrix.DeepLearning <- function(obj, subset = NULL, weights = NULL)
 }
 
 #' \code{print.DeepLearning}
+#' @param x DeepLearning object to print.
+#' @param ... Not used.
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @export
 print.DeepLearning <- function(x, ...)

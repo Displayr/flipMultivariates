@@ -6,6 +6,11 @@
 \usage{
 \method{print}{DeepLearning}(x, ...)
 }
+\arguments{
+\item{x}{DeepLearning object to print.}
+
+\item{...}{Not used.}
+}
 \description{
 \code{print.DeepLearning}
 }

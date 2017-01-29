@@ -6,7 +6,8 @@
 \usage{
 LDA(formula, data = NULL, subset = NULL, weights = NULL,
   prior = "Equal", missing = "Exclude cases with missing data",
-  output = "Means", variance = "moment", seed = 12321,
+  output = "Means", outcome.color = "#5B9BD5",
+  predictors.color = "#ED7D31", variance = "moment", seed = 12321,
   statistical.assumptions, auxiliary.data = NULL, show.labels = FALSE, ...)
 }
 \arguments{
@@ -39,6 +40,10 @@ vector of probabilities can be provided.}
 
 \item{output}{One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
 \code{"Scatterplot"}, and \code{"Moonplot"}.}
+
+\item{outcome.color}{Color used to display centroids in Scatterplot output.}
+
+\item{predictors.color}{Color used to display variable correlations in Scatterplot output.}
 
 \item{variance}{The method used to estimate the variance; either \code{"moment"} for
 the method of moments or \code{"mle"} for maximum likelihood estimaion.}

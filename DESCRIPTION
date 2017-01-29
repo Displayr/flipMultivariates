@@ -15,6 +15,7 @@ Imports:
     flipRegression,
     flipStatistics,
     flipTransformations,
+    flipChartBasics,
     flipU,
     MASS,
     methods,
@@ -33,6 +34,7 @@ Remotes:
     NumbersInternational/flipStatistics,
     NumbersInternational/flipTransformations,
     NumbersInternational/flipU,
+    NumbersInternational/flipChartBasics,
     NumbersInternational/rhtmlLabeledScatter,
     NumbersInternational/rhtmlMoonPlot
 RoxygenNote: 5.0.1

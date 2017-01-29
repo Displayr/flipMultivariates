@@ -24,6 +24,8 @@
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
 #' \code{"Scatterplot"}, and \code{"Moonplot"}.
+#' @param outcome.color Color used to display centroids in Scatterplot output.
+#' @param predictors.color Color used to display variable correlations in Scatterplot output.
 #' @param variance The method used to estimate the variance; either \code{"moment"} for
 #' the method of moments or \code{"mle"} for maximum likelihood estimaion.
 #' @param seed The random number seed used in imputation.
@@ -65,6 +67,8 @@ LDA <- function(formula,
                 prior = "Equal",
                 missing = "Exclude cases with missing data",
                 output = "Means",
+                outcome.color = '#5B9BD5',
+                predictors.color = '#ED7D31',
                 variance = "moment",
                 seed = 12321,
                 statistical.assumptions,
@@ -218,6 +222,8 @@ LDA <- function(formula,
     # 7.Saving parameters
     result$formula <- input.formula
     result$output <- output
+    result$outcome.color <- outcome.color
+    result$predictors.color <- predictors.color
     result$missing <- missing
     result
 }
@@ -438,10 +444,12 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         {
             coords <- rbind(x$centroids, correlations)
             groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
+            gcolors <- c(x$outcome.color, x$predictors.color)
             print(LabeledScatter(X = coords[, 1],
                                              Y = coords[, 2],
                                              label = rownames(coords),
                                              group = groups,
+                                             colors = gcolors,
                                              fixed.aspect = TRUE,
                                              title = "Linear Discriminant Analysis",
                                              #x.title = ""#column.labels[1],
