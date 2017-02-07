@@ -19,6 +19,16 @@ specifies the (non-factor) discriminators, and any transformations, interactions
 or other non-additive operators will be ignored.
 transformations nor}
 
+\item{hidden}{A vector of integers giving the number of units in each layer.}
+
+\item{unit.function}{Type of function to use. By default it is \code{"rectifiedLinearUnit"}.}
+
+\item{learning.rate, learning.decay, dropout.input, dropout.hidden, dither, bootstrap, pretrain.epoch}{Parameter passed to DArch.}
+
+\item{epochs}{Duration of training period.}
+
+\item{batch.size}{Size of training set}
+
 \item{data}{A \code{\link{data.frame}} from which variables specified
 in formula are preferentially to be taken.}
 

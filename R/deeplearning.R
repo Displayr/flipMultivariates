@@ -19,6 +19,11 @@
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
+#' @param hidden A vector of integers giving the number of units in each layer.
+#' @param unit.function Type of function to use. By default it is \code{"rectifiedLinearUnit"}.
+#' @param learning.rate,learning.decay,dropout.input,dropout.hidden,dither,bootstrap,pretrain.epoch Parameter passed to DArch.
+#' @param epochs Duration of training period.
+#' @param batch.size Size of training set
 #' @param ... Other arguments to be supplied to \code{\link{darch}}.
 #' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
 #' @importFrom flipFormat Labels
@@ -211,8 +216,6 @@ VariableImportance <- function(object)
         struct <- c(struct, nrow(xx@layers[[i]][["weights"]]) - 1)
         cat("i:", dim(xx@layers[[i]][["weights"]]), "\n")
     }
-    cat(str(mod_in), "\n")
-    cat("struct:", struct, "\n")
     struct <- c(struct, ncol(xx@layers[[length(xx@layers)]][["weights"]]))
     varImp <- suppressWarnings(olden(mod_in, struct=struct, bar_plot=FALSE))
     rownames(varImp) <- object$variablenames
@@ -246,6 +249,7 @@ ConfusionMatrix.DeepLearning <- function(obj, subset = NULL, weights = NULL)
 #' @param x DeepLearning object to print.
 #' @param ... Not used.
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
+#' @importFrom graphics plot
 #' @export
 print.DeepLearning <- function(x, ...)
 {
