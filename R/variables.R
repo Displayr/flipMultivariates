@@ -132,3 +132,36 @@ deepLearningExtractVariables <- function(object, type, newdata = object$model, n
 }
 
 
+#' \code{predict.SupportVectorMachine}
+#'
+#' Predicts values for numeric outcomes and group membership for categories, for the entire sample passed
+#' into the original analysis (including missing and filtered values).
+#' @param object A \code{SupportVectorMachine} object.
+#' @param newdata Optionally, a data frame in which to look for variables with which to predict.
+#' If omitted, the data used to fit the model is used.
+#' @param na.action Function determining what should be done with missing values in \code{newdata}.
+#' The default is to predict \code{NA}.
+#' @param ... Additional arguments to pass to predict.SupportVectorMachine.
+#' @import e1071
+#' @importFrom stats na.pass
+#' @export
+predict.SupportVectorMachine <- function(object, newdata = object$model, na.action = na.pass, ...)
+{
+    predict(object$original, newdata = newdata, na.action = na.action)
+}
+
+#' \code{Probabilities.SupportVectorMachine}
+#'
+#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
+#' @param x A \code{SupportVectorMachine} object.
+#' @import e1071
+#' @importFrom stats na.pass
+#' @export
+Probabilities.SupportVectorMachine <- function(x)
+{
+    if(x$numeric.outcome)
+        stop("Probabilities are only applicable to models with categorical outcome variables.")
+    predict(x$original, decision.values = TRUE, probability = TRUE,
+            newdata = x$model, na.action = na.pass)
+}
+
