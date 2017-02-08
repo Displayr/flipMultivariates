@@ -8,6 +8,8 @@ Description: Multivariate models and supporting code.
 Depends:
     R (>= 3.1.1)
 License: MIT + file LICENSE
+Depends:
+    darch
 Imports:
     flipAnalysisOfVariance,
     flipData,
@@ -21,7 +23,6 @@ Imports:
     methods,
     randomForest,
     NeuralNetTools,
-    darch,
     rhtmlLabeledScatter,
     rhtmlMoonPlot
 Suggests:

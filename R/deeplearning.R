@@ -134,9 +134,6 @@ DeepLearning <- function(formula,
         vnames <- c(vnames, paste0(cnames[i], tmp))
     }
 
-    # Not sure why, but it seems necessary to load darch library in this way
-    # Using @import in the header or requireNamespace() both do not work
-    require(darch)
     result <- list()
     nlev <- nlevels(.estimation.data.1[,1])
     if (is.null(nlev) || nlev == 0)
