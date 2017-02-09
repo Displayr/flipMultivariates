@@ -11,6 +11,7 @@ License: MIT + file LICENSE
 Depends:
     darch
 Imports:
+    e1071,
     flipAnalysisOfVariance,
     flipData,
     flipFormat,

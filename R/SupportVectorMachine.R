@@ -16,6 +16,8 @@
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
+#' @param cost A positive number controlling the compromoise between exactly fitting the training data
+#' (higher cost) and the abailaity to generalise to unseen data (lower cost).
 #' @param seed The random number seed used in imputation.
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
@@ -34,6 +36,7 @@ SupportVectorMachine <- function(formula,
                                  weights = NULL,
                                  output = "Accuracy",
                                  missing  = "Exclude cases with missing data",
+                                 cost = 1,
                                  seed = 12321,
                                  statistical.assumptions,
                                  show.labels = FALSE,
@@ -45,6 +48,8 @@ SupportVectorMachine <- function(formula,
     cl <- match.call()
     if(!missing(statistical.assumptions))
         stop("'statistical.assumptions' objects are not yet supported.")
+    if (cost <= 0)
+        stop("cost must be positive.")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
     subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
@@ -96,7 +101,7 @@ SupportVectorMachine <- function(formula,
     ####################################################################
     set.seed(seed)
     result <- list(original = svm(.formula, data = .estimation.data.1,
-                                  probability = TRUE, ...))
+                                  probability = TRUE, cost = cost, ...))
     result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####

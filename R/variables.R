@@ -142,7 +142,6 @@ deepLearningExtractVariables <- function(object, type, newdata = object$model, n
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
 #' @param ... Additional arguments to pass to predict.SupportVectorMachine.
-#' @import e1071
 #' @importFrom stats na.pass
 #' @export
 predict.SupportVectorMachine <- function(object, newdata = object$model, na.action = na.pass, ...)
@@ -154,7 +153,6 @@ predict.SupportVectorMachine <- function(object, newdata = object$model, na.acti
 #'
 #' Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
 #' @param x A \code{SupportVectorMachine} object.
-#' @import e1071
 #' @importFrom stats na.pass
 #' @export
 Probabilities.SupportVectorMachine <- function(x)

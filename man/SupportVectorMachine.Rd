@@ -6,7 +6,8 @@
 \usage{
 SupportVectorMachine(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  seed = 12321, statistical.assumptions, show.labels = FALSE, ...)
+  cost = 1, seed = 12321, statistical.assumptions, show.labels = FALSE,
+  ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -29,6 +30,9 @@ name of a variable in \code{data}. It may not be an expression.}
 \item{missing}{How missing data is to be treated. Options:
 \code{"Error if missing data"},
 \code{"Exclude cases with missing data"},}
+
+\item{cost}{A positive number controlling the compromoise between exactly fitting the training data
+(higher cost) and the abailaity to generalise to unseen data (lower cost).}
 
 \item{seed}{The random number seed used in imputation.}
 
