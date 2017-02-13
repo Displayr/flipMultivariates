@@ -78,8 +78,24 @@ SupportVectorMachine <- function(formula,
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+
     # Treatment of missing values.
+    #print(paste("pre-EstimationData", str(data)))
     processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
+    #print(table(processed.data$estimation.data$A7))
+    #print(table(data$A7))
+    #print(paste("post-EstimationData", str(processed.data$estimation.data)))
+
+    # Reinstate levels of factors
+    #factor.levels <- lapply(data, levels)
+    #for (col in names(processed.data$estimation.data)) {
+    #    print(col)
+    #    print(factor.levels[col])
+    #    print(levels(processed.data$estimation.data[col]))
+    #}
+
+    #print(paste("post-ReLevel", str(processed.data$estimation.data)))
+
     unfiltered.weights <- processed.data$unfiltered.weights
     .estimation.data <- processed.data$estimation.data
     n.predictors <- ncol(.estimation.data)
@@ -124,10 +140,6 @@ SupportVectorMachine <- function(formula,
         result$outcome.label <- outcome.label
         # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-        if (numeric.outcome)
-            names(result$original$importanceSD) <- variable.labels
-        else
-            rownames(result$original$importanceSD) <- variable.labels
         # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
     }
     else
@@ -153,27 +165,31 @@ print.SupportVectorMachine <- function(x, ...)
         subtitle <- ""
         if (!x$numeric.outcome)
         {
-            confM <- ConfusionMatrix(x)
+            #confM <- ConfusionMatrix(x)
+            confM <- x$confusion
             tot.cor <- sum(diag(confM))/sum(confM)
             class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-            tmp.text <- paste(paste0(rownames(confM), ":"),
-                              paste0(FormatWithDecimals(class.cor*100, 2), "%"),
-                              collapse=", ")
-            subtitle <- sprintf("Correct predictions: %.2f%% (%s)",
-                                tot.cor*100, tmp.text)
+            names(class.cor) <- colnames(confM)
+            #tmp.text <- paste(paste0(rownames(confM), ":"),
+            #                  paste0(FormatWithDecimals(class.cor*100, 2), "%"),
+            #                  collapse=", ")
+            subtitle <- sprintf("Overall Accuracy: %.2f%%",
+                                tot.cor*100)
+            tbl <- DeepLearningTable(class.cor,
+                                     column.labels = "Accuracy by class",
+                                     order.values = FALSE,
+                                     title = title,
+                                     subtitle = subtitle,
+                                     footer = x$sample.description)
+            print(tbl)
         } else
         {
-            pred <- predict(x)
+            pred <- x$original$fitted
             rmse <- sqrt(mean((pred - x$model[,1])^2))
             rsq <- (cor(pred, x$model[,1]))^2
-            subtitle <- sprintf("R-sq: %.2f, RMSE: %.2f", rsq, rmse)
+            print(paste("R-squared : ", FormatWithDecimals(rsq, 2)))
+            print(paste("RMSE      : ", FormatWithDecimals(rmse, 2)))
         }
-        # TODO - use actual data and dedicated function in flipFormat
-        tbl <- DeepLearningTable(c(4,2,3),
-                                 title = title,
-                                 subtitle = subtitle,
-                                 footer = x$sample.description)
-        print(tbl)
     }
     else
     {
@@ -192,7 +208,9 @@ print.SupportVectorMachine <- function(x, ...)
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or, the name or, the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @details The proportion of observed values that take the same values as the predicted values.
+#' @details Produces a confusion matrix for a trained model. Predictions are based on the
+#' training data (not a separate test set).
+#' The proportion of observed values that take the same values as the predicted values.
 #' Where the outcome variable in the model is not a factor and not a count, predicted values
 #' are assigned to the closest observed value.
 #' @importFrom stats predict
@@ -202,7 +220,7 @@ print.SupportVectorMachine <- function(x, ...)
 #' @export
 ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = NULL)
 {
-    observed <- Observed(obj)
-    predicted <- predict(obj)
+    observed <- obj$estimation.data[ , obj$outcome.name]
+    predicted <- obj$original$fitted
     return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
 }
