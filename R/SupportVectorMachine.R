@@ -194,6 +194,7 @@ print.SupportVectorMachine <- function(x, ...)
     else
     {
         print(x$original)
+        print(x$confusion)
         invisible(x)
     }
 }

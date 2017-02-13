@@ -28,7 +28,8 @@ Imports:
     rhtmlMoonPlot
 Suggests:
     testthat,
-    mlbench
+    mlbench,
+    flipExampleData
 Remotes:
     Displayr/flipAnalysisOfVariance,
     Displayr/flipData,
