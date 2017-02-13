@@ -30,14 +30,14 @@ Suggests:
     testthat,
     mlbench
 Remotes:
-    NumbersInternational/flipAnalysisOfVariance,
-    NumbersInternational/flipData,
-    NumbersInternational/flipFormat,
-    NumbersInternational/flipRegression,
-    NumbersInternational/flipStatistics,
-    NumbersInternational/flipTransformations,
-    NumbersInternational/flipU,
-    NumbersInternational/flipChartBasics,
-    NumbersInternational/rhtmlLabeledScatter,
-    NumbersInternational/rhtmlMoonPlot
+    Displayr/flipAnalysisOfVariance,
+    Displayr/flipData,
+    Displayr/flipFormat,
+    Displayr/flipRegression,
+    Displayr/flipStatistics,
+    Displayr/flipTransformations,
+    Displayr/flipU,
+    Displayr/flipChartBasics,
+    Displayr/rhtmlLabeledScatter,
+    Displayr/rhtmlMoonPlot
 RoxygenNote: 5.0.1
