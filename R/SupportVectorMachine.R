@@ -181,19 +181,29 @@ print.SupportVectorMachine <- function(x, ...)
                                      title = title,
                                      subtitle = subtitle,
                                      footer = x$sample.description)
-            print(tbl)
+            #print(tbl)
         } else
         {
             pred <- x$original$fitted
             rmse <- sqrt(mean((pred - x$model[,1])^2))
             rsq <- (cor(pred, x$model[,1]))^2
-            print(paste("R-squared : ", FormatWithDecimals(rsq, 2)))
-            print(paste("RMSE      : ", FormatWithDecimals(rmse, 2)))
+            tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
+                                     column.labels = " ",
+                                     order.values = FALSE,
+                                     title = title,
+                                     subtitle = "Measure of fit",
+                                     footer = x$sample.description)
+
+            #cat("R-squared : ", FormatWithDecimals(rsq, 2),
+            #    "\nRMSE      : ", FormatWithDecimals(rmse, 2))
+            #invisible(x)
         }
+        print(tbl)
     }
     else
     {
         print(x$original)
+        print("Confusion matrix:")
         print(x$confusion)
         invisible(x)
     }
@@ -212,16 +222,30 @@ print.SupportVectorMachine <- function(x, ...)
 #' @details Produces a confusion matrix for a trained model. Predictions are based on the
 #' training data (not a separate test set).
 #' The proportion of observed values that take the same values as the predicted values.
-#' Where the outcome variable in the model is not a factor and not a count, predicted values
-#' are assigned to the closest observed value.
+#' Where the outcome variable in the model is not a factor and not a count, observed and predicted
+#' values are assigned to buckets.
 #' @importFrom stats predict
 #' @importFrom methods is
 #' @importFrom flipData Observed
-#' @importFrom flipRegression ConfusionMatrixFromVariables
+#' @importFrom flipU IsCount
+#' @importFrom flipRegression ConfusionMatrixFromVariables ConfusionMatrixFromVariablesLinear
 #' @export
 ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = NULL)
 {
     observed <- obj$estimation.data[ , obj$outcome.name]
     predicted <- obj$original$fitted
-    return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
+
+    if (is.factor(observed)) {
+        return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
+
+    } else if (IsCount(observed)) {
+        return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
+
+    } else {
+        min.value <- min(predicted, observed)
+        max.value <- max(predicted, observed)
+        range <- max.value - min.value
+        breakpoints <- seq(min.value, max.value, range / 8)
+        return(ConfusionMatrixFromVariables(cut(observed, breakpoints), cut(predicted, breakpoints), subset, weights))
+    }
 }

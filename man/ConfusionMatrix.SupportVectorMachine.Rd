@@ -24,7 +24,7 @@ name of a variable in \code{data}. It may not be an expression.}
 Produces a confusion matrix for a trained model. Predictions are based on the
 training data (not a separate test set).
 The proportion of observed values that take the same values as the predicted values.
-Where the outcome variable in the model is not a factor and not a count, predicted values
-are assigned to the closest observed value.
+Where the outcome variable in the model is not a factor and not a count, observed and predicted
+values are assigned to buckets.
 }
 
