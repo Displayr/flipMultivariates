@@ -12,7 +12,7 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @param output One of \code{"Accuracy"}, or \code{"Detail"}.
+#' @param output One of \code{"Accuracy"}, \code{"Confusion"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
@@ -80,22 +80,7 @@ SupportVectorMachine <- function(formula,
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
 
     # Treatment of missing values.
-    #print(paste("pre-EstimationData", str(data)))
     processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
-    #print(table(processed.data$estimation.data$A7))
-    #print(table(data$A7))
-    #print(paste("post-EstimationData", str(processed.data$estimation.data)))
-
-    # Reinstate levels of factors
-    #factor.levels <- lapply(data, levels)
-    #for (col in names(processed.data$estimation.data)) {
-    #    print(col)
-    #    print(factor.levels[col])
-    #    print(levels(processed.data$estimation.data[col]))
-    #}
-
-    #print(paste("post-ReLevel", str(processed.data$estimation.data)))
-
     unfiltered.weights <- processed.data$unfiltered.weights
     .estimation.data <- processed.data$estimation.data
     n.predictors <- ncol(.estimation.data)
@@ -140,7 +125,6 @@ SupportVectorMachine <- function(formula,
         result$outcome.label <- outcome.label
         # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-        # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
     }
     else
         result$outcome.label <- outcome.name
@@ -148,10 +132,6 @@ SupportVectorMachine <- function(formula,
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
-    #result$sort.by.importance <- sort.by.importance
-    # 5. Statistics - no importance for svm
-    #result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD
-    #result$p.values <- 2 * (1 - pnorm(abs(result$z.statistics)))
     result
 }
 
@@ -165,14 +145,10 @@ print.SupportVectorMachine <- function(x, ...)
         subtitle <- ""
         if (!x$numeric.outcome)
         {
-            #confM <- ConfusionMatrix(x)
             confM <- x$confusion
             tot.cor <- sum(diag(confM))/sum(confM)
             class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
             names(class.cor) <- colnames(confM)
-            #tmp.text <- paste(paste0(rownames(confM), ":"),
-            #                  paste0(FormatWithDecimals(class.cor*100, 2), "%"),
-            #                  collapse=", ")
             subtitle <- sprintf("Overall Accuracy: %.2f%%",
                                 tot.cor*100)
             tbl <- DeepLearningTable(class.cor,
@@ -181,7 +157,6 @@ print.SupportVectorMachine <- function(x, ...)
                                      title = title,
                                      subtitle = subtitle,
                                      footer = x$sample.description)
-            #print(tbl)
         } else
         {
             pred <- x$original$fitted
@@ -193,18 +168,17 @@ print.SupportVectorMachine <- function(x, ...)
                                      title = title,
                                      subtitle = "Measure of fit",
                                      footer = x$sample.description)
-
-            #cat("R-squared : ", FormatWithDecimals(rsq, 2),
-            #    "\nRMSE      : ", FormatWithDecimals(rmse, 2))
-            #invisible(x)
         }
         print(tbl)
+    }
+    else if (x$output == "Confusion")
+    {
+        print(x$confusion)
+        invisible(x)
     }
     else
     {
         print(x$original)
-        print("Confusion matrix:")
-        print(x$confusion)
         invisible(x)
     }
 }
@@ -241,6 +215,7 @@ ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = N
     } else if (IsCount(observed)) {
         return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
 
+    # numeric variable and not a count - use 8 buckets
     } else {
         min.value <- min(predicted, observed)
         max.value <- max(predicted, observed)
