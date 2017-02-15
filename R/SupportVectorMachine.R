@@ -12,7 +12,7 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @param output One of \code{"Accuracy"}, \code{"Confusion"} or \code{"Detail"}.
+#' @param output One of \code{"Accuracy"}, \code{"Confusion Matrix"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
@@ -152,8 +152,8 @@ print.SupportVectorMachine <- function(x, ...)
             names(class.cor) <- colnames(confM)
             subtitle <- sprintf("Overall Accuracy: %.2f%%",
                                 tot.cor*100)
-            tbl <- DeepLearningTable(class.cor,
-                                     column.labels = "Accuracy by class",
+            tbl <- DeepLearningTable(class.cor*100,
+                                     column.labels = "Accuracy by class (%)",
                                      order.values = FALSE,
                                      title = title,
                                      subtitle = subtitle,
@@ -161,8 +161,8 @@ print.SupportVectorMachine <- function(x, ...)
         } else
         {
             pred <- x$original$fitted
-            rmse <- sqrt(mean((pred - x$model[,1])^2))
-            rsq <- (cor(pred, x$model[,1]))^2
+            rmse <- sqrt(mean((pred - x$estimation.data[, x$outcome.name])^2))
+            rsq <- (cor(pred, x$estimation.data[, x$outcome.name]))^2
             tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
                                      column.labels = " ",
                                      order.values = FALSE,
@@ -172,10 +172,8 @@ print.SupportVectorMachine <- function(x, ...)
         }
         print(tbl)
     }
-    else if (x$output == "Confusion")
+    else if (x$output == "Confusion Matrix")
     {
-        #print(x$confusion)
-        #invisible(x)
         mat <- GetTidyTwoDimensionalArray(x$confusion)
         color <- "Reds"
         n.row <- nrow(mat)
@@ -233,7 +231,7 @@ ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = N
         min.value <- min(predicted, observed)
         max.value <- max(predicted, observed)
         range <- max.value - min.value
-        buckets <- floor(sqrt(length(predicted) / 2))
+        buckets <- min(floor(sqrt(length(predicted) / 3)), 30)
         breakpoints <- seq(min.value, max.value, range / buckets)
         return(ConfusionMatrixFromVariables(cut(observed, breakpoints), cut(predicted, breakpoints), subset, weights))
     }
