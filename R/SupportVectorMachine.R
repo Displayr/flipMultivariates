@@ -136,6 +136,8 @@ SupportVectorMachine <- function(formula,
 }
 
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
+#' @importFrom flipData GetTidyTwoDimensionalArray
+#' @importFrom rhtmlHeatmap Heatmap
 #' @export
 print.SupportVectorMachine <- function(x, ...)
 {
@@ -173,8 +175,20 @@ print.SupportVectorMachine <- function(x, ...)
     }
     else if (x$output == "Confusion")
     {
-        print(x$confusion)
-        invisible(x)
+        #print(x$confusion)
+        #invisible(x)
+        mat <- GetTidyTwoDimensionalArray(x$confusion)
+        color <- "Reds"
+        n.row <- nrow(mat)
+        show.cellnote.in.cell <- (n.row <= 10)
+        heatmap <- Heatmap(mat, Rowv = FALSE, Colv = FALSE,
+                           scale = "none", dendrogram = "none",
+                           xaxis_location = "top", yaxis_location = "left",
+                           colors = color, color_range = NULL, cexRow = 0.79,
+                           cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
+                           xaxis_hidden = FALSE, yaxis_hidden = FALSE,
+                           xaxis_title = "Predicted", yaxis_title = "Observed")
+        print(heatmap)
     }
     else
     {
@@ -215,12 +229,13 @@ ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = N
     } else if (IsCount(observed)) {
         return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
 
-    # numeric variable and not a count - use 8 buckets
+    # numeric variable and not a count - bucket values
     } else {
         min.value <- min(predicted, observed)
         max.value <- max(predicted, observed)
         range <- max.value - min.value
-        breakpoints <- seq(min.value, max.value, range / 8)
+        buckets <- floor(sqrt(length(predicted) / 2))
+        breakpoints <- seq(min.value, max.value, range / buckets)
         return(ConfusionMatrixFromVariables(cut(observed, breakpoints), cut(predicted, breakpoints), subset, weights))
     }
 }

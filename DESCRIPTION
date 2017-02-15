@@ -24,6 +24,7 @@ Imports:
     methods,
     randomForest,
     NeuralNetTools,
+    rhtmlHeatmap,
     rhtmlLabeledScatter,
     rhtmlMoonPlot
 Suggests:
@@ -39,6 +40,7 @@ Remotes:
     Displayr/flipTransformations,
     Displayr/flipU,
     Displayr/flipChartBasics,
+    Displayr/rhtmlHeatmap,
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot
 RoxygenNote: 5.0.1
