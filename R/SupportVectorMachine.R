@@ -137,7 +137,6 @@ SupportVectorMachine <- function(formula,
 
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @importFrom flipData GetTidyTwoDimensionalArray
-#' @importFrom rhtmlHeatmap Heatmap
 #' @export
 print.SupportVectorMachine <- function(x, ...)
 {
@@ -181,7 +180,7 @@ print.SupportVectorMachine <- function(x, ...)
         color <- "Reds"
         n.row <- nrow(mat)
         show.cellnote.in.cell <- (n.row <= 10)
-        heatmap <- Heatmap(mat, Rowv = FALSE, Colv = FALSE,
+        heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
                            scale = "none", dendrogram = "none",
                            xaxis_location = "top", yaxis_location = "left",
                            colors = color, color_range = NULL, cexRow = 0.79,
