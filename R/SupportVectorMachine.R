@@ -149,35 +149,36 @@ print.SupportVectorMachine <- function(x, ...)
     if (x$output == "Accuracy")
     {
         title <- paste0("Support Vector Machine: ", x$outcome.label)
+        if (x$show.labels) {
+            predictors <- paste(x$variable.labels, collapse = ", ")
+        } else {
+            predictors <- paste(attr(x$original$terms, "term.labels"), collapse = ", ")
+        }
+
         if (!x$numeric.outcome)
         {
             confM <- x$confusion
             tot.cor <- sum(diag(confM))/sum(confM)
             class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
             names(class.cor) <- colnames(confM)
-            if (x$show.labels) {
-                predictors <- paste(x$variable.labels, collapse = ", ")
-            } else {
-                predictors <- paste(attr(x$original$terms, "term.labels"), collapse = ", ")
-            }
             subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
-            subtitle <- paste(subtitle, " (Predictors :", predictors, ")", sep = "")
             tbl <- DeepLearningTable(class.cor*100,
                                      column.labels = "Accuracy by class (%)",
                                      order.values = FALSE,
                                      title = title,
-                                     subtitle = subtitle,
+                                     subtitle = paste(subtitle, " (Predictors :", predictors, ")", sep = ""),
                                      footer = x$sample.description)
         } else
         {
             pred <- x$original$fitted
             rmse <- sqrt(mean((pred - x$estimation.data[, x$outcome.name])^2))
             rsq <- (cor(pred, x$estimation.data[, x$outcome.name]))^2
+            subtitle <- "Measure of fit"
             tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,
-                                     subtitle = "Measure of fit",
+                                     subtitle = paste(subtitle, " (Predictors :", predictors, ")", sep = ""),
                                      footer = x$sample.description)
         }
         print(tbl)
@@ -189,18 +190,18 @@ print.SupportVectorMachine <- function(x, ...)
         n.row <- nrow(mat)
         show.cellnote.in.cell <- (n.row <= 10)
         if (x$numeric.outcome) {
-            x_hidden <- TRUE
-            y_hidden <- TRUE
+            labRow <- rep("", nrow(mat))
+            labCol <- rep("", ncol(mat))
         } else {
-            x_hidden <- FALSE
-            y_hidden <- FALSE
+            labRow <- rownames(mat)
+            labCol <- colnames(mat)
         }
         heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
                            scale = "none", dendrogram = "none",
                            xaxis_location = "top", yaxis_location = "left",
                            colors = color, color_range = NULL, cexRow = 0.79,
                            cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
-                           xaxis_hidden = x_hidden, yaxis_hidden = y_hidden,
+                           labRow = labRow, labCol = labCol,
                            xaxis_title = "Predicted", yaxis_title = "Observed")
         print(heatmap)
     }
