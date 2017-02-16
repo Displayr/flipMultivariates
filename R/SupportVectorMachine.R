@@ -90,11 +90,13 @@ SupportVectorMachine <- function(formula,
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
     .formula <- DataFormula(input.formula)
+
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
         .estimation.data
     else
         AdjustDataToReflectWeights(.estimation.data, .weights)
+
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
@@ -104,6 +106,7 @@ SupportVectorMachine <- function(formula,
     result <- list(original = svm(.formula, data = .estimation.data.1,
                                   probability = TRUE, cost = cost, ...))
     result$original$call <- cl
+
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
@@ -111,6 +114,7 @@ SupportVectorMachine <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+
     # 2. Saving descriptive information.
     class(result) <- "SupportVectorMachine"
     result$outcome.name <- outcome.name
@@ -119,6 +123,7 @@ SupportVectorMachine <- function(formula,
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
     {
@@ -128,7 +133,8 @@ SupportVectorMachine <- function(formula,
     }
     else
         result$outcome.label <- outcome.name
-    # 4.Saving parameters
+
+    # 4. Saving parameters
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
@@ -142,16 +148,20 @@ print.SupportVectorMachine <- function(x, ...)
 {
     if (x$output == "Accuracy")
     {
-        title <- paste0("Support Vector Machine: ", x$outcome.name)
-        subtitle <- ""
+        title <- paste0("Support Vector Machine: ", x$outcome.label)
         if (!x$numeric.outcome)
         {
             confM <- x$confusion
             tot.cor <- sum(diag(confM))/sum(confM)
             class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
             names(class.cor) <- colnames(confM)
-            subtitle <- sprintf("Overall Accuracy: %.2f%%",
-                                tot.cor*100)
+            if (x$show.labels) {
+                predictors <- paste(x$variable.labels, collapse = ", ")
+            } else {
+                predictors <- paste(attr(x$original$terms, "term.labels"), collapse = ", ")
+            }
+            subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
+            subtitle <- paste(subtitle, " (Predictors :", predictors, ")", sep = "")
             tbl <- DeepLearningTable(class.cor*100,
                                      column.labels = "Accuracy by class (%)",
                                      order.values = FALSE,
@@ -178,12 +188,19 @@ print.SupportVectorMachine <- function(x, ...)
         color <- "Reds"
         n.row <- nrow(mat)
         show.cellnote.in.cell <- (n.row <= 10)
+        if (x$numeric.outcome) {
+            x_hidden <- TRUE
+            y_hidden <- TRUE
+        } else {
+            x_hidden <- FALSE
+            y_hidden <- FALSE
+        }
         heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
                            scale = "none", dendrogram = "none",
                            xaxis_location = "top", yaxis_location = "left",
                            colors = color, color_range = NULL, cexRow = 0.79,
                            cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
-                           xaxis_hidden = FALSE, yaxis_hidden = FALSE,
+                           xaxis_hidden = x_hidden, yaxis_hidden = y_hidden,
                            xaxis_title = "Predicted", yaxis_title = "Observed")
         print(heatmap)
     }
