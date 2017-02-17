@@ -32,7 +32,7 @@ name of a variable in \code{data}. It may not be an expression.}
 \code{"Exclude cases with missing data"},}
 
 \item{cost}{A positive number controlling the compromoise between exactly fitting the training data
-(higher cost) and the abailaity to generalise to unseen data (lower cost).}
+(higher cost) and the ability to generalise to unseen data (lower cost).}
 
 \item{seed}{The random number seed used in imputation.}
 

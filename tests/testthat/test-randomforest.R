@@ -12,7 +12,7 @@ hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALS
 hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
-hair1$num <- flipTransformations::AsNumeric(hair1$x1, binary = FALSE)
+hair1$num <- suppressWarnings(flipTransformations::AsNumeric(hair1$x1, binary = FALSE))
 hair1$numeric <- hair1$num + runif(length(hair1$num)) / 10
 attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)

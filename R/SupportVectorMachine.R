@@ -17,7 +17,7 @@
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
 #' @param cost A positive number controlling the compromoise between exactly fitting the training data
-#' (higher cost) and the abailaity to generalise to unseen data (lower cost).
+#' (higher cost) and the ability to generalise to unseen data (lower cost).
 #' @param seed The random number seed used in imputation.
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
@@ -49,7 +49,7 @@ SupportVectorMachine <- function(formula,
     if(!missing(statistical.assumptions))
         stop("'statistical.assumptions' objects are not yet supported.")
     if (cost <= 0)
-        stop("cost must be positive.")
+        stop("cost must be positive")
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
     subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
@@ -128,7 +128,6 @@ SupportVectorMachine <- function(formula,
     if (result$show.labels <- show.labels)
     {
         result$outcome.label <- outcome.label
-        # Removing the outcome variable
         result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
     }
     else
@@ -149,11 +148,21 @@ print.SupportVectorMachine <- function(x, ...)
     if (x$output == "Accuracy")
     {
         title <- paste0("Support Vector Machine: ", x$outcome.label)
-        if (x$show.labels) {
-            predictors <- paste(x$variable.labels, collapse = ", ")
-        } else {
-            predictors <- paste(attr(x$original$terms, "term.labels"), collapse = ", ")
+        if (x$show.labels)
+        {
+            predictors <- x$variable.labels
         }
+        else
+        {
+            predictors <- attr(x$original$terms, "term.labels")
+        }
+
+        extracted <- ExtractCommonPrefix(predictors)
+        if (!is.na(extracted$common.prefix))
+        {
+            predictors <- extracted$shortened.labels
+        }
+        predictors <- paste(predictors, collapse = ", ")
 
         if (!x$numeric.outcome)
         {
@@ -168,11 +177,13 @@ print.SupportVectorMachine <- function(x, ...)
                                      title = title,
                                      subtitle = paste(subtitle, " (Predictors :", predictors, ")", sep = ""),
                                      footer = x$sample.description)
-        } else
+        }
+        else
         {
-            pred <- x$original$fitted
-            rmse <- sqrt(mean((pred - x$estimation.data[, x$outcome.name])^2))
-            rsq <- (cor(pred, x$estimation.data[, x$outcome.name]))^2
+            obs <- Observed(x)
+            pred <- predict(x)
+            rmse <- sqrt(mean((pred - obs)^2))
+            rsq <- (cor(pred, obs))^2
             subtitle <- "Measure of fit"
             tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
                                      column.labels = " ",
@@ -182,6 +193,7 @@ print.SupportVectorMachine <- function(x, ...)
                                      footer = x$sample.description)
         }
         print(tbl)
+
     }
     else if (x$output == "Confusion Matrix")
     {
@@ -189,10 +201,13 @@ print.SupportVectorMachine <- function(x, ...)
         color <- "Reds"
         n.row <- nrow(mat)
         show.cellnote.in.cell <- (n.row <= 10)
-        if (x$numeric.outcome) {
+        if (x$numeric.outcome)
+        {
             labRow <- rep("", nrow(mat))
             labCol <- rep("", ncol(mat))
-        } else {
+        }
+        else
+        {
             labRow <- rownames(mat)
             labCol <- colnames(mat)
         }
@@ -202,7 +217,9 @@ print.SupportVectorMachine <- function(x, ...)
                            colors = color, color_range = NULL, cexRow = 0.79,
                            cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
                            labRow = labRow, labCol = labCol,
-                           xaxis_title = "Predicted", yaxis_title = "Observed")
+                           xaxis_title = "Predicted", yaxis_title = "Observed",
+                           title = paste0("Support Vector Machine Confusion Matrix: ", x$outcome.label),
+                           footer = x$sample.description)
         print(heatmap)
     }
     else
@@ -235,17 +252,21 @@ print.SupportVectorMachine <- function(x, ...)
 #' @export
 ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = NULL)
 {
-    observed <- obj$estimation.data[ , obj$outcome.name]
-    predicted <- obj$original$fitted
+    observed <- Observed(obj)
+    predicted <- predict(obj)
 
-    if (is.factor(observed)) {
+    if (is.factor(observed))
+    {
         return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
-
-    } else if (IsCount(observed)) {
+    }
+    else if (IsCount(observed))
+    {
         return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
 
-    # numeric variable and not a count - bucket values
-    } else {
+    }
+    else
+    {
+        # numeric variable and not a count - bucket predicted and observed values
         min.value <- min(predicted, observed)
         max.value <- max(predicted, observed)
         range <- max.value - min.value

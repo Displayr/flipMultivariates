@@ -146,10 +146,13 @@ deepLearningExtractVariables <- function(object, type, newdata = object$model, n
 #' @export
 predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    if (is.null(newdata)) {
+    if (is.null(newdata))
+    {
         newdata <- object$model
-    } else {
-        train.factor.df <- object$model[ , names(object$model) != object$outcome.name]
+    }
+    else
+    {
+        train.factor.df <- object$model[, names(object$model) != object$outcome.name]
         all.factors <- sapply(train.factor.df, is.factor)
         train.factor.df <- droplevels(train.factor.df[ , all.factors])
         train.levels <- sapply(lapply(train.factor.df, table), length)
@@ -157,10 +160,11 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
         test.factor.df <- newdata[ , all.factors]
         test.levels <- sapply(lapply(test.factor.df, table), length)
 
-        if (!identical(train.levels, test.levels)) {
+        if (!identical(train.levels, test.levels))
+        {
             wrong <- names(test.levels[!(test.levels %in% train.levels)])
             stop("Prediction data contains variables (", wrong, ") with more levels than training data. ",
-                 "Remove or combine prediction data with the additional levels, or add to training data.")
+                 "Remove or combine prediction data with the additional levels, or increase training data to include all levels.")
         }
     }
     predict(object$original, newdata = newdata, na.action = na.action)
@@ -176,7 +180,7 @@ Probabilities.SupportVectorMachine <- function(x)
 {
     if(x$numeric.outcome)
         stop("Probabilities are only applicable to models with categorical outcome variables.")
-    predict(x$original, decision.values = TRUE, probability = TRUE,
-            newdata = x$model, na.action = na.pass)
+
+    predict(x$original, decision.values = TRUE, probability = TRUE, newdata = x$model, na.action = na.pass)
 }
 
