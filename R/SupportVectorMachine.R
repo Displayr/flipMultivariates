@@ -141,7 +141,8 @@ SupportVectorMachine <- function(formula,
 }
 
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
-#' @importFrom flipData GetTidyTwoDimensionalArray
+#' @importFrom flipData GetTidyTwoDimensionalArray Observed
+#' @importFrom flipU IsCount
 #' @importFrom utils read.table
 #' @export
 print.SupportVectorMachine <- function(x, ...)
@@ -181,8 +182,8 @@ print.SupportVectorMachine <- function(x, ...)
         }
         else
         {
-            obs <- Observed(x)
-            pred <- predict(x)
+            obs <- Observed(x)[x$subset == TRUE]    # subset also accounts for NAs
+            pred <- predict(x)[x$subset == TRUE]
             rmse <- sqrt(mean((pred - obs)^2))
             rsq <- (cor(pred, obs))^2
             subtitle <- "Measure of fit"
