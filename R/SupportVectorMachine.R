@@ -142,6 +142,7 @@ SupportVectorMachine <- function(formula,
 
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @importFrom flipData GetTidyTwoDimensionalArray
+#' @importFrom utils read.table
 #' @export
 print.SupportVectorMachine <- function(x, ...)
 {

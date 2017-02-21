@@ -93,7 +93,7 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
 #' @param ... Additional arguments to pass to predict.SupportVectorMachine.
-#' @importFrom stats na.pass
+#' @importFrom stats na.pass na.omit complete.cases
 #' @export
 predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.omit, ...)
 {

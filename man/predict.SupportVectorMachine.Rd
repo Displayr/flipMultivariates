@@ -5,7 +5,7 @@
 \title{\code{predict.SupportVectorMachine}}
 \usage{
 \method{predict}{SupportVectorMachine}(object, newdata = NULL,
-  na.action = na.pass, ...)
+  na.action = na.omit, ...)
 }
 \arguments{
 \item{object}{A \code{SupportVectorMachine} object.}
