@@ -203,23 +203,42 @@ print.SupportVectorMachine <- function(x, ...)
         show.cellnote.in.cell <- (n.row <= 10)
         if (x$numeric.outcome)
         {
-            labRow <- rep("", nrow(mat))
-            labCol <- rep("", ncol(mat))
+            breakpoints <- read.table(text = gsub("[^.0-9]", " ", rownames(mat)), col.names = c("lower", "upper"))
+            rownames(mat) <- breakpoints$upper
+            colnames(mat) <- breakpoints$upper
         }
-        else
-        {
-            labRow <- rownames(mat)
-            labCol <- colnames(mat)
-        }
+
+        # create tooltip matrices of percentages
+        cell.pct <- 100 * mat / sum(mat)
+        cell.pct <- matrix(sprintf("%s%% of all cases",
+                                format(round(cell.pct, 2), nsmall = 2)),
+                                nrow = n.row, ncol = n.row)
+
+        column.sums <- t(data.frame(colSums(mat)))
+        column.sums <- column.sums[rep(row.names(column.sums), n.row), ]
+        column.pct <- 100 * mat / column.sums
+        column.pct <- matrix(sprintf("%s%% of Predicted class",
+                                   format(round(column.pct, 2), nsmall = 2)),
+                                   nrow = n.row, ncol = n.row)
+
+        row.sums <- t(data.frame(rowSums(mat)))
+        row.sums <- row.sums[rep(row.names(row.sums), n.row), ]
+        row.pct <- 100 * mat / t(row.sums)
+        row.pct <- matrix(sprintf("%s%% of Observed class",
+                                     format(round(row.pct, 2), nsmall = 2)),
+                                     nrow = n.row, ncol = n.row)
+
         heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
                            scale = "none", dendrogram = "none",
                            xaxis_location = "top", yaxis_location = "left",
                            colors = color, color_range = NULL, cexRow = 0.79,
                            cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
-                           labRow = labRow, labCol = labCol,
                            xaxis_title = "Predicted", yaxis_title = "Observed",
                            title = paste0("Support Vector Machine Confusion Matrix: ", x$outcome.label),
-                           footer = x$sample.description)
+                           footer = x$sample.description,
+                           extra_tooltip_info = list("% cases" = cell.pct,
+                                                     "% Predicted" = column.pct,
+                                                     "% Observed" = row.pct))
         print(heatmap)
     }
     else
@@ -266,11 +285,11 @@ ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = N
     }
     else
     {
-        # numeric variable and not a count - bucket predicted and observed values
-        min.value <- min(predicted, observed)
-        max.value <- max(predicted, observed)
+        # numeric variable and not a count - bucket predicted and observed based on range of values
+        min.value <- min(predicted[subset = TRUE], observed[subset = TRUE], na.rm = TRUE)
+        max.value <- max(predicted[subset = TRUE], observed[subset = TRUE], na.rm = TRUE)
         range <- max.value - min.value
-        buckets <- min(floor(sqrt(length(predicted) / 3)), 30)
+        buckets <- min(floor(sqrt(length(predicted[subset = TRUE]) / 3)), 30)
         breakpoints <- seq(min.value, max.value, range / buckets)
         return(ConfusionMatrixFromVariables(cut(observed, breakpoints), cut(predicted, breakpoints), subset, weights))
     }

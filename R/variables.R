@@ -144,30 +144,57 @@ deepLearningExtractVariables <- function(object, type, newdata = object$model, n
 #' @param ... Additional arguments to pass to predict.SupportVectorMachine.
 #' @importFrom stats na.pass
 #' @export
-predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.pass, ...)
+predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.omit, ...)
 {
     if (is.null(newdata))
     {
-        newdata <- object$model
+        # Must droplevels since EstimationData removes unused levels from training data.  svm.predict() binary
+        # encodes prediction variables according to the number of levels and will fail if newdata contains
+        # a different number of levels from training data (even if no instances have the unused levels).
+        newdata <- droplevels(object$model)
+        exclusions <- rep(FALSE, nrow(newdata))
     }
     else
     {
-        train.factor.df <- object$model[, names(object$model) != object$outcome.name]
-        all.factors <- sapply(train.factor.df, is.factor)
-        train.factor.df <- droplevels(train.factor.df[ , all.factors])
-        train.levels <- sapply(lapply(train.factor.df, table), length)
+        training <- object$model[, names(object$model) != object$outcome.name]
+        train.levels <- sapply(droplevels(training), levels)
 
-        test.factor.df <- newdata[ , all.factors]
-        test.levels <- sapply(lapply(test.factor.df, table), length)
+        # droplevels to be consistent with treatment of training data
+        newdata <- droplevels(newdata[, names(newdata) != object$outcome.name])
+        prediction.levels <- sapply(newdata, levels)
+        exclusions <- rep(FALSE, nrow(newdata))
 
-        if (!identical(train.levels, test.levels))
+        if (!identical(names(training), names(newdata)))
+            stop("Attempting to predict based on a different set of variables than that used to
+                 train the model.")
+
+        for (i in 1:length(train.levels))
         {
-            wrong <- names(test.levels[!(test.levels %in% train.levels)])
-            stop("Prediction data contains variables (", wrong, ") with more levels than training data. ",
-                 "Remove or combine prediction data with the additional levels, or increase training data to include all levels.")
+            if (!is.null(train.levels[[i]]))    # factor variables only
+            {
+                # if prediction has any levels not in train
+                new.levels <- setdiff(prediction.levels[[i]], train.levels[[i]])
+                if (!identical(new.levels, character(0)))
+                    # set exclusions to TRUE for any newdata row with a new factor level
+                    nb.excluded <- sum(exclusions == TRUE)
+                    exclusions[newdata[, i] %in% new.levels] <- TRUE
+                    newly.excluded <- sum(exclusions == TRUE) - nb.excluded
+                    warning(sprintf("Prediction variable %s contains categories (%s) that were not used for training. %d instances are affected and will be predicted NA.",
+                                    names(training[i]), new.levels, newly.excluded))
+
+                # if train has any levels not in prediction, then add those levels to prediction
+                if (!identical(setdiff(train.levels[[i]], prediction.levels[[i]]), character(0)))
+                    levels(newdata[, i]) <- train.levels[[i]]
+            }
+
         }
+
     }
-    predict(object$original, newdata = newdata, na.action = na.action)
+    # Since e1071 svm predictions cannot return NA for missing data, predict only for complete.cases
+    # and no new factor levels, default to NA for other instances.
+    newdata[complete.cases(newdata) & !exclusions, "prediction"] <-
+        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !exclusions, ]))
+    return(newdata$prediction)
 }
 
 #' \code{Probabilities.SupportVectorMachine}
