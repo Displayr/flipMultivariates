@@ -202,7 +202,7 @@ print.SupportVectorMachine <- function(x, ...)
         color <- "Reds"
         n.row <- nrow(mat)
         show.cellnote.in.cell <- (n.row <= 10)
-        if (x$numeric.outcome)
+        if (x$numeric.outcome & !IsCount(Observed(x)))
         {
             breakpoints <- read.table(text = gsub("[^.0-9]", " ", rownames(mat)), col.names = c("lower", "upper"))
             rownames(mat) <- breakpoints$upper
@@ -282,7 +282,6 @@ ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = N
     else if (IsCount(observed))
     {
         return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
-
     }
     else
     {
