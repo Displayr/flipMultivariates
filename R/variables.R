@@ -111,10 +111,10 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
     # Hence we filter out instances of newdata with new levels (predict NA), and add back to newdata any
     # levels not present but were in training data.  Thus droplevels(newdata) is aligned with training levels.
 
-    training <- object$model[object$subset, names(object$model) != object$outcome.name]
+    training <- object$model[object$subset, names(object$model) != object$outcome.name, drop = FALSE]
     train.levels <- sapply(droplevels(training), levels)
 
-    newdata <- newdata[, names(newdata) != object$outcome.name]
+    newdata <- newdata[, names(newdata) != object$outcome.name, drop = FALSE]
     prediction.levels <- sapply(newdata, levels)
     exclusions <- rep(FALSE, nrow(newdata))
 
@@ -145,7 +145,7 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
     # Since e1071 svm predictions cannot return NA for missing data, predict only for complete.cases and
     # no new factors.  Default to NA for other instances.
     newdata[complete.cases(newdata) & !exclusions, "prediction"] <-
-        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !exclusions, ]))
+        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !exclusions, , drop = FALSE]))
     return(newdata$prediction)
 }
 
