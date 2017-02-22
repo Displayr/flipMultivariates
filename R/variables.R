@@ -99,50 +99,51 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
 {
     if (is.null(newdata))
     {
-        # Must droplevels since EstimationData removes unused levels from training data.  svm.predict() binary
-        # encodes prediction variables according to the number of levels and will fail if newdata contains
-        # a different number of levels from training data (even if no instances have the unused levels).
-        newdata <- droplevels(object$model)
-        exclusions <- rep(FALSE, nrow(newdata))
+        newdata <- object$model
+        predicting.training <- TRUE
     }
     else
+        predicting.training <- FALSE
+
+    # EstimationData removes unused levels from training data (after applying filter). svm.predict() binary
+    # encodes factor variables according to their number of levels and will fail if newdata contains
+    # a different number of levels from training data (even if no instances have the unused levels).
+    # Hence we filter out instances of newdata with new levels (predict NA), and add back to newdata any
+    # levels not present but were in training data.  Thus droplevels(newdata) is aligned with training levels.
+
+    training <- object$model[object$subset, names(object$model) != object$outcome.name]
+    train.levels <- sapply(droplevels(training), levels)
+
+    newdata <- newdata[, names(newdata) != object$outcome.name]
+    prediction.levels <- sapply(newdata, levels)
+    exclusions <- rep(FALSE, nrow(newdata))
+
+    if (!identical(names(training), names(newdata)))
+        stop("Attempting to predict based on different variables than that used to train the model.")
+
+    for (i in 1:length(train.levels))
     {
-        training <- object$model[, names(object$model) != object$outcome.name]
-        train.levels <- sapply(droplevels(training), levels)
-
-        # droplevels to be consistent with treatment of training data
-        newdata <- droplevels(newdata[, names(newdata) != object$outcome.name])
-        prediction.levels <- sapply(newdata, levels)
-        exclusions <- rep(FALSE, nrow(newdata))
-
-        if (!identical(names(training), names(newdata)))
-            stop("Attempting to predict based on a different set of variables than that used to
-                 train the model.")
-
-        for (i in 1:length(train.levels))
+        if (!is.null(train.levels[[i]]))    # factor variables only
         {
-            if (!is.null(train.levels[[i]]))    # factor variables only
+            # if prediction has any levels not in train
+            new.levels <- setdiff(prediction.levels[[i]], train.levels[[i]])
+            if (!identical(new.levels, character(0)))
             {
-                # if prediction has any levels not in train
-                new.levels <- setdiff(prediction.levels[[i]], train.levels[[i]])
-                if (!identical(new.levels, character(0)))
-                    # set exclusions to TRUE for any newdata row with a new factor level
-                    nb.excluded <- sum(exclusions == TRUE)
-                    exclusions[newdata[, i] %in% new.levels] <- TRUE
-                    newly.excluded <- sum(exclusions == TRUE) - nb.excluded
+                # set exclusions to TRUE for any newdata row with a new factor level
+                nb.excluded <- sum(exclusions == TRUE)
+                exclusions[newdata[, i] %in% new.levels] <- TRUE
+                newly.excluded <- sum(exclusions == TRUE) - nb.excluded
+                if (newly.excluded > 0 & !predicting.training)
                     warning(sprintf("Prediction variable %s contains categories (%s) that were not used for training. %d instances are affected and will be predicted NA.",
                                     names(training[i]), new.levels, newly.excluded))
-
-                # if train has any levels not in prediction, then add those levels to prediction
-                if (!identical(setdiff(train.levels[[i]], prediction.levels[[i]]), character(0)))
-                    levels(newdata[, i]) <- train.levels[[i]]
             }
-
+            # if train has any levels not in prediction, then add those levels to prediction
+            if (!identical(setdiff(train.levels[[i]], prediction.levels[[i]]), character(0)))
+                levels(newdata[, i]) <- train.levels[[i]]
         }
-
     }
-    # Since e1071 svm predictions cannot return NA for missing data, predict only for complete.cases
-    # and no new factor levels, default to NA for other instances.
+    # Since e1071 svm predictions cannot return NA for missing data, predict only for complete.cases and
+    # no new factors.  Default to NA for other instances.
     newdata[complete.cases(newdata) & !exclusions, "prediction"] <-
         predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !exclusions, ]))
     return(newdata$prediction)

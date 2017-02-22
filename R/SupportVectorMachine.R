@@ -87,7 +87,6 @@ SupportVectorMachine <- function(formula,
     n <- nrow(.estimation.data)
     if (n < ncol(.estimation.data) + 1)
         stop("The sample size is too small for it to be possible to conduct the analysis.")
-    post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
     .formula <- DataFormula(input.formula)
 
@@ -114,6 +113,7 @@ SupportVectorMachine <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+    #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
 
     # 2. Saving descriptive information.
     class(result) <- "SupportVectorMachine"
