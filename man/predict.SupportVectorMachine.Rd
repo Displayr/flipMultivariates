@@ -10,8 +10,8 @@
 \arguments{
 \item{object}{A \code{SupportVectorMachine} object.}
 
-\item{newdata}{Optionally, a data frame in which to look for variables with which to predict.
-If omitted, the data used to fit the model is used.}
+\item{newdata}{Optionally, a data frame including the variables used to fit the model.
+If omitted, the actual data used to fit the model is used (before any filtering).}
 
 \item{na.action}{Function determining what should be done with missing values in \code{newdata}.
 The default is to predict \code{NA}.}
@@ -19,7 +19,8 @@ The default is to predict \code{NA}.}
 \item{...}{Additional arguments to pass to predict.SupportVectorMachine.}
 }
 \description{
-Predicts values for numeric outcomes and group membership for categories, for the entire sample passed
-into the original analysis (including missing and filtered values).
+Predicts values for numeric outcomes and group membership for categories based on new data or the data
+used to fit the model.  A value is returned for every instance including missing and filtered cases,
+producing NA where no prediction is possible (eg missing data or unfitted factor levels).
 }
 
