@@ -191,7 +191,7 @@ print.SupportVectorMachine <- function(x, ...)
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
+                                     subtitle = paste(subtitle, " (Predictors :", predictors, ")", sep = ""),
                                      footer = x$sample.description)
         }
         print(tbl)
