@@ -14,10 +14,9 @@ If omitted, the actual data used to fit the model is used (before any filtering)
 }
 \description{
 Verifies that newdata is consistent with data used to used to fit a model.  newdata must contain a
-superset of the variables used to fit the model or a stop error results. If a factor variable of
+superset of the variables used to fit the model or an error results. If a factor variable of
 newdata contains fewer levels than the factor used for fitting, the levels are expanded.  If a factor
 variable contains more levels than the factor used for fitting, a warning is given.  Returns newdata
-with potentially expanded factor levels and an 'exclusions' flag indicating which instances can
-be used for prediction.
+with potentially expanded factor levels and 'new.level.flags' indicating which instances have new levels.
 }
 

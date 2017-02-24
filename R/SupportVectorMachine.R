@@ -191,7 +191,7 @@ print.SupportVectorMachine <- function(x, ...)
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,
-                                     subtitle = paste(subtitle, " (Predictors :", predictors, ")", sep = ""),
+                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
                                      footer = x$sample.description)
         }
         print(tbl)
@@ -222,6 +222,7 @@ print.SupportVectorMachine <- function(x, ...)
         column.pct <- matrix(sprintf("%s%% of Predicted class",
                                    format(round(column.pct, 2), nsmall = 2)),
                                    nrow = n.row, ncol = n.row)
+        column.pct[mat == 0] <- "-"
 
         row.sums <- t(data.frame(rowSums(mat)))
         row.sums <- row.sums[rep(row.names(row.sums), n.row), ]
@@ -229,6 +230,7 @@ print.SupportVectorMachine <- function(x, ...)
         row.pct <- matrix(sprintf("%s%% of Observed class",
                                      format(round(row.pct, 2), nsmall = 2)),
                                      nrow = n.row, ncol = n.row)
+        row.pct[mat == 0] <- "-"
 
         heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
                            scale = "none", dendrogram = "none",

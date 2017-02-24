@@ -10,9 +10,16 @@
 #' The default is to predict \code{NA}.
 #' @importFrom stats na.pass
 #' @export
-predict.LDA <- function(object, newdata = object$model, na.action = na.pass, ...)
+predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    ldaExtractVariables(object, "class", object$prior, newdata, na.action, ...)
+    aligned <- AlignPredictionVariables(object, newdata)
+    newdata <- aligned$newdata
+    new.level.flags <- aligned$new.level.flags
+    # Predict only for instances with no new factors, default to NA otherwise.
+    # droplevels is applied after filtering for the cases that can be predicted.
+    newdata[!new.level.flags, "prediction"] <- ldaExtractVariables(object, "class", object$prior,
+                                                                   newdata = droplevels(newdata[!new.level.flags, , drop = FALSE]), na.action, ...)
+    return(newdata$prediction)
 }
 
 #' \code{Probabilities.LDA}
@@ -40,9 +47,8 @@ DiscriminantVariables <- function(x)
 #' @importFrom stats predict
 ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.action = na.pass, ...)
 {
-    outcome.i <- match(object$outcome.name, names(newdata))
-    newdata <- newdata[, -outcome.i]
-    suppressWarnings(predict(object$original,prior = prior , newdata = newdata, na.action = na.action)[[type]])
+    newdata[, object$outcome.name] <- NULL
+    suppressWarnings(predict(object$original, prior = prior , newdata = newdata, na.action = na.action)[[type]])
 }
 
 #' \code{predict.RandomForest}
@@ -56,9 +62,17 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' @param ... Additional arguments to pass to predict.randomForest.
 #' @importFrom stats na.pass
 #' @export
-predict.RandomForest <- function(object, newdata = object$model, na.action = na.pass, ...)
+predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    randomForestExtractVariables(object, "response", newdata = newdata, na.action = na.action)
+    aligned <- AlignPredictionVariables(object, newdata)
+    newdata <- aligned$newdata
+    new.level.flags <- aligned$new.level.flags
+    # Predict only for instances with no new factors, default to NA otherwise.
+    # droplevels is applied after filtering for the cases that can be predicted.
+    newdata[!new.level.flags, "prediction"] <- randomForestExtractVariables(object, "response",
+                                            newdata = droplevels(newdata[!new.level.flags, , drop = FALSE]),
+                                            na.action = na.action)
+    return(newdata$prediction)
 }
 
 #' \code{Probabilities.RandomForest}
@@ -77,9 +91,6 @@ Probabilities.RandomForest <- function(x)
 #' @import randomForest
 randomForestExtractVariables <- function(object, type, newdata = object$model, na.action = na.pass)
 {
-    #outcome.i <- match(object$outcome.name, names(newdata))
-
-    #newdata <- newdata[, -outcome.i]
     predict(object$original, type, newdata = newdata, na.action = na.action)
 }
 
@@ -101,12 +112,13 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
 {
     # AlignPredictionVariables is still required without newdata because predictions in object$fitted may be
     # a subset of object$model.
-    newdata <- AlignPredictionVariables(object, newdata)
+    aligned <- AlignPredictionVariables(object, newdata)
+    newdata <- aligned$newdata
+    new.level.flags <- aligned$new.level.flags
     # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases and
-    # no new factors.  Default to NA for other instances.
-    # droplevels after filtering for the cases that can be predicted.
-    newdata[complete.cases(newdata) & !newdata$exclusions, "prediction"] <-
-        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !newdata$exclusions, , drop = FALSE]))
+    # no new factors.  Default to NA for other instances. droplevels is applied after removing cases that cannot be predicted.
+    newdata[complete.cases(newdata) & !new.level.flags, "prediction"] <-
+        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !new.level.flags, , drop = FALSE]))
     return(newdata$prediction)
 }
 
@@ -133,11 +145,10 @@ Probabilities.SupportVectorMachine <- function(x)
 #' \code{AlignPredictionVariables}
 #'
 #' Verifies that newdata is consistent with data used to used to fit a model.  newdata must contain a
-#' superset of the variables used to fit the model or a stop error results. If a factor variable of
+#' superset of the variables used to fit the model or an error results. If a factor variable of
 #' newdata contains fewer levels than the factor used for fitting, the levels are expanded.  If a factor
 #' variable contains more levels than the factor used for fitting, a warning is given.  Returns newdata
-#' with potentially expanded factor levels and an 'exclusions' flag indicating which instances can
-#' be used for prediction.
+#' with potentially expanded factor levels and 'new.level.flags' indicating which instances have new levels.
 #' @param object A \code{SupportVectorMachine} object.
 #' @param newdata Optionally, a data frame including the variables used to fit the model.
 #' If omitted, the actual data used to fit the model is used (before any filtering).
@@ -161,12 +172,13 @@ AlignPredictionVariables <- function(object, newdata)
     training <- object$model[object$subset, names(object$model) != object$outcome.name, drop = FALSE]
     train.levels <- sapply(droplevels(training), levels)
 
-    newdata <- newdata[, names(newdata) %in% names(training), drop = FALSE]
+    if (!identical(setdiff(names(training), names(newdata)), character(0)))
+        stop("Attempting to predict based on fewer variables than those used to train the model.")
+    newdata <- newdata[, names(training)]
     prediction.levels <- sapply(newdata, levels)
 
-    if (!identical(names(training), names(newdata)))
-        stop("Attempting to predict based on different variables than those used to train the model.")
-    newdata["exclusions"] <- FALSE
+    new.level.flags <- rep(FALSE, nrow(newdata))
+    nb.flags <- 0
 
     for (i in 1:length(train.levels))
     {
@@ -176,18 +188,18 @@ AlignPredictionVariables <- function(object, newdata)
             new.levels <- setdiff(prediction.levels[[i]], train.levels[[i]])
             if (!identical(new.levels, character(0)))
             {
-                # set exclusions to TRUE for any newdata row with a new factor level
-                nb.excluded <- sum(newdata$exclusions[newdata$exclusions == TRUE])
-                newdata$exclusions[newdata[, i] %in% new.levels] <- TRUE
-                newly.excluded <- sum(newdata$exclusions[newdata$exclusions == TRUE]) - nb.excluded
-                if (newly.excluded > 0 & !predicting.training)
-                    warning(sprintf("Prediction variable %s contains categories (%s) that were not used for training. %d instances are affected and will be predicted NA.",
-                                    names(training[i]), new.levels, newly.excluded))
+                # set flags to TRUE for any newdata row with a new factor level
+                new.level.flags[newdata[, i] %in% new.levels] <- TRUE
+                updated.nb.flags <- sum(new.level.flags[new.level.flags == TRUE])
+                if ((updated.nb.flags - nb.flags) > 0 & !predicting.training)
+                    warning(sprintf("Prediction variable %s contains categories (%s) that were not used for training. %d instances are affected.",
+                                    names(training[i]), new.levels, updated.nb.flags - nb.flags))
+                nb.flags <- updated.nb.flags
             }
             # if train has any levels not in prediction, then add those levels to prediction
             if (!identical(setdiff(train.levels[[i]], prediction.levels[[i]]), character(0)))
                 levels(newdata[, i]) <- train.levels[[i]]
         }
     }
-    return(newdata)
+    return(list(newdata = newdata, new.level.flags = new.level.flags))
 }
