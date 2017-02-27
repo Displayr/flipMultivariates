@@ -13,14 +13,8 @@
 #' @export
 predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    aligned <- CheckPredictionVariables(object, newdata)
-    newdata <- aligned$newdata
-    new.level.flags <- aligned$new.level.flags
-    # Predict only for instances with no new factors, default to NA otherwise.
-    # droplevels is applied after filtering for the cases that can be predicted.
-    newdata[!new.level.flags, "prediction"] <- ldaExtractVariables(object, "class", object$prior,
-                                                                   newdata = droplevels(newdata[!new.level.flags, , drop = FALSE]), na.action, ...)
-    return(newdata$prediction)
+    newdata <- CheckPredictionVariables(object, newdata)
+    ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
 }
 
 #' \code{Probabilities.LDA}
@@ -66,15 +60,8 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' @export
 predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    aligned <- CheckPredictionVariables(object, newdata)
-    newdata <- aligned$newdata
-    new.level.flags <- aligned$new.level.flags
-    # Predict only for instances with no new factors, default to NA otherwise.
-    # droplevels is applied after filtering for the cases that can be predicted.
-    newdata[!new.level.flags, "prediction"] <- randomForestExtractVariables(object, "response",
-                                            newdata = droplevels(newdata[!new.level.flags, , drop = FALSE]),
-                                            na.action = na.action)
-    return(newdata$prediction)
+    newdata <- CheckPredictionVariables(object, newdata)
+    randomForestExtractVariables(object, "response", newdata = newdata, na.action = na.action)
 }
 
 #' \code{Probabilities.RandomForest}
@@ -115,13 +102,11 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.
 {
     # CheckPredictionVariables is still required without newdata because predictions in object$fitted may be
     # a subset of object$model.
-    aligned <- CheckPredictionVariables(object, newdata)
-    newdata <- aligned$newdata
-    new.level.flags <- aligned$new.level.flags
-    # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases and
-    # no new factors.  Default to NA for other instances. droplevels is applied after removing cases that cannot be predicted.
-    newdata[complete.cases(newdata) & !new.level.flags, "prediction"] <-
-        predict(object$original, newdata = droplevels(newdata[complete.cases(newdata) & !new.level.flags, , drop = FALSE]))
+    newdata <- CheckPredictionVariables(object, newdata)
+    # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases (without NA or new levels).
+    # Default to NA for other instances.
+    newdata[complete.cases(newdata), "prediction"] <-
+        predict(object$original, newdata = newdata[complete.cases(newdata), , drop = FALSE])
     return(newdata$prediction)
 }
 
