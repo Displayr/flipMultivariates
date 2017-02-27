@@ -11,7 +11,7 @@
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
+predict.LDA <- function(object, newdata = object$model, na.action = na.pass, ...)
 {
     newdata <- CheckPredictionVariables(object, newdata)
     ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
@@ -58,7 +58,7 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
+predict.RandomForest <- function(object, newdata = object$model, na.action = na.pass, ...)
 {
     newdata <- CheckPredictionVariables(object, newdata)
     randomForestExtractVariables(object, "response", newdata = newdata, na.action = na.action)
@@ -98,13 +98,13 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 #' @importFrom stats na.omit complete.cases
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.SupportVectorMachine <- function(object, newdata = NULL, na.action = na.omit, ...)
+predict.SupportVectorMachine <- function(object, newdata = object$model, na.action = na.omit, ...)
 {
     # CheckPredictionVariables is still required without newdata because predictions in object$fitted may be
     # a subset of object$model.
     newdata <- CheckPredictionVariables(object, newdata)
-    # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases (without NA or new levels).
-    # Default to NA for other instances.
+    # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases
+    # (without NA or new levels). Default to NA for other instances.
     newdata[complete.cases(newdata), "prediction"] <-
         predict(object$original, newdata = newdata[complete.cases(newdata), , drop = FALSE])
     return(newdata$prediction)
