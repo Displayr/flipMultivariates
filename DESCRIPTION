@@ -1,13 +1,12 @@
 Package: flipMultivariates
 Title: Multivariate models
 Version: 0.1
-Date: 2015-11-07
-Author: Numbers International Pty Ltd
-Maintainer: Tim Bock <tim.bock@numbers.net.au>
-Description: Multivariate models and supporting code.
+Author: Displayr <opensource@displayr.com>
+Maintainer: Displayr <opensource@displayr.com>
+Description: Multivariate models (e.g. LDA, random forest, SVM) according to the flip Project conventions.
 Depends:
     R (>= 3.1.1)
-License: MIT + file LICENSE
+License: GPL-3
 Imports:
     e1071,
     flipAnalysisOfVariance,
