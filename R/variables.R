@@ -1,13 +1,15 @@
 #' \code{predict.LDA}
 #'
-#' Predicts group membership  for the entire sample passed into the original analysis (including missing and filtered values).
+#' Predicts a model outcome based on \code{newdata} and a fitted LDA \code{object}.  A value (which
+#' may be NA) is returned for every instance including those with missing data and for the
+#' fitted \code{data} before filtering in the case that \code{newdata} is not specified.
+#' NA is returned for cases with unfitted factor levels.
 #' @param object A \code{LDA} object.
-#' @param newdata Optionally, a data frame in which to look for variables with which to predict.
-#' If omitted, the data used to fit the model is used.
+#' @param newdata Optionally, a data frame including the variables used to fit the model.
+#' If omitted, the \code{data} supplied to \code{LDA()} is used before any filtering.
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
 #' @param ... Additional arguments to pass to predict.lda.
-#' The default is to predict \code{NA}.
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export
@@ -48,10 +50,13 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 
 #' \code{predict.RandomForest}
 #'
-#' Predicts values for numeric outcomes and group membership for categories, for the entire sample passed into the original analysis (including missing and filtered values).
+#' Predicts values for numeric outcomes and group membership for categories based on \code{newdata}
+#' and a fitted RandomForest \code{object}.  A value (which may be NA) is returned for every instance
+#' including those with missing data and for the fitted \code{data} before filtering in the case
+#' that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
 #' @param object A \code{RandomForest} object.
-#' @param newdata Optionally, a data frame in which to look for variables with which to predict.
-#' If omitted, the data used to fit the model is used.
+#' @param newdata Optionally, a data frame including the variables used to fit the model.
+#' If omitted, the \code{data} supplied to \code{RandomForest()} is used before any filtering.
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
 #' @param ... Additional arguments to pass to predict.randomForest.
@@ -86,15 +91,16 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 
 #' \code{predict.SupportVectorMachine}
 #'
-#' Predicts values for numeric outcomes and group membership for categories based on new data or the data
-#' used to fit the model.  A value is returned for every instance including missing and filtered cases,
-#' producing NA where no prediction is possible (eg missing data or unfitted factor levels).
+#' Predicts values for numeric outcomes and group membership for categories based on \code{newdata}
+#' and a fitted SupportVectorMachine \code{object}.  A value (which may be NA) is returned for every instance
+#' including those with missing data and for the fitted \code{data} before filtering in the case
+#' that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
 #' @param object A \code{SupportVectorMachine} object.
 #' @param newdata Optionally, a data frame including the variables used to fit the model.
-#' If omitted, the actual data used to fit the model is used (before any filtering).
+#' If omitted, the \code{data} supplied to \code{SupportVectorMachine()} is used before any filtering.
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
-#' @param ... Additional arguments to pass to predict.SupportVectorMachine.
+#' @param ... Additional arguments to pass to predict.svm.
 #' @importFrom stats na.omit complete.cases
 #' @importFrom flipData CheckPredictionVariables
 #' @export
