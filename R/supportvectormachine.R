@@ -143,6 +143,7 @@ SupportVectorMachine <- function(formula,
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @importFrom flipData GetTidyTwoDimensionalArray Observed
 #' @importFrom flipU IsCount
+#' @importFrom flipRegression PrintConfusionMatrix
 #' @importFrom utils read.table
 #' @export
 print.SupportVectorMachine <- function(x, ...)
@@ -199,51 +200,7 @@ print.SupportVectorMachine <- function(x, ...)
     }
     else if (x$output == "Confusion Matrix")
     {
-        mat <- GetTidyTwoDimensionalArray(x$confusion)
-        color <- "Reds"
-        n.row <- nrow(mat)
-        show.cellnote.in.cell <- (n.row <= 10)
-        if (x$numeric.outcome & !IsCount(Observed(x)))
-        {
-            breakpoints <- read.table(text = gsub("[^.0-9]", " ", rownames(mat)), col.names = c("lower", "upper"))
-            rownames(mat) <- breakpoints$upper
-            colnames(mat) <- breakpoints$upper
-        }
-
-        # create tooltip matrices of percentages
-        cell.pct <- 100 * mat / sum(mat)
-        cell.pct <- matrix(sprintf("%s%% of all cases",
-                                format(round(cell.pct, 2), nsmall = 2)),
-                                nrow = n.row, ncol = n.row)
-
-        column.sums <- t(data.frame(colSums(mat)))
-        column.sums <- column.sums[rep(row.names(column.sums), n.row), ]
-        column.pct <- 100 * mat / column.sums
-        column.pct <- matrix(sprintf("%s%% of Predicted class",
-                                   format(round(column.pct, 2), nsmall = 2)),
-                                   nrow = n.row, ncol = n.row)
-        column.pct[mat == 0] <- "-"
-
-        row.sums <- t(data.frame(rowSums(mat)))
-        row.sums <- row.sums[rep(row.names(row.sums), n.row), ]
-        row.pct <- 100 * mat / t(row.sums)
-        row.pct <- matrix(sprintf("%s%% of Observed class",
-                                     format(round(row.pct, 2), nsmall = 2)),
-                                     nrow = n.row, ncol = n.row)
-        row.pct[mat == 0] <- "-"
-
-        heatmap <- rhtmlHeatmap::Heatmap(mat, Rowv = FALSE, Colv = FALSE,
-                           scale = "none", dendrogram = "none",
-                           xaxis_location = "top", yaxis_location = "left",
-                           colors = color, color_range = NULL, cexRow = 0.79,
-                           cellnote = mat, show_cellnote_in_cell = show.cellnote.in.cell,
-                           xaxis_title = "Predicted", yaxis_title = "Observed",
-                           title = paste0("Support Vector Machine Confusion Matrix: ", x$outcome.label),
-                           footer = x$sample.description,
-                           extra_tooltip_info = list("% cases" = cell.pct,
-                                                     "% Predicted" = column.pct,
-                                                     "% Observed" = row.pct))
-        print(heatmap)
+        PrintConfusionMatrix(x)
     }
     else
     {
@@ -253,47 +210,3 @@ print.SupportVectorMachine <- function(x, ...)
 }
 
 
-
-#' \code{ConfusionMatrix}
-#'
-#' @param obj A model with an outcome variable.
-#' @param subset An optional vector specifying a subset of observations to be
-#'   used in the fitting process, or, the name of a variable in \code{data}. It
-#'   may not be an expression.
-#' @param weights An optional vector of sampling weights, or, the name or, the
-#'   name of a variable in \code{data}. It may not be an expression.
-#' @details Produces a confusion matrix for a trained model. Predictions are based on the
-#' training data (not a separate test set).
-#' The proportion of observed values that take the same values as the predicted values.
-#' Where the outcome variable in the model is not a factor and not a count, observed and predicted
-#' values are assigned to buckets.
-#' @importFrom stats predict
-#' @importFrom methods is
-#' @importFrom flipData Observed
-#' @importFrom flipU IsCount
-#' @importFrom flipRegression ConfusionMatrixFromVariables ConfusionMatrixFromVariablesLinear
-#' @export
-ConfusionMatrix.SupportVectorMachine <- function(obj, subset = NULL, weights = NULL)
-{
-    observed <- Observed(obj)
-    predicted <- predict(obj)
-
-    if (is.factor(observed))
-    {
-        return(ConfusionMatrixFromVariables(observed, predicted, subset, weights))
-    }
-    else if (IsCount(observed))
-    {
-        return(ConfusionMatrixFromVariablesLinear(observed, predicted, subset, weights))
-    }
-    else
-    {
-        # numeric variable and not a count - bucket predicted and observed based on range of values
-        min.value <- min(predicted[subset = TRUE], observed[subset = TRUE], na.rm = TRUE)
-        max.value <- max(predicted[subset = TRUE], observed[subset = TRUE], na.rm = TRUE)
-        range <- max.value - min.value
-        buckets <- min(floor(sqrt(length(predicted[subset = TRUE]) / 3)), 30)
-        breakpoints <- seq(min.value, max.value, range / buckets)
-        return(ConfusionMatrixFromVariables(cut(observed, breakpoints), cut(predicted, breakpoints), subset, weights))
-    }
-}

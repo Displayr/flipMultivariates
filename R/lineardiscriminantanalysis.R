@@ -22,7 +22,7 @@
 #'   based on the observed data.  If set to "equal" the prior will be set to
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
-#' @param output One of \code{"Means"}, \code{"Confusion matrix"}, or \code{"Detail"}.
+#' @param output One of \code{"Means"}, \code{"Confusion Matrix"}, or \code{"Detail"}.
 #' \code{"Scatterplot"}, and \code{"Moonplot"}.
 #' @param outcome.color Color used to display centroids in Scatterplot output.
 #' @param predictors.color Color used to display variable correlations in Scatterplot output.
@@ -397,6 +397,7 @@ LDA.fit = function (x,
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
 #' @importFrom rhtmlMoonPlot moonplot
+#' @importFrom flipRegression PrintConfusionMatrix
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -407,10 +408,9 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     column.names <- levels(dependent)
 
     output <- x$output
-    if (output == "Confusion matrix")
+    if (output == "Confusion Matrix")
     {
-        print(x$confusion)
-
+        PrintConfusionMatrix(x)
     }
     else if (output == "Means")
     {
