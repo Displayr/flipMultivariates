@@ -56,7 +56,7 @@
 #' @importFrom flipFormat Labels Names
 #' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor StandardizeData
 #' @importFrom flipStatistics Correlation MeanByGroup
-#' @importFrom flipU OutcomeName
+#' @importFrom flipU OutcomeName IsCount
 #' @importFrom stats aggregate
 #' @importFrom flipRegression ConfusionMatrix
 #' @export
@@ -99,6 +99,8 @@ LDA <- function(formula,
     data <- GetData(input.formula, data, auxiliary.data)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
+    if (!is.factor(data[, outcome.name]) &!IsCount(data[, outcome.name]))
+        stop("LDA requires the outcome variable to be categorical or a count.")
     data <- CreatingFactorDependentVariableIfNecessary(formula, data)
     ####################################################################
     ##### Data manipulation specific to LDA                        #####
