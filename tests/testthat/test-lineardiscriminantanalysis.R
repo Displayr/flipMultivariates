@@ -128,7 +128,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
 
 
 test_that("Replicating colas example in SPSS - default", {
-            library(colas, package = "flipExampleData")
+    data(colas, package = "flipExampleData")
               zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Equal"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
@@ -143,7 +143,7 @@ test_that("Replicating colas example in SPSS - default", {
 
 
 test_that("Replicating colas example in SPSS - compute from group sizes", {
-            library(colas, package = "flipExampleData")
+    data(colas, package = "flipExampleData")
               zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
