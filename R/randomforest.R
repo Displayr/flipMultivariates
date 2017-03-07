@@ -32,16 +32,16 @@
 #' @importFrom flipTransformations AdjustDataToReflectWeights
 #' @export
 RandomForest <- function(formula,
-                data = NULL,
-                subset = NULL,
-                weights = NULL,
-                output = "Importance",
-                missing  = "Exclude cases with missing data",
-                seed = 12321,
-                statistical.assumptions,
-                show.labels = FALSE,
-                sort.by.importance = TRUE,
-                ...)
+                         data = NULL,
+                         subset = NULL,
+                         weights = NULL,
+                         output = "Importance",
+                         missing  = "Exclude cases with missing data",
+                         seed = 12321,
+                         statistical.assumptions,
+                         show.labels = FALSE,
+                         sort.by.importance = TRUE,
+                         ...)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
@@ -100,7 +100,7 @@ RandomForest <- function(formula,
     ####################################################################
     set.seed(seed)
     result <- list(original = randomForest(.formula,
-        importance = TRUE, data = .estimation.data.1))
+                                           importance = TRUE, data = .estimation.data.1))
     result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
