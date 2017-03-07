@@ -184,7 +184,7 @@ print.RandomForest <- function(x, ...)
     }
     else if (x$output == "Confusion Matrix")
     {
-        PrintConfusionMatrix(x)
+        PrintConfusionMatrix(x$confusion, x$sample.description)
     }
     else
     {

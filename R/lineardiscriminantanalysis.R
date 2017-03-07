@@ -412,7 +412,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     output <- x$output
     if (output == "Confusion Matrix")
     {
-        PrintConfusionMatrix(x)
+        PrintConfusionMatrix(x$confusion, x$sample.description)
     }
     else if (output == "Means")
     {
