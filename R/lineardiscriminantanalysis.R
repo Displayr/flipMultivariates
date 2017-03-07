@@ -188,12 +188,14 @@ LDA <- function(formula,
     # 1. Setting the class and call.
     result$original$call <- cl
     class(result) <- "LDA"
+
     # 2. Saving data - generally applicable.
     if (missing == "Imputation (replace missing values with estimates)")
         data <- processed.data$data
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+
     # 3. Saving data - applicable only to LDA
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
@@ -202,12 +204,14 @@ LDA <- function(formula,
     result$centroids <- MeanByGroup(dv, group, .weights)
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
+
     # 4. Saving descriptive information.
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.predictors <- ncol(.estimation.data) - 1
     result$n.observations <- n
     result$estimation.data <- .estimation.data
+
     # 5. Replacing names with labels
     if (result$show.labels <- show.labels)
     {
@@ -219,8 +223,10 @@ LDA <- function(formula,
     }
     else
         result$outcome.label <- outcome.name
-    # 6. Analysis specified to predictive methods.
+
+    # 6. Save confusion matrix
     result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+
     # 7.Saving parameters
     result$formula <- input.formula
     result$output <- output

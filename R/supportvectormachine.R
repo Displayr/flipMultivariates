@@ -122,7 +122,6 @@ SupportVectorMachine <- function(formula,
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
 
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
@@ -133,7 +132,8 @@ SupportVectorMachine <- function(formula,
     else
         result$outcome.label <- outcome.name
 
-    # 4. Saving parameters
+    # 4. Saving parameters and confusion matrix
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
