@@ -1,7 +1,7 @@
 context("subset label")
 test_that("Subset info is good",
           {
-              library(colas, package = "flipExampleData")
+              data(colas, package = "flipExampleData")
               zLDA <- suppressWarnings(LDA(d1 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"))
               zLDA
               zLDA <- suppressWarnings(LDA(d1 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, subset = colas$Q5_16_1 == "Yes", data = colas, prior = "Observed"))
