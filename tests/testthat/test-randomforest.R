@@ -1,9 +1,9 @@
 context("Random Forest")
 
-#test_that("CE-676 Incorrect error about missing values",{
-#    data(colas, package = "flipExampleData")
-#    expect_error(suppressWarnings(RandomForest(d1 ~ q2d, data = colas)))
-#})
+test_that("CE-676 Incorrect error about missing values",{
+    data(colas, package = "flipExampleData")
+    expect_error(suppressWarnings(RandomForest(d1 ~ q2d, data = colas)), NA)
+})
 
 data(hbatwithsplits, package = "flipExampleData")
 hair <- hbatwithsplits
@@ -48,7 +48,7 @@ test_that("Print Random forests",{
 library(flipRegression)
 test_that("Random forests",{
 
-    # no weight, no filte
+    # no weight, no filter
     expect_error(z <- RandomForest(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, show.labels = TRUE), NA)
     Accuracy(z)
     ConfusionMatrix(z)
