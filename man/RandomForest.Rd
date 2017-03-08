@@ -26,7 +26,7 @@ may not be an expression. \code{subset} may not}
 \item{weights}{An optional vector of sampling weights, or, the name or, the
 name of a variable in \code{data}. It may not be an expression.}
 
-\item{output}{One of \code{"Importance"}, \code{"Confusion Matrix"} or \code{"Detail"}.}
+\item{output}{One of \code{"Importance"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.}
 
 \item{missing}{How missing data is to be treated in the regression. Options:
 \code{"Error if missing data"},

@@ -38,7 +38,7 @@ vector of probabilities can be provided.}
 \code{"Exclude cases with missing data"}
 \code{"Imputation (replace missing values with estimates)"}}
 
-\item{output}{One of \code{"Means"}, \code{"Confusion Matrix"}, or \code{"Detail"}.
+\item{output}{One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
 \code{"Scatterplot"}, and \code{"Moonplot"}.}
 
 \item{outcome.color}{Color used to display centroids in Scatterplot output.}

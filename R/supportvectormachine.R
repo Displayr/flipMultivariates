@@ -12,7 +12,7 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @param output One of \code{"Accuracy"}, \code{"Confusion Matrix"} or \code{"Detail"}.
+#' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
@@ -198,7 +198,7 @@ print.SupportVectorMachine <- function(x, ...)
         print(tbl)
 
     }
-    else if (x$output == "Confusion Matrix")
+    else if (x$output == "Prediction-Accuracy Table")
     {
         PrintConfusionMatrix(x$confusion, x$sample.description)
     }

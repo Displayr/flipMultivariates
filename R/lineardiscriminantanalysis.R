@@ -22,7 +22,7 @@
 #'   based on the observed data.  If set to "equal" the prior will be set to
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
-#' @param output One of \code{"Means"}, \code{"Confusion Matrix"}, or \code{"Detail"}.
+#' @param output One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
 #' \code{"Scatterplot"}, and \code{"Moonplot"}.
 #' @param outcome.color Color used to display centroids in Scatterplot output.
 #' @param predictors.color Color used to display variable correlations in Scatterplot output.
@@ -416,7 +416,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     column.names <- levels(dependent)
 
     output <- x$output
-    if (output == "Confusion Matrix")
+    if (output == "Prediction-Accuracy Table")
     {
         PrintConfusionMatrix(x$confusion, x$sample.description)
     }

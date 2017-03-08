@@ -25,7 +25,7 @@ may not be an expression.}
 \item{weights}{An optional vector of sampling weights, or the
 name of a variable in \code{data}. It may not be an expression.}
 
-\item{output}{One of \code{"Accuracy"}, \code{"Confusion Matrix"} or \code{"Detail"}.}
+\item{output}{One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.}
 
 \item{missing}{How missing data is to be treated. Options:
 \code{"Error if missing data"},

@@ -29,7 +29,7 @@ test_that("plots",
               expect_error(print(zLDA), NA)
               zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Moonplot"))
               expect_error(print(zLDA), NA)
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Confusion Matrix"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Prediction-Accuracy Table"))
               expect_error(print(zLDA), NA)
               hair1$X1 <- hair1$x1
               flipFormat::Labels(hair1$X1) <- "Duration"
@@ -43,6 +43,8 @@ test_that("plots",
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Scatterplot", show.labels = TRUE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Moonplot", show.labels = FALSE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Moonplot", show.labels = TRUE))
+              suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Prediction-Accuracy Table", show.labels = FALSE))
+              suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Prediction-Accuracy Table", show.labels = TRUE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, show.labels = FALSE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, show.labels = TRUE))
 
