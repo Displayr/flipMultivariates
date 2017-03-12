@@ -134,7 +134,7 @@ RandomForest <- function(formula,
         result$outcome.label <- outcome.name
 
     # 4.Saving parameters and confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
@@ -148,7 +148,6 @@ RandomForest <- function(formula,
 
 #' @import randomForest
 #' @importFrom flipFormat RandomForestTable FormatWithDecimals RandomForestTable ExtractCommonPrefix
-#' @importFrom flipRegression PrintConfusionMatrix
 #' @export
 print.RandomForest <- function(x, ...)
 {
@@ -184,7 +183,7 @@ print.RandomForest <- function(x, ...)
     }
     else if (x$output == "Prediction-Accuracy Table")
     {
-        PrintConfusionMatrix(x$confusion, x$sample.description)
+        print(x$confusion)
     }
     else
     {

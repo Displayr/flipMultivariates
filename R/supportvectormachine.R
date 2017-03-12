@@ -133,7 +133,7 @@ SupportVectorMachine <- function(formula,
         result$outcome.label <- outcome.name
 
     # 4. Saving parameters and confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
@@ -143,7 +143,6 @@ SupportVectorMachine <- function(formula,
 #' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
 #' @importFrom flipData GetTidyTwoDimensionalArray Observed
 #' @importFrom flipU IsCount
-#' @importFrom flipRegression PrintConfusionMatrix
 #' @importFrom utils read.table
 #' @export
 print.SupportVectorMachine <- function(x, ...)
@@ -200,7 +199,7 @@ print.SupportVectorMachine <- function(x, ...)
     }
     else if (x$output == "Prediction-Accuracy Table")
     {
-        PrintConfusionMatrix(x$confusion, x$sample.description)
+        print(x$confusion)
     }
     else
     {

@@ -225,7 +225,7 @@ LDA <- function(formula,
         result$outcome.label <- outcome.name
 
     # 6. Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
 
     # 7.Saving parameters
     result$formula <- input.formula
@@ -405,7 +405,6 @@ LDA.fit = function (x,
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
 #' @importFrom rhtmlMoonPlot moonplot
-#' @importFrom flipRegression PrintConfusionMatrix
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -418,7 +417,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     output <- x$output
     if (output == "Prediction-Accuracy Table")
     {
-        PrintConfusionMatrix(x$confusion, x$sample.description)
+        print(x$confusion)
     }
     else if (output == "Means")
     {
