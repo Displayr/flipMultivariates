@@ -224,16 +224,15 @@ LDA <- function(formula,
     else
         result$outcome.label <- outcome.name
 
-    # 6.Saving parameters
+    # 6. Save confusion matrix
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
+
+    # 7.Saving parameters
     result$formula <- input.formula
     result$output <- output
     result$outcome.color <- outcome.color
     result$predictors.color <- predictors.color
     result$missing <- missing
-
-    # 7. Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
-
     result
 }
 

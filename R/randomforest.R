@@ -134,11 +134,11 @@ RandomForest <- function(formula,
         result$outcome.label <- outcome.name
 
     # 4.Saving parameters and confusion matrix
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
     result$sort.by.importance <- sort.by.importance
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
 
     # 5. Statistics
     result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD

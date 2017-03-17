@@ -133,10 +133,10 @@ SupportVectorMachine <- function(formula,
         result$outcome.label <- outcome.name
 
     # 4. Saving parameters and confusion matrix
+    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights, result$sample.description)
     result$formula <- input.formula
     result$output <- output
     result$missing <- missing
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
     result
 }
 
