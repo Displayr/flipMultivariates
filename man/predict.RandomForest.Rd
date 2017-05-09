@@ -24,4 +24,3 @@ and a fitted RandomForest \code{object}.  A value (which may be NA) is returned 
 including those with missing data and for the fitted \code{data} before filtering in the case
 that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
 }
-

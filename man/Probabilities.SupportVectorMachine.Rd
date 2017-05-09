@@ -12,4 +12,3 @@ Probabilities.SupportVectorMachine(x)
 \description{
 Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
 }
-

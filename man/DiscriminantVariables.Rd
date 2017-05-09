@@ -12,4 +12,3 @@ DiscriminantVariables(x)
 \description{
 Computes discriminant varibales for the entire sample passed into the original analysis (including missing and filtered values).
 }
-

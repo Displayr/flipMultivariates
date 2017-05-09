@@ -24,4 +24,3 @@ may be NA) is returned for every instance including those with missing data and 
 fitted \code{data} before filtering in the case that \code{newdata} is not specified.
 NA is returned for cases with unfitted factor levels.
 }
-

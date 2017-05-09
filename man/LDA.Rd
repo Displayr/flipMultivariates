@@ -84,4 +84,3 @@ von Hippel, Paul T. 2007. "Regression With Missing Y's: An
   heteroscedasticity consistent standard errors in the linear regression
   model. The American Statistician, 54(3): 217-224.
 }
-

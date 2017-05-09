@@ -19,4 +19,3 @@
 \description{
 print.LDA
 }
-
