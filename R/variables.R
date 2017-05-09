@@ -150,8 +150,21 @@ predict.GradientBoost <- function(object, newdata = object$model, ...)
 {
     newdata <- CheckPredictionVariables(object, newdata)
     newdata <- OneHot(newdata, object$outcome.name)$X
+
+    prediction <- predict(object$original, newdata = newdata, reshape = TRUE, ...)
+
+    if (object$original$params$objective == "binary:logistic")
+    {
+        prediction <- as.factor(prediction > 0.5)
+        levels(prediction) <- object$outcome.levels
+    }
+    if (object$original$params$objective == "multi:softprob")
+    {
+        prediction <- as.factor(apply(prediction, 1, which.max))
+        levels(prediction) <- object$outcome.levels
+    }
+
     # Since xgboost predicts regardless of missing data, overwrite with NA if not complete.cases
-    prediction <- predict(object$original, newdata = newdata, ...)
     prediction[!complete.cases(newdata)] <- NA
     return(prediction)
 }
@@ -160,20 +173,20 @@ predict.GradientBoost <- function(object, newdata = object$model, ...)
 #'
 #' Estimates probabilities of group membership for the entire sample passed into the original analysis (including
 #' missing and filtered values).
-#' @param x A \code{GradientBoost} object.
+#' @param object A \code{GradientBoost} object.
 #' @export
-Probabilities.GradientBoost <- function(x)
+Probabilities.GradientBoost <- function(object)
 {
-    if(x$numeric.outcome)
+    if(object$numeric.outcome)
         stop("Probabilities are only applicable to models with categorical outcome variables.")
 
-    predictions <- predict(x$original, newdata = x$model, probability = TRUE)
-    prob.excluding.na <- attr(predictions, "probabilities")
+    data <- CheckPredictionVariables(object, object$model)
+    data <- OneHot(data, object$outcome.name)$X
+    probabilities <- predict(object$original, newdata = data, reshape = TRUE)
+
     # add NA probability for instances with missing prediction variables
-    all.probs <- data.frame(matrix(NA, ncol = ncol(prob.excluding.na), nrow = nrow(x$model)))
-    all.probs[row.names(prob.excluding.na), ] <- prob.excluding.na
-    colnames(all.probs) <- colnames(prob.excluding.na)
-    return(all.probs)
+    probabilities[!complete.cases(data), ] <- NA
+    return(probabilities)
 }
 
 

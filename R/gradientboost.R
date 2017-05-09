@@ -92,18 +92,20 @@ GradientBoost <- function(formula,
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
     numeric.data <- OneHot(.estimation.data.1, outcome.name)
+    n.class <- 1
 
     if (numeric.outcome)
     {
         objective <- "reg:linear"
     }
-    else if (nlevels(.estimation.data[, outcome.name]) == 2)
+    else if (length(numeric.data$outcome.levels) == 2)
     {
         objective <- "binary:logistic"
     }
     else
     {
-        objective <- "multi:softmax"
+        objective <- "multi:softprob"
+        n.class <- length(numeric.data$outcome.levels)
     }
 
     ####################################################################
@@ -113,7 +115,7 @@ GradientBoost <- function(formula,
     ####################################################################
     set.seed(seed)
     result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y,
-                                      params = list(booster = booster, objective = objective),
+                                      params = list(booster = booster, objective = objective, num_class = n.class),
                                       nrounds = 100, save_period = NULL, ...))
     result$original$call <- cl
 
@@ -132,6 +134,7 @@ GradientBoost <- function(formula,
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
+    result$outcome.levels <- numeric.data$outcome.levels
 
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)

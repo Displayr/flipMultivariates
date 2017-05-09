@@ -4,10 +4,10 @@
 \alias{Probabilities.GradientBoost}
 \title{\code{Probabilities.GradientBoost}}
 \usage{
-Probabilities.GradientBoost(x)
+Probabilities.GradientBoost(object)
 }
 \arguments{
-\item{x}{A \code{GradientBoost} object.}
+\item{object}{A \code{GradientBoost} object.}
 }
 \description{
 Estimates probabilities of group membership for the entire sample passed into the original analysis (including
