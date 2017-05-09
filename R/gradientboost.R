@@ -92,6 +92,7 @@ GradientBoost <- function(formula,
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
     numeric.data <- OneHot(.estimation.data.1, outcome.name)
+    print(numeric.data$outcome.levels)
     n.class <- 1
 
     if (numeric.outcome)
@@ -107,7 +108,7 @@ GradientBoost <- function(formula,
         objective <- "multi:softprob"
         n.class <- length(numeric.data$outcome.levels)
     }
-
+    print(paste0("objective: ", objective, " n.class: ", n.class))
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
