@@ -27,7 +27,7 @@
 #' @importFrom flipData GetData EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
-#' @importFrom xgboost xgboost
+#' @importFrom xgboost xgboost xgb.cv
 #' @importFrom flipTransformations AdjustDataToReflectWeights OneHot
 #' @export
 GradientBoost <- function(formula,
@@ -92,32 +92,40 @@ GradientBoost <- function(formula,
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
     numeric.data <- OneHot(.estimation.data.1, outcome.name)
-    print(numeric.data$outcome.levels)
     n.class <- 1
 
     if (numeric.outcome)
     {
         objective <- "reg:linear"
+        xval.metric <- "test_rmse_mean"
     }
     else if (length(numeric.data$outcome.levels) == 2)
     {
         objective <- "binary:logistic"
+        xval.metric <- "test_error_mean"
     }
     else
     {
         objective <- "multi:softprob"
         n.class <- length(numeric.data$outcome.levels)
+        xval.metric <- "test_merror_mean"
     }
-    print(paste0("objective: ", objective, " n.class: ", n.class))
+
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
+
+    xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = list(booster = booster, objective = objective, num_class = n.class),
+                   nrounds = 1000, nfold = 10, early_stopping_rounds = 8, maximize = FALSE, ...)
+    best.rounds <- which.min(xval$evaluation_log[, xval.metric])
+
     result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y,
                                       params = list(booster = booster, objective = objective, num_class = n.class),
-                                      nrounds = 100, save_period = NULL, ...))
+                                      save_period = NULL, nrounds = best.rounds, ...))
+
     result$original$call <- cl
 
     ####################################################################
@@ -136,6 +144,7 @@ GradientBoost <- function(formula,
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
     result$outcome.levels <- numeric.data$outcome.levels
+    result$prediction.columns <- colnames(numeric.data$X)
 
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
@@ -218,7 +227,7 @@ print.GradientBoost <- function(x, ...)
     }
     else if (x$output == "Importance")
     {
-        importance <- xgb.importance(feature_names = all.vars(x$formula[[3]]), model = x$original)
+        importance <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
         xgb.plot.importance(importance, rel_to_first = TRUE, xlab = "Relative importance")
     }
     else
