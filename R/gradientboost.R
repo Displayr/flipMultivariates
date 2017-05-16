@@ -122,13 +122,13 @@ GradientBoost <- function(formula,
 
     if (search.rounds == 0)
     {
-        xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = list(booster = booster, objective = objective, num_class = n.class),
-                       nrounds = 1000, nfold = 10, early_stopping_rounds = 8, maximize = FALSE)
+        params.list <- list(booster = booster, objective = objective, num_class = n.class, nthread = 1)
+        xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, nrounds = 1000, nfold = 10,
+                       params = params.list, early_stopping_rounds = 8, maximize = FALSE, verbose = 0)
         best.rounds <- which.min(xval$evaluation_log[, xval.metric])
 
-        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y,
-                                          params = list(booster = booster, objective = objective, num_class = n.class),
-                                          save_period = NULL, nrounds = best.rounds))
+        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, params = params.list,
+                                          save_period = NULL, nrounds = best.rounds, verbose = 0))
     }
     else
     {
@@ -164,7 +164,8 @@ GradientBoost <- function(formula,
                     n.rounds <- n.rounds + 100
             }
         }
-        #print(paste(best.param, collapse = ", "))
+        print(best.error.rounds)
+        print(paste(best.param[4:10], collapse = ", "))
         set.seed(seed)      # reset seed after variable number of search.rounds
         result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, verbose = 0,
                                           params = best.param, save_period = NULL, nrounds = best.error.rounds))
