@@ -182,7 +182,7 @@ Probabilities.GradientBoost <- function(object)
 
     data <- CheckPredictionVariables(object, object$model)
     data <- OneHot(data, object$outcome.name)$X
-    probabilities <- predict(object$original, newdata = data, reshape = TRUE)
+    probabilities <- data.frame(predict(object$original, newdata = data, reshape = TRUE))
 
     # add NA probability for instances with missing prediction variables
     probabilities[!complete.cases(data), ] <- NA

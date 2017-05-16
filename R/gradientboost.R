@@ -20,14 +20,16 @@
 #' @param booster Whether the underlying model is a tree or linear regression. Options:
 #'   \code{"gbtree"},
 #'   \code{"gblinear"}.
+#' @param search.rounds The number of sets of random paramaters to search in order to tune the model.
+#' Zero implies using the default paramaters.
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param ... Other arguments to be supplied to \code{\link{xgboost}}.
 #' @importFrom flipData GetData EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom xgboost xgboost xgb.cv
+#' @importFrom stats runif
 #' @importFrom flipTransformations AdjustDataToReflectWeights OneHot
 #' @export
 GradientBoost <- function(formula,
@@ -37,9 +39,9 @@ GradientBoost <- function(formula,
                                  output = "Accuracy",
                                  missing  = "Exclude cases with missing data",
                                  booster = "gbtree",
+                                 search.rounds = 0,
                                  seed = 12321,
-                                 show.labels = FALSE,
-                                 ...)
+                                 show.labels = FALSE)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
@@ -118,13 +120,55 @@ GradientBoost <- function(formula,
     ####################################################################
     set.seed(seed)
 
-    xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = list(booster = booster, objective = objective, num_class = n.class),
-                   nrounds = 1000, nfold = 10, early_stopping_rounds = 8, maximize = FALSE, ...)
-    best.rounds <- which.min(xval$evaluation_log[, xval.metric])
+    if (search.rounds == 0)
+    {
+        xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = list(booster = booster, objective = objective, num_class = n.class),
+                       nrounds = 1000, nfold = 10, early_stopping_rounds = 8, maximize = FALSE)
+        best.rounds <- which.min(xval$evaluation_log[, xval.metric])
 
-    result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y,
-                                      params = list(booster = booster, objective = objective, num_class = n.class),
-                                      save_period = NULL, nrounds = best.rounds, ...))
+        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y,
+                                          params = list(booster = booster, objective = objective, num_class = n.class),
+                                          save_period = NULL, nrounds = best.rounds))
+    }
+    else
+    {
+        best.param <- list()
+        best.error <- Inf
+        best.error.rounds <- 0
+        n.rounds <- 100
+        cv.nfold <- 5
+
+        for (iter in 1:search.rounds) {
+            param <- list(booster = booster,
+                          objective = objective,
+                          num_class = n.class,
+                          max_depth = sample(6:10, 1),
+                          eta = runif(1, .01, .3),
+                          gamma = runif(1, 0.0, 0.2),
+                          subsample = runif(1, .6, .9),
+                          colsample_bytree = runif(1, .5, .8),
+                          min_child_weight = sample(1:40, 1),
+                          max_delta_step = sample(1:10, 1))
+            xgbcv <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = param,
+                           nfold = cv.nfold, nrounds = n.rounds,
+                           verbose = 0, early_stopping_rounds = 8, maximize = FALSE)
+
+            min.error <- min(xgbcv$evaluation_log[, xval.metric])
+            min.error.rounds <- which.min(xgbcv$evaluation_log[, xval.metric])
+
+            if (min.error < best.error) {
+                best.error <- min.error
+                best.error.rounds <- min.error.rounds
+                best.param <- param
+                if (best.error.rounds == n.rounds)
+                    n.rounds <- n.rounds + 100
+            }
+        }
+        #print(paste(best.param, collapse = ", "))
+        set.seed(seed)      # reset seed after variable number of search.rounds
+        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, verbose = 0,
+                                          params = best.param, save_period = NULL, nrounds = best.error.rounds))
+    }
 
     result$original$call <- cl
 

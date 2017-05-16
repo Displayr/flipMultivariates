@@ -6,7 +6,8 @@
 \usage{
 GradientBoost(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  booster = "gbtree", seed = 12321, show.labels = FALSE, ...)
+  booster = "gbtree", search.rounds = 0, seed = 12321,
+  show.labels = FALSE)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -35,12 +36,13 @@ name of a variable in \code{data}. It may not be an expression.}
 \code{"gbtree"},
 \code{"gblinear"}.}
 
+\item{search.rounds}{The number of sets of random paramaters to search in order to tune the model.
+Zero implies using the default paramaters.}
+
 \item{seed}{The random number seed used in imputation.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
-
-\item{...}{Other arguments to be supplied to \code{\link{xgboost}}.}
 }
 \description{
 GradientBoost
