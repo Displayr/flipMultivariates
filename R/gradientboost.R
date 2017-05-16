@@ -122,7 +122,7 @@ GradientBoost <- function(formula,
 
     if (search.rounds == 0)
     {
-        params.list <- list(booster = booster, objective = objective, num_class = n.class, nthread = 1)
+        params.list <- list(booster = booster, objective = objective, num_class = n.class)
         xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, nrounds = 1000, nfold = 10,
                        params = params.list, early_stopping_rounds = 8, maximize = FALSE, verbose = 0)
         best.rounds <- which.min(xval$evaluation_log[, xval.metric])
@@ -142,12 +142,12 @@ GradientBoost <- function(formula,
             param <- list(booster = booster,
                           objective = objective,
                           num_class = n.class,
-                          max_depth = sample(6:10, 1),
-                          eta = runif(1, .01, .3),
+                          max_depth = sample(4:10, 1),
+                          eta = runif(1, .01, .5),
                           gamma = runif(1, 0.0, 0.2),
-                          subsample = runif(1, .6, .9),
-                          colsample_bytree = runif(1, .5, .8),
-                          min_child_weight = sample(1:40, 1),
+                          subsample = runif(1, .6, 1.0),
+                          colsample_bytree = runif(1, .5, 1.0),
+                          min_child_weight = sample(1:10, 1),
                           max_delta_step = sample(1:10, 1))
             xgbcv <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = param,
                            nfold = cv.nfold, nrounds = n.rounds,
@@ -164,8 +164,8 @@ GradientBoost <- function(formula,
                     n.rounds <- n.rounds + 100
             }
         }
-        print(best.error.rounds)
-        print(paste(best.param[4:10], collapse = ", "))
+        #print(best.error.rounds)
+        #print(paste(best.param[4:10], collapse = ", "))
         set.seed(seed)      # reset seed after variable number of search.rounds
         result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, verbose = 0,
                                           params = best.param, save_period = NULL, nrounds = best.error.rounds))
