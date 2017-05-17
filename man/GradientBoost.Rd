@@ -6,7 +6,7 @@
 \usage{
 GradientBoost(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  booster = "gbtree", search.rounds = 0, seed = 12321,
+  booster = "gbtree", grid.search = FALSE, seed = 12321,
   show.labels = FALSE)
 }
 \arguments{
@@ -36,8 +36,7 @@ name of a variable in \code{data}. It may not be an expression.}
 \code{"gbtree"},
 \code{"gblinear"}.}
 
-\item{search.rounds}{The number of sets of random paramaters to search in order to tune the model.
-Zero implies using the default paramaters.}
+\item{grid.search}{Whether to search the paramater space in order to tune the model.}
 
 \item{seed}{The random number seed used in imputation.}
 
