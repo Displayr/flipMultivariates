@@ -36,7 +36,7 @@ name of a variable in \code{data}. It may not be an expression.}
 \code{"gbtree"},
 \code{"gblinear"}.}
 
-\item{grid.search}{Whether to search the paramater space in order to tune the model.}
+\item{grid.search}{Whether to search the parameter space in order to tune the model.}
 
 \item{seed}{The random number seed used in imputation.}
 

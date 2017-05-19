@@ -20,7 +20,7 @@
 #' @param booster Whether the underlying model is a tree or linear regression. Options:
 #'   \code{"gbtree"},
 #'   \code{"gblinear"}.
-#' @param grid.search Whether to search the paramater space in order to tune the model.
+#' @param grid.search Whether to search the parameter space in order to tune the model.
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
@@ -119,8 +119,14 @@ GradientBoost <- function(formula,
     ####################################################################
     set.seed(seed)
 
-    params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        max_depth = 6, eta = 0.3, gamma = 0, subsample = 1, colsample_bytree = 1)
+    if (booster == "gbtree")
+        params.default <- list(booster = booster, objective = objective, num_class = n.class,
+                        max_depth = 6, eta = 0.3, gamma = 0, subsample = 1, colsample_bytree = 1,
+                        alpha = 0, lambda = 1)
+    else
+        params.default <- list(booster = booster, objective = objective, num_class = n.class,
+                        lambda = 0, alpha = 0, lambda_bias = 0)
+
 
     if (!grid.search)
     {
@@ -146,10 +152,16 @@ GradientBoost <- function(formula,
 
         n.rounds <- 1000
         cv.nfold <- 5
-        search.grid <- expand.grid(subsample = c(0.7, 1),
-                                   colsample_bytree = c(0.7, 1),
-                                   eta = c(0.1, 0.2, 0.3),
-                                   max_depth = c(4, 6, 9))
+
+        if (booster == "gbtree")
+            search.grid <- expand.grid(subsample = c(0.7, 1),
+                                       colsample_bytree = c(0.7, 1),
+                                       eta = c(0.1, 0.2, 0.3),
+                                       max_depth = c(4, 6, 9))
+        else
+            search.grid <- expand.grid(lambda = c(0, 0.1, 1),
+                                       alpha = c(0, 0.1, 1),
+                                       lambda_bias = c(0))
 
         search.results <- apply(search.grid, 1, cross.validate, params.default, seed)
 
