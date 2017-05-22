@@ -17,6 +17,7 @@ Imports:
     flipTransformations,
     flipChartBasics,
     flipU,
+    ggplot2,
     MASS,
     methods,
     randomForest,

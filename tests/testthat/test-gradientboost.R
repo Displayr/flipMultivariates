@@ -13,7 +13,7 @@ hair1$cat <- factor(hair1$num)
 library(flipRegression)
 
 test_that("Print Gradient Boost",{
-    for (output in c("Detail", "Importance", "Accuracy", "Prediction-Accuracy Table"))
+    for (output in c("Detail", "Accuracy", "Prediction-Accuracy Table"))
         for (booster in c("gbtree", "gblinear"))
             for (grid.search in c(TRUE, FALSE))
             {
@@ -28,8 +28,21 @@ test_that("Print Gradient Boost",{
 
 })
 
+test_that("Print Gradient Boost Importance",{
+    for (grid.search in c(TRUE, FALSE))
+    {
+        z <- GradientBoost(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE,
+                        output = "Importance", data = hair1, subset = split60 == "Estimation Sample", booster = "gbtree", grid.search = grid.search)
+        expect_error(capture.output(print(z)), NA)
+        z <- GradientBoost(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = FALSE,
+                        output = "Imporance", data = hair1, subset = split60 == "Estimation Sample", booster = "gbtree", grid.search = grid.search)
+        expect_error(capture.output(print(z)), NA)
+            }
+})
+
+
 library(flipRegression)
-test_that("Gradient Boost",{
+test_that("Gradient Boost Weights and Filters",{
 
     # no weight, no filter
     expect_error(z <- GradientBoost(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, booster = "gbtree"), NA)
@@ -73,10 +86,12 @@ test_that("Gradient Boost",{
     ConfusionMatrix(z)
 })
 
-test_that("Gradient Boost",{
+test_that("Gradient Boost Errors",{
 
     # insufficient data
     expect_error(z <- GradientBoost(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1[1:5, ], show.labels = TRUE), "There are fewer observations*")
+    # importance for linear booster
+    expect_error(z <- GradientBoost(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12, data = hair1, booster = "gblinear", output = "Importance", show.labels = TRUE), "Importance is only available for*")
 })
 
 test_that("Save variables",

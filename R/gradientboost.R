@@ -45,6 +45,9 @@ GradientBoost <- function(formula,
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
+    if (booster == "gblinear" && output == "Importance")
+        stop("Importance is only available for gbtree booster.") # https://github.com/dmlc/xgboost/issues/2331
+
     cl <- match.call()
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
     subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
@@ -214,7 +217,8 @@ GradientBoost <- function(formula,
 #' @importFrom flipData GetTidyTwoDimensionalArray Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
-#' @importFrom xgboost xgb.importance xgb.plot.importance
+#' @importFrom xgboost xgb.importance xgb.ggplot.importance
+#' @importFrom ggplot2 ggtitle
 #' @export
 print.GradientBoost <- function(x, ...)
 {
@@ -275,7 +279,9 @@ print.GradientBoost <- function(x, ...)
     else if (x$output == "Importance")
     {
         importance <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
-        xgb.plot.importance(importance, rel_to_first = TRUE, xlab = "Relative importance")
+        #xgb.plot.importance(importance, rel_to_first = TRUE, xlab = "Relative importance") base graphics plot
+        gg <- xgb.ggplot.importance(importance, rel_to_first = TRUE, top_n = 10)
+        print(gg + ggtitle(paste0("Importance: ", x$outcome.label)))
     }
     else
     {
