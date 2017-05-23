@@ -128,7 +128,7 @@ GradientBoost <- function(formula,
                         alpha = 0, lambda = 1)
     else
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        lambda = 0, alpha = 0, lambda_bias = 0)
+                        lambda = 0, alpha = 0, lambda_bias = 0, nthread = 1)
 
 
     if (!grid.search)
