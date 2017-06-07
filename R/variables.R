@@ -160,7 +160,7 @@ predict.GradientBoost <- function(object, newdata = object$model, ...)
     }
     if (object$original$params$objective == "multi:softprob")
     {
-        prediction <- as.factor(apply(prediction, 1, which.max))
+        prediction <- factor(apply(prediction, 1, which.max), levels = as.character(1:length(object$outcome.levels)))
         levels(prediction) <- object$outcome.levels
     }
 
