@@ -462,7 +462,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
                                              title = "Linear Discriminant Analysis",
                                              #x.title = ""#column.labels[1],
                                              #y.title = ""#column.labels[2],
-                                             axis.font.size = 8,
+                                             axis.font.size = 10,
                                              labels.font.size = 12,
                                              title.font.size = 20,
                                              y.title.font.size = 16,
