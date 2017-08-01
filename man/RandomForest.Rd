@@ -13,15 +13,14 @@ RandomForest(formula, data = NULL, subset = NULL, weights = NULL,
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
 That is, the response is the grouping factor and the right hand side
 specifies the (non-factor) discriminators, and any transformations, interactions,
-or other non-additive operators will be ignored.
-transformations nor}
+or other non-additive operators will be ignored.}
 
 \item{data}{A \code{\link{data.frame}} from which variables specified
 in formula are preferentially to be taken.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the fitting process, or, the name of a variable in \code{data}. It
-may not be an expression. \code{subset} may not}
+may not be an expression.}
 
 \item{weights}{An optional vector of sampling weights, or, the name or, the
 name of a variable in \code{data}. It may not be an expression.}
