@@ -69,8 +69,6 @@ RandomForest <- function(formula,
     if (setequal(data[!is.na(data[, outcome.i]), outcome.i], c(0, 1)))
         data[, outcome.i] <- as.factor(data[, outcome.i])
     outcome.variable <- data[, outcome.i]
-    #if (setequal(outcome.variable[!is.na(outcome.variable)], c(0, 1)))
-    #    outcome.variable <- as.factor(outcome.variable)
     numeric.outcome <- !is.factor(outcome.variable)
     variable.labels <- Labels(data)
     outcome.label <- variable.labels[outcome.i]
@@ -80,6 +78,7 @@ RandomForest <- function(formula,
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+
     # Treatment of missing values.
     processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
     unfiltered.weights <- processed.data$unfiltered.weights
@@ -91,6 +90,7 @@ RandomForest <- function(formula,
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
     .formula <- DataFormula(input.formula)
+
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
         .estimation.data
