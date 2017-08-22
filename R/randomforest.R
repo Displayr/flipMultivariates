@@ -148,7 +148,7 @@ RandomForest <- function(formula,
 }
 
 #' @import randomForest
-#' @importFrom flipFormat RandomForestTable FormatWithDecimals RandomForestTable ExtractCommonPrefix
+#' @importFrom flipFormat RandomForestTable FormatAsReal RandomForestTable ExtractCommonPrefix
 #' @export
 print.RandomForest <- function(x, ...)
 {
@@ -165,7 +165,7 @@ print.RandomForest <- function(x, ...)
             rownames(imp) <- extracted$shortened.labels
         }
         subtitle <- if (x$numeric.outcome)
-            paste("R-squared:", FormatWithDecimals(x$original$rsq[length(x$original$rsq)], 3))
+            paste("R-squared:", FormatAsReal(x$original$rsq[length(x$original$rsq)], decimals = 3))
         else
         {
             err <- x$original$err.rate

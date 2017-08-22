@@ -213,7 +213,7 @@ GradientBoost <- function(formula,
     result
 }
 
-#' @importFrom flipFormat DeepLearningTable FormatWithDecimals ExtractCommonPrefix
+#' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
 #' @importFrom flipData GetTidyTwoDimensionalArray Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
