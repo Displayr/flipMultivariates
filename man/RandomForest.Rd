@@ -19,10 +19,10 @@ or other non-additive operators will be ignored.}
 in formula are preferentially to be taken.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
-used in the fitting process, or, the name of a variable in \code{data}. It
+used in the fitting process, or the name of a variable in \code{data}. It
 may not be an expression.}
 
-\item{weights}{An optional vector of sampling weights, or, the name or, the
+\item{weights}{An optional vector of sampling weights, or the
 name of a variable in \code{data}. It may not be an expression.}
 
 \item{output}{One of \code{"Importance"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.}

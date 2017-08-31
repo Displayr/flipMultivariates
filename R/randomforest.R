@@ -8,9 +8,9 @@
 #' @param data A \code{\link{data.frame}} from which variables specified
 #' in formula are preferentially to be taken.
 #' @param subset An optional vector specifying a subset of observations to be
-#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   used in the fitting process, or the name of a variable in \code{data}. It
 #'   may not be an expression.
-#' @param weights An optional vector of sampling weights, or, the name or, the
+#' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
 #' @param output One of \code{"Importance"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated in the regression. Options:
@@ -62,6 +62,11 @@ RandomForest <- function(formula,
         if (is.null(attr(weights, "name")))
             attr(weights, "name") <- deparse(substitute(weights))
     weights <- eval(substitute(weights), data, parent.frame())
+
+    # randomForest fails when variable names contain "$" even if surrounded by backticks, so replace with "."
+    input.formula <- formula(gsub("\\$", "\\.", deparse(input.formula)))
+    colnames(data) <- gsub("\\$", "\\.", colnames(data))
+
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
@@ -89,7 +94,6 @@ RandomForest <- function(formula,
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula)
 
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
@@ -102,7 +106,7 @@ RandomForest <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-    result <- list(original = randomForest(.formula,
+    result <- list(original = randomForest(input.formula,
                                            importance = TRUE, data = .estimation.data.1))
     result$original$call <- cl
     ####################################################################

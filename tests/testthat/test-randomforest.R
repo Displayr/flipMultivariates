@@ -16,20 +16,23 @@ hair1$num <- suppressWarnings(flipTransformations::AsNumeric(hair1$x1, binary = 
 hair1$numeric <- hair1$num + runif(length(hair1$num)) / 10
 attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)
+hair1 <- cbind(hair1, hair1[, "x18"])
+colnames(hair1)[ncol(hair1)] <- "dollar$x18"
+
 library(flipRegression)
 
 test_that("Print Random forests",{
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = FALSE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = FALSE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = TRUE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = FALSE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = FALSE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = TRUE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
+    z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18, show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
     z <- RandomForest(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
