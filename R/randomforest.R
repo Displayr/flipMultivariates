@@ -62,13 +62,13 @@ RandomForest <- function(formula,
         if (is.null(attr(weights, "name")))
             attr(weights, "name") <- deparse(substitute(weights))
     weights <- eval(substitute(weights), data, parent.frame())
+    data <- GetData(input.formula, data, auxiliary.data = NULL)
 
     # randomForest fails when variable names contain "$" even if surrounded by backticks, so replace with "."
     input.formula <- formula(gsub("\\$", "\\.", deparse(input.formula)))
     if (!is.null(data))
         colnames(data) <- gsub("\\$", "\\.", colnames(data))
 
-    data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
     outcome.i <- match(outcome.name, names(data))
