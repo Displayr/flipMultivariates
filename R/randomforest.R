@@ -65,9 +65,12 @@ RandomForest <- function(formula,
     data <- GetData(input.formula, data, auxiliary.data = NULL)
 
     # randomForest fails when variable names contain "$" even if surrounded by backticks, so replace with "."
-    input.formula <- formula(gsub("\\$", "\\.", deparse(input.formula)))
-    if (!is.null(data))
+    input.formula <- gsub("\\$", "\\.", deparse(input.formula))
+    input.formula <- formula(gsub("\\`", "", input.formula))
+    if (!is.null(data)) {
         colnames(data) <- gsub("\\$", "\\.", colnames(data))
+        colnames(data) <- gsub("\\`", "", colnames(data))
+    }
 
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula)
