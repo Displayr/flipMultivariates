@@ -23,7 +23,7 @@
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
-#' \code{"Scatterplot"}, and \code{"Moonplot"}.
+#' \code{"Scatterplot"}, \code{"Moonplot"} or \code{"Discriminant Functions"}.
 #' @param outcome.color Color used to display centroids in Scatterplot output.
 #' @param predictors.color Color used to display variable correlations in Scatterplot output.
 #' @param variance The method used to estimate the variance; either \code{"moment"} for
@@ -251,7 +251,7 @@ LDA <- function(formula,
 #' @param tol TODO
 #' @param method TODO
 #' @param weights TODO
-#' @param CV TODO
+#' @param CV Not used.
 #' @param nu TODO
 #' @param ... Additional arguments.
 #' @details This is a wrapper for MASS::lda and MASS::qda.
@@ -384,15 +384,48 @@ LDA.fit = function (x,
                                                  sep = ""))
         dimnames(group.means)[[2L]] <- colnames(x)
     }
+
+    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
     result <- list(prior = prior, counts = counts, means = group.means,
                  scaling = scaling, lev = lev, svd = X.s$d[1L:rank], N = n,
-                 call = cl)
+                 discriminant.functions = discriminant.functions, call = cl)
     class(result) <- "lda"
     result
 }
 
+# Calculate linear discriminant functions
+# as per equation 4.10 in Hastie, Elements of Statistical Learning
+lda.functions <- function(x, groups, grp.means, prior, weights){
+
+    gr <- length(unique(groups))
+    num.var <- ncol(x)
+
+    W <- array(0, dim = c(num.var, num.var))
+
+    for(i in 1:gr){
+        filter <- groups == unique(groups)[i]
+        cov <- cov.wt(x[filter, ], wt = weights[filter], method = "ML")$cov * sum(weights[filter])
+        W <- W + cov
+    }
+
+    V <- W / (sum(weights) - gr)
+    iV <- solve(V)
+
+    class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
+    colnames(class.funs) <- paste("group", 1:gr, sep=".")
+    rownames(class.funs) <- c("constant", paste("var", 1:num.var, sep = "."))
+
+    for(i in 1:gr) {
+        class.funs[1, i] <- -0.5 * t(grp.means[i, ]) %*% iV %*% (grp.means[i, ])
+        class.funs[2:(num.var + 1), i] <- iV %*% (grp.means[i, ])
+    }
+
+    class.funs[1,] <- class.funs[1,] + log(prior)
+    return(class.funs)
+}
 
 
 #' print.LDA
@@ -468,6 +501,9 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
                                              y.title.font.size = 16,
                                              x.title.font.size = 16))
         }
+    }
+    else if (output == "Discriminant Functions") {
+        return(x$original$discriminant.functions)
     }
     else
         print(x$original, ...)
