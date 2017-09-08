@@ -415,8 +415,8 @@ lda.functions <- function(x, groups, grp.means, prior, weights){
     iV <- solve(V)
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
-    colnames(class.funs) <- paste("group", 1:gr, sep=".")
-    rownames(class.funs) <- c("constant", paste("var", 1:num.var, sep = "."))
+    colnames(class.funs) <- rownames(grp.means)
+    rownames(class.funs) <- c("intercept", colnames(grp.means))
 
     for(i in 1:gr) {
         class.funs[1, i] <- -0.5 * t(grp.means[i, ]) %*% iV %*% (grp.means[i, ])
@@ -503,7 +503,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         }
     }
     else if (output == "Discriminant Functions") {
-        return(x$original$discriminant.functions)
+        print(x$original$discriminant.functions)
     }
     else
         print(x$original, ...)
