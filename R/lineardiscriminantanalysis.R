@@ -503,7 +503,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         }
     }
     else if (output == "Discriminant Functions") {
-        return(x$original$discriminant.functions)
+        print(x$original$discriminant.functions)
     }
     else
         print(x$original, ...)
