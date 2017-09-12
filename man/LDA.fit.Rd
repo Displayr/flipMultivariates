@@ -25,7 +25,7 @@ vector of probabilities can be provided.}
 
 \item{weights}{TODO}
 
-\item{CV}{TODO}
+\item{CV}{Not used.}
 
 \item{nu}{TODO}
 

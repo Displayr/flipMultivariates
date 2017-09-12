@@ -5,7 +5,6 @@
 #' That is, the response is the grouping factor and the right hand side
 #' specifies the (non-factor) discriminators, and any transformations, interactions,
 #' or other non-additive operators will be ignored.
-#' transformations nor
 #' @param data A \code{\link{data.frame}} from which variables specified
 #' in formula are preferentially to be taken.
 #' @param subset An optional vector specifying a subset of observations to be
@@ -18,8 +17,8 @@
 #'   \code{"Exclude cases with missing data"}
 #'   \code{"Imputation (replace missing values with estimates)"}
 #' @param prior The assumed probability of each value of y occurring in the
-#'   population.  By default this is set to "observed" and the value is computed
-#'   based on the observed data.  If set to "equal" the prior will be set to
+#'   population.  By default this is set to "Observed" and the value is computed
+#'   based on the observed data.  If set to "Equal" the prior will be set to
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
@@ -64,7 +63,7 @@ LDA <- function(formula,
                 data = NULL,
                 subset = NULL,
                 weights = NULL,
-                prior = "Equal",
+                prior = "Observed",
                 missing = "Exclude cases with missing data",
                 output = "Means",
                 outcome.color = '#5B9BD5',
@@ -163,7 +162,7 @@ LDA <- function(formula,
         stop(error)
     else if (length(prior) != n.levels)
         stop(error)
-    else if (sum(prior) != 1 | min(prior) <= 0 | max(prior) >= 1)
+    else if (abs(sum(prior) - 1) > 1e-10 | min(prior) <= 0 | max(prior) >= 1)
         stop(error)
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
@@ -220,6 +219,7 @@ LDA <- function(formula,
         #result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
         colnames(result$original$means) <- labels
         row.names(result$original$scaling) <- labels
+        rownames(result$original$discriminant.functions) <- c("Intercept", labels)
     }
     else
         result$outcome.label <- outcome.name
@@ -398,7 +398,7 @@ LDA.fit = function (x,
 
 # Calculate linear discriminant functions
 # as per equation 4.10 in Hastie, Elements of Statistical Learning
-lda.functions <- function(x, groups, grp.means, prior, weights){
+lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
 
     gr <- length(unique(groups))
     num.var <- ncol(x)
@@ -416,7 +416,7 @@ lda.functions <- function(x, groups, grp.means, prior, weights){
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
     colnames(class.funs) <- rownames(grp.means)
-    rownames(class.funs) <- c("intercept", colnames(grp.means))
+    rownames(class.funs) <- c("Intercept", colnames(grp.means))
 
     for(i in 1:gr) {
         class.funs[1, i] <- -0.5 * t(grp.means[i, ]) %*% iV %*% (grp.means[i, ])
@@ -503,7 +503,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         }
     }
     else if (output == "Discriminant Functions") {
-        print(x$original$discriminant.functions)
+        return(x$original$discriminant.functions)
     }
     else
         print(x$original, ...)

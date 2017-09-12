@@ -5,7 +5,7 @@
 \title{\code{LDA}}
 \usage{
 LDA(formula, data = NULL, subset = NULL, weights = NULL,
-  prior = "Equal", missing = "Exclude cases with missing data",
+  prior = "Observed", missing = "Exclude cases with missing data",
   output = "Means", outcome.color = "#5B9BD5",
   predictors.color = "#ED7D31", variance = "moment", seed = 12321,
   statistical.assumptions, auxiliary.data = NULL, show.labels = FALSE, ...)
@@ -14,8 +14,7 @@ LDA(formula, data = NULL, subset = NULL, weights = NULL,
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
 That is, the response is the grouping factor and the right hand side
 specifies the (non-factor) discriminators, and any transformations, interactions,
-or other non-additive operators will be ignored.
-transformations nor}
+or other non-additive operators will be ignored.}
 
 \item{data}{A \code{\link{data.frame}} from which variables specified
 in formula are preferentially to be taken.}
@@ -28,8 +27,8 @@ may not be an expression. \code{subset} may not}
 name of a variable in \code{data}. It may not be an expression.}
 
 \item{prior}{The assumed probability of each value of y occurring in the
-population.  By default this is set to "observed" and the value is computed
-based on the observed data.  If set to "equal" the prior will be set to
+population.  By default this is set to "Observed" and the value is computed
+based on the observed data.  If set to "Equal" the prior will be set to
 be equal for each group (this is the default in SPSS).  Alternatively, a
 vector of probabilities can be provided.}
 
@@ -39,7 +38,7 @@ vector of probabilities can be provided.}
 \code{"Imputation (replace missing values with estimates)"}}
 
 \item{output}{One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
-\code{"Scatterplot"}, and \code{"Moonplot"}.}
+\code{"Scatterplot"}, \code{"Moonplot"} or \code{"Discriminant Functions"}.}
 
 \item{outcome.color}{Color used to display centroids in Scatterplot output.}
 
