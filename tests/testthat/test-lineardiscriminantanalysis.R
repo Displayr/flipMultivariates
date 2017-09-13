@@ -83,6 +83,7 @@ test_that("LDA Replicating SPSS defaults - unweighted",
               zLDA.probs <- flipData::Probabilities(zLDA)
               expect_equal(.83131933755411, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(21,0,0,1,11,0,0,2,25))
+              expect_equal(24.56271, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
           }
 )
 
@@ -98,6 +99,7 @@ test_that("LDA Replicating SPSS defaults - weighted",
               head(zLDA.probs)
               expect_equal(0.92558, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(1023,0,0,43,501,0,0,43,1107))
+              expect_equal(19.98625, zLDA$original$discriminant.functions[3,3], tolerance = 0.001)
           }
 )
 
@@ -114,6 +116,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
               head(zLDA.probs)
               expect_equal(0.89292, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(21,0,0,1,10,0,0,3,25))
+              expect_equal(-7.578596, zLDA$original$discriminant.functions[4,1], tolerance = 0.001)
           }
 )
 
@@ -129,6 +132,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
               head(zLDA.probs)
               expect_equal(0.92946, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(1056,8,0,10,493,0,0,43,1107))
+              expect_equal(-359.3452, zLDA$original$discriminant.functions[1,1], tolerance = 0.001)
           }
 )
 
@@ -144,7 +148,8 @@ test_that("Replicating colas example in SPSS - default", {
               zLDA.probs <- flipData::Probabilities(zLDA)
               head(zLDA.probs)
               expect_equal(.12683, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
-              # Not that confusion does not match, due to multiple groups with equivalent probabilities.
+              expect_equal(-33.32786, zLDA$original$discriminant.functions[1,1], tolerance = 0.001)
+              # Note that confusion does not match, due to multiple groups with equivalent probabilities.
 })
 
 
@@ -160,6 +165,7 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
               head(zLDA.probs)
               expect_equal(.19651, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion[, 1]), c(141, 37, 61, 25, 9, 43, 2, 3))
+              expect_equal(9.505386, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
 })
 
 
