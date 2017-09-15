@@ -51,7 +51,7 @@
 #'   Econometrica, 48, 817-838. Long, J. S. and Ervin, L. H. (2000). Using
 #'   heteroscedasticity consistent standard errors in the linear regression
 #'   model. The American Statistician, 54(3): 217-224.
-#' @importFrom flipData CalibrateWeight GetData CleanSubset CleanWeights EstimationData DataFormula
+#' @importFrom flipData CalibrateWeight GetData CleanSubset CleanWeights EstimationData
 #' @importFrom flipFormat Labels Names
 #' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor StandardizeData
 #' @importFrom flipStatistics Correlation MeanByGroup

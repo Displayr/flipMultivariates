@@ -88,7 +88,7 @@ SupportVectorMachine <- function(formula,
     if (n < ncol(.estimation.data) + 1)
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula)
+    .formula <- DataFormula(input.formula, data)
 
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
