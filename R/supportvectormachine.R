@@ -66,7 +66,7 @@ SupportVectorMachine <- function(formula,
     weights <- eval(substitute(weights), data, parent.frame())
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula)
+    outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
     outcome.variable <- data[, outcome.i]
     numeric.outcome <- !is.factor(outcome.variable)

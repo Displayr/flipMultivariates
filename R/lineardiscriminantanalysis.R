@@ -97,7 +97,7 @@ LDA <- function(formula,
     weights <- eval(substitute(weights), data, parent.frame())
     data <- GetData(input.formula, data, auxiliary.data)
     row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula)
+    outcome.name <- OutcomeName(input.formula, data)
     if (!is.factor(data[, outcome.name]) &!IsCount(data[, outcome.name]))
         stop("LDA requires the outcome variable to be categorical or a count.")
     data <- CreatingFactorDependentVariableIfNecessary(formula, data)

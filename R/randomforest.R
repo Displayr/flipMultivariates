@@ -73,7 +73,7 @@ RandomForest <- function(formula,
     }
 
     row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula)
+    outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
     if (setequal(data[!is.na(data[, outcome.i]), outcome.i], c(0, 1)))
         data[, outcome.i] <- as.factor(data[, outcome.i])
