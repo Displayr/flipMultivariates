@@ -21,7 +21,7 @@ in formula are preferentially to be taken.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the fitting process, or, the name of a variable in \code{data}. It
-may not be an expression. \code{subset} may not}
+may not be an expression.}
 
 \item{weights}{An optional vector of sampling weights, or, the name or, the
 name of a variable in \code{data}. It may not be an expression.}
@@ -40,16 +40,16 @@ vector of probabilities can be provided.}
 \item{output}{One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
 \code{"Scatterplot"}, \code{"Moonplot"} or \code{"Discriminant Functions"}.}
 
-\item{outcome.color}{Color used to display centroids in Scatterplot output.}
+\item{outcome.color}{Color used to display centroids in \code{"Scatterplot"} output.}
 
-\item{predictors.color}{Color used to display variable correlations in Scatterplot output.}
+\item{predictors.color}{Color used to display variable correlations in \code{"Scatterplot"} output.}
 
 \item{variance}{The method used to estimate the variance; either \code{"moment"} for
 the method of moments or \code{"mle"} for maximum likelihood estimaion.}
 
 \item{seed}{The random number seed used in imputation.}
 
-\item{statistical.assumptions}{A Statistical Assumptions object.}
+\item{statistical.assumptions}{Not supported.}
 
 \item{auxiliary.data}{A \code{\link{data.frame}} containing additional variables
 to be used in imputation (if required). While adding more variables will improve
@@ -66,11 +66,10 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 Linear Discriminant Analysis
 }
 \details{
-"Imputation (replace missing values with estimates): All selected
+Imputation (replace missing values with estimates): All selected
   outcome and predictor variables are included in the imputation, along with
   all \code{auxiliary.data}, excluding cases that are excluded via subset or
-   have invalid weights, but including
-  cases with missing values of the outcome variable.
+  have invalid weights, but including cases with missing values of the outcome variable.
   Then, cases with missing values in the outcome variable are excluded from
   the analysis (von Hippel 2007). See \code{\link[flipImputation]{Imputation}}.
 }

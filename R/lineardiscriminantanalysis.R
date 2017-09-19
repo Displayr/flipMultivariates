@@ -9,7 +9,7 @@
 #' in formula are preferentially to be taken.
 #' @param subset An optional vector specifying a subset of observations to be
 #'   used in the fitting process, or, the name of a variable in \code{data}. It
-#'   may not be an expression. \code{subset} may not
+#'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or, the name or, the
 #'   name of a variable in \code{data}. It may not be an expression.
 #' @param missing How missing data is to be treated in the regression. Options:
@@ -23,12 +23,12 @@
 #'   vector of probabilities can be provided.
 #' @param output One of \code{"Means"}, \code{"Prediction-Accuracy Table"}, or \code{"Detail"}.
 #' \code{"Scatterplot"}, \code{"Moonplot"} or \code{"Discriminant Functions"}.
-#' @param outcome.color Color used to display centroids in Scatterplot output.
-#' @param predictors.color Color used to display variable correlations in Scatterplot output.
+#' @param outcome.color Color used to display centroids in \code{"Scatterplot"} output.
+#' @param predictors.color Color used to display variable correlations in \code{"Scatterplot"} output.
 #' @param variance The method used to estimate the variance; either \code{"moment"} for
 #' the method of moments or \code{"mle"} for maximum likelihood estimaion.
 #' @param seed The random number seed used in imputation.
-#' @param statistical.assumptions A Statistical Assumptions object.
+#' @param statistical.assumptions Not supported.
 #' @param auxiliary.data A \code{\link{data.frame}} containing additional variables
 #'  to be used in imputation (if required). While adding more variables will improve
 #'  the quality of the imputation, it will dramatically slow down the time to estimate.
@@ -37,11 +37,10 @@
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param ... Additional argments to be past to  \code{LDA.formula}.
-#' @details "Imputation (replace missing values with estimates): All selected
+#' @details Imputation (replace missing values with estimates): All selected
 #'   outcome and predictor variables are included in the imputation, along with
 #'   all \code{auxiliary.data}, excluding cases that are excluded via subset or
-#'    have invalid weights, but including
-#'   cases with missing values of the outcome variable.
+#'   have invalid weights, but including cases with missing values of the outcome variable.
 #'   Then, cases with missing values in the outcome variable are excluded from
 #'   the analysis (von Hippel 2007). See \code{\link[flipImputation]{Imputation}}.
 #' @references von Hippel, Paul T. 2007. "Regression With Missing Y's: An
