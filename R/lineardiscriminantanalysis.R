@@ -476,14 +476,14 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         print(table)
     } else if (output == "Scatterplot" | output == "Moonplot")
     {
-        scale <- apply(abs(x$centroids), 2, mean) / apply(abs(x$correlations), 2, mean)
-        correlations <- sweep(x$correlations, 2, scale, "*")
+        scale <- apply(abs(x$correlations), 2, mean) / apply(abs(x$centroids), 2, mean)
+        centroids <- sweep(x$centroids, 2, scale, "*")
         if (output == "Moonplot")
-            print(moonplot(x$centroids, correlations))
+            print(moonplot(centroids, x$correlations))
         else
         {
-            coords <- rbind(x$centroids, correlations)
-            groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
+            coords <- rbind(centroids, x$correlations)
+            groups <- c(rep(x$outcome.label, nrow(centroids)), rep(x$predictors.label, nrow(x$correlations)))
             gcolors <- c(x$outcome.color, x$predictors.color)
             print(LabeledScatter(X = coords[, 1],
                                              Y = coords[, 2],
