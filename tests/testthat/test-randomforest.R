@@ -18,6 +18,7 @@ attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)
 hair1 <- cbind(hair1, hair1[, "x18"])
 colnames(hair1)[ncol(hair1)] <- "dollar$x18"
+hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
 
 library(flipRegression)
 
@@ -45,6 +46,8 @@ test_that("Print Random forests",{
     z <- RandomForest(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = TRUE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
     z <- RandomForest(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
+    expect_error(capture.output(print(z)), NA)
+    z <- RandomForest(x6 ~ ., show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair2)
     expect_error(capture.output(print(z)), NA)
 })
 

@@ -17,13 +17,15 @@ hair1  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALS
 hair1$x1 <- hair$x1
 hair1$split60 <- hair$split60
 hair1$id <- hair$id
+hair2 <- hair1
+hair2$split60 <- hair2$id <- NULL
 
 
 test_that("plots",
           {
               expect_error(suppressWarnings(LDA(x6 ~ x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, show.labels = TRUE, output = "Confusion Matrix"))
                            , "LDA requires the outcome variable to be categorical or a count.")
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Means"))
+              zLDA <- suppressWarnings(LDA(x1 ~ ., method = "moment", data = hair2, subset = hair1$split60 == "Estimation Sample", show.labels = TRUE, output = "Means"))
               expect_error(print(zLDA), NA)
               zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Scatterplot"))
               expect_error(print(zLDA), NA)
