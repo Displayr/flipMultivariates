@@ -214,12 +214,13 @@ GradientBoost <- function(formula,
 }
 
 #' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
-#' @importFrom flipData GetTidyTwoDimensionalArray Observed
+#' @importFrom flipData Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
 #' @importFrom xgboost xgb.importance xgb.ggplot.importance
 #' @importFrom ggplot2 ggtitle
 #' @export
+#' @method print GradientBoost
 print.GradientBoost <- function(x, ...)
 {
     if (x$output == "Accuracy")

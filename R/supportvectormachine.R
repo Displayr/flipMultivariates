@@ -141,10 +141,11 @@ SupportVectorMachine <- function(formula,
 }
 
 #' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
-#' @importFrom flipData GetTidyTwoDimensionalArray Observed
+#' @importFrom flipData Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
 #' @export
+#' @method print SupportVectorMachine
 print.SupportVectorMachine <- function(x, ...)
 {
     if (x$output == "Accuracy")
