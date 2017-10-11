@@ -77,7 +77,7 @@ test_that("Replicating SPSS defaults using MASS:LDA",
 
 test_that("LDA Replicating SPSS defaults - unweighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Equal"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.86959956, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -91,7 +91,7 @@ test_that("LDA Replicating SPSS defaults - unweighted",
 
 test_that("LDA Replicating SPSS defaults - weighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Equal"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -141,7 +141,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
 
 test_that("Replicating colas example in SPSS - default", {
     data(colas, package = "flipExampleData")
-              zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Equal"))
+              zLDA <- suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
