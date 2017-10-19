@@ -52,11 +52,14 @@ test_that("plots",
 
           })
 
-# test_that("CE-626 System is computationally singular)",
-#           {
-#                 data(colas, package = "flipExampleData")
-#                 expect_error(print(LDA(q3 ~ Q5_5_1 + Q5_7_1, weights = unclass(colas$q7), data = colas)), NA)
-#           })
+test_that("System is computationally singular)",
+           {
+               x <- rnorm(100)
+               y <- rnorm(100)
+               z <- x
+               #expect_warning(expect_error(print(LDA(hair1$x1 ~ x + y + z)), "system is exactly singular"), "System is computationally.")
+               expect_error(expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "System is computationally."), "system is exactly singular")
+           })
 
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.

@@ -331,7 +331,8 @@ LDA.fit = function (x,
     if (rank == 0L)
         stop("rank = 0: variables are numerically constant")
     if (rank < k)
-        warning("variables are collinear")
+        warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
+                       paste(colnames(x)[X.s$d <= tol], collapse = ", "), " may help."))
     scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank],, rank)
     # if (CV)
     # {
