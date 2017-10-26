@@ -2,7 +2,7 @@
 % Please edit documentation in R/lineardiscriminantanalysis.R
 \name{LDA}
 \alias{LDA}
-\title{\code{LDA}}
+\title{Perform linear discriminant analysis}
 \usage{
 LDA(formula, data = NULL, subset = NULL, weights = NULL,
   prior = "Observed", missing = "Exclude cases with missing data",
@@ -14,7 +14,7 @@ LDA(formula, data = NULL, subset = NULL, weights = NULL,
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
 That is, the response is the grouping factor and the right hand side
 specifies the (non-factor) discriminators, and any transformations, interactions,
-or other non-additive operators will be ignored.}
+or other non-additive operators apart from \code{.} will be ignored.}
 
 \item{data}{A \code{\link{data.frame}} from which variables specified
 in formula are preferentially to be taken.}
@@ -63,7 +63,7 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 \item{...}{Additional argments to be past to  \code{LDA.formula}.}
 }
 \description{
-Linear Discriminant Analysis
+Perform linear discriminant analysis
 }
 \details{
 Imputation (replace missing values with estimates): All selected

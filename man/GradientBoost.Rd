@@ -2,7 +2,7 @@
 % Please edit documentation in R/gradientboost.R
 \name{GradientBoost}
 \alias{GradientBoost}
-\title{\code{GradientBoost}}
+\title{Fit a gradient boosted ensemble of underlying tree or regression models}
 \usage{
 GradientBoost(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
@@ -13,7 +13,7 @@ GradientBoost(formula, data = NULL, subset = NULL, weights = NULL,
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
 That is, the response is the grouping factor and the right hand side
 specifies the (non-factor) discriminators, and any transformations, interactions,
-or other non-additive operators will be ignored.}
+or other non-additive operators apart from \code{.} will be ignored.}
 
 \item{data}{A \code{\link{data.frame}} from which variables specified
 in formula are preferentially to be taken.}
@@ -44,5 +44,5 @@ name of a variable in \code{data}. It may not be an expression.}
 variables label is an attribute (e.g., attr(foo, "label")).}
 }
 \description{
-GradientBoost
+Fit a gradient boosted ensemble of underlying tree or regression models
 }

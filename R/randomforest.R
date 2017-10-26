@@ -1,10 +1,9 @@
-#' \code{RandomForest}
+#' Fit a random forest model
 #'
-#' RandomForest
 #' @param formula A formula of the form \code{groups ~ x1 + x2 + ...}
 #' That is, the response is the grouping factor and the right hand side
 #' specifies the (non-factor) discriminators, and any transformations, interactions,
-#' or other non-additive operators will be ignored.
+#' or other non-additive operators apart from \code{.} will be ignored.
 #' @param data A \code{\link{data.frame}} from which variables specified
 #' in formula are preferentially to be taken.
 #' @param subset An optional vector specifying a subset of observations to be
