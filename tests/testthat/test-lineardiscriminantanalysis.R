@@ -21,17 +21,22 @@ hair2 <- hair1
 hair2$split60 <- hair2$id <- NULL
 
 
-test_that("plots",
+test_that("LDA: plots",
           {
-              expect_error(suppressWarnings(LDA(x6 ~ x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, show.labels = TRUE, output = "Confusion Matrix"))
+              expect_error(suppressWarnings(LDA(x6 ~ x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment",
+                                                data = hair1, show.labels = TRUE, output = "Confusion Matrix"))
                            , "LDA requires the outcome variable to be categorical or a count.")
-              zLDA <- suppressWarnings(LDA(x1 ~ ., method = "moment", data = hair2, subset = hair1$split60 == "Estimation Sample", show.labels = TRUE, output = "Means"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, subset = split60 == "Estimation Sample",
+                                           show.labels = TRUE, output = "Scatterplot"))
               expect_error(print(zLDA), NA)
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Scatterplot"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, subset = split60 == "Estimation Sample",
+                                           show.labels = TRUE, output = "Moonplot"))
               expect_error(print(zLDA), NA)
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Moonplot"))
-              expect_error(print(zLDA), NA)
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, output = "Prediction-Accuracy Table"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, subset = split60 == "Estimation Sample",
+                                           show.labels = TRUE, output = "Prediction-Accuracy Table"))
               expect_error(print(zLDA), NA)
               hair1$X1 <- hair1$x1
               flipFormat::Labels(hair1$X1) <- "Duration"
@@ -49,7 +54,6 @@ test_that("plots",
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, output = "Prediction-Accuracy Table", show.labels = TRUE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, show.labels = FALSE))
               suppressWarnings(LDA(X1 ~ X6 + X7 + X8, data = hair1, show.labels = TRUE))
-
           })
 
 test_that("System is computationally singular)",
@@ -57,8 +61,8 @@ test_that("System is computationally singular)",
                x <- rnorm(100)
                y <- rnorm(100)
                z <- x
-               #expect_warning(expect_error(print(LDA(hair1$x1 ~ x + y + z)), "system is exactly singular"), "System is computationally.")
-               expect_error(expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "System is computationally."), "system is exactly singular")
+               expect_error(expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "System is computationally."),
+                            "system is exactly singular")
            })
 
 
@@ -68,7 +72,8 @@ test_that("Replicating SPSS defaults using MASS:LDA",
               #### Reproducing SPSS default results.
               # Mass.
               library(MASS)
-              zlda = lda(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, data = hair1, subset = split60 == "Estimation Sample", method = "moment")#, prior = rep(1/3,3))#, method = "mle")   #, "moment")[1])
+              zlda = lda(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                         data = hair1, subset = split60 == "Estimation Sample", method = "moment")
               variance.explained <- round(zlda$svd^2/sum(zlda$svd^2), 4L)
               expect_equal(0.86959956, variance.explained[1], tolerance = 0.001)
               zlda.discriminant.variables <- MASS:::predict.lda(zlda, newdata = hair1[,1:13], na.action = na.pass)[["x"]]
@@ -80,7 +85,9 @@ test_that("Replicating SPSS defaults using MASS:LDA",
 
 test_that("LDA Replicating SPSS defaults - unweighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Observed"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, subset = split60 == "Estimation Sample",
+                                           show.labels = TRUE, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.86959956, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -94,7 +101,9 @@ test_that("LDA Replicating SPSS defaults - unweighted",
 
 test_that("LDA Replicating SPSS defaults - weighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Observed"))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, weights = hair1$id,
+                                           subset = split60 == "Estimation Sample", show.labels = TRUE, prior = "Observed"))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -110,7 +119,9 @@ test_that("LDA Replicating SPSS defaults - weighted",
 
 test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, prior = "Observed", subset = split60 == "Estimation Sample", show.labels = TRUE))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, prior = "Observed",
+                                           subset = split60 == "Estimation Sample", show.labels = TRUE))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.87, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -126,7 +137,9 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
 
 test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
           {
-              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18, method = "moment", data = hair1, prior = "Observed", weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE))
+              zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                           method = "moment", data = hair1, prior = "Observed",
+                                           weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
@@ -171,5 +184,15 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
               expect_equal(9.505386, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
 })
 
+test_that("LDA: dot in formula", {
+    zLDA <- suppressWarnings(LDA(x1 ~ ., method = "moment", data = hair2, subset = hair1$split60 == "Estimation Sample",
+                                 show.labels = TRUE, output = "Means"))
+    zLDA2 <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                              method = "moment", data = hair2, subset = hair1$split60 == "Estimation Sample",
+                              show.labels = TRUE, output = "Means"))
+    zLDA$original$call <- zLDA$formula <- zLDA$call <- NULL
+    zLDA2$original$call <- zLDA2$formula <- zLDA2$call <- NULL
+    expect_equal(zLDA, zLDA2)
+})
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
