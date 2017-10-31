@@ -325,7 +325,8 @@ LDA.fit = function (x,
     if (method == "moment")
         var.weighted = var.weighted * weights.sum / (weights.sum - ng)
     X <- sqrt(fac) * (x - group.means[g, ]) %*% scaling
-    X.s <- WeightedSVD(X, weights, nu = 0L)
+    X.s <- suppressWarnings(WeightedSVD(X, weights, nu = 0L)) # warning is better handled below
+    X.s$d[is.nan(X.s$d)] <- 0
     rank <- sum(X.s$d > tol)
     if (rank == 0L)
         stop("rank = 0: variables are numerically constant")
