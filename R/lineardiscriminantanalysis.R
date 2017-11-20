@@ -257,7 +257,7 @@ LDA <- function(formula,
 #'   \url{http://www.ats.ucla.edu/stat/spss/output/SPSS_discrim.htm}
 #' @importFrom flipStatistics WeightedCounts
 #' @importFrom flipTransformations WeightedSVD
-#' @importFrom stats cov.wt cor
+#' @importFrom stats cov.wt cor alias
 #' @export
 LDA.fit = function (x,
                    grouping,
@@ -302,6 +302,12 @@ LDA.fit = function (x,
         g <- factor(g, levels = lev1)
         counts <- as.vector(WeightedCounts(g, weights))
     }
+
+    al <- suppressWarnings(alias(grouping ~ . , data = data.frame(x)))
+    if(!is.null(al$Complete))
+        warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
+                    paste(rownames(al$Complete), collapse = ", "), " may help."))
+
     proportions <- prop.table(counts)
     ng <- length(proportions)
     names(prior) <- names(counts) <- lev1
@@ -309,7 +315,7 @@ LDA.fit = function (x,
     x.by.weights <- sweep(x, 1, weights, "*")
     group.sums <- tapply(x.by.weights, list(rep(g, k), col(x)), sum)
     group.means <- sweep(group.sums, 1, counts, "/")
-    #print(group.means)
+
     var.weighted = cov.wt(x - group.means[g, ], weights, method == "mle")$cov
     f1 <- sqrt(diag(var.weighted))
     if (any(f1 < tol))
@@ -330,9 +336,7 @@ LDA.fit = function (x,
     rank <- sum(X.s$d > tol)
     if (rank == 0L)
         stop("rank = 0: variables are numerically constant")
-    if (rank < k)
-        warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
-                       paste(colnames(x)[X.s$d <= tol], collapse = ", "), " may help."))
+
     scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank],, rank)
     # if (CV)
     # {
