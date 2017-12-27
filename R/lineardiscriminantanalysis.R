@@ -139,6 +139,8 @@ LDA <- function(formula,
     n.levels <- nlevels(filtered.outcome.variable)
     if (n.levels > 10)
         warning(paste("The outcome variable contains", n.levels, "categories. Consider either merging categories, or, using a model more appropriate for such data (e.g., Linear Regression)."))
+    if (n.levels == 1)
+        stop("The outcome variable contains only one category, after applying any filter. At least 2 categories are required to produce a model.")
     n.smallest <- round((min.o <- min(observed.prior)) * n)
     if (n.smallest < 30)
     {
