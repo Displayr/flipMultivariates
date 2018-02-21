@@ -312,7 +312,8 @@ LDA.fit = function (x,
     al <- suppressWarnings(alias(grouping ~ . , data = data.frame(x)))
     if(!is.null(al$Complete))
         warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
-                    paste(labels(match(rownames(al$Complete), colnames(x))), collapse = ", "), " may help."))
+                       paste(rownames(al$Complete), collapse = ", "), " may help."))
+                       #paste(labels[match(rownames(al$Complete), colnames(x))]), collapse = ", "), " may help.")
 
     proportions <- prop.table(counts)
     ng <- length(proportions)
@@ -395,10 +396,11 @@ LDA.fit = function (x,
         dimnames(group.means)[[2L]] <- colnames(x)
     }
 
-    discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
-                                       error = function(e) {warning("Discriminant functions could not be computed. ",
-                                                                    "This may sometimes be fixed by removing colinear variables.");
-                                                            NULL})
+    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+    #discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
+    #                                   error = function(e) {warning("Discriminant functions could not be computed. ",
+    #                                                                "This may sometimes be fixed by removing colinear variables.");
+    #                                                        NULL})
 
     cl <- match.call()
     cl[[1L]] <- as.name("lda")

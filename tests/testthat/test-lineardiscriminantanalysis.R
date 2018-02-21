@@ -184,6 +184,9 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
               expect_equal(9.505386, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
 })
 
+
+hair2$x6[5:10] <- NA
+
 test_that("LDA: dot in formula", {
     zLDA <- suppressWarnings(LDA(x1 ~ ., method = "moment", data = hair2, subset = hair1$split60 == "Estimation Sample",
                                  show.labels = TRUE, output = "Means"))
