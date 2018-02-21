@@ -312,7 +312,6 @@ LDA.fit = function (x,
     al <- suppressWarnings(alias(grouping ~ . , data = data.frame(x)))
     if(!is.null(al$Complete))
         warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
-                       #paste(rownames(al$Complete), collapse = ", "), " may help."))
                        paste(labels[match(rownames(al$Complete), colnames(x))], collapse = ", "), " may help."))
 
     proportions <- prop.table(counts)
@@ -427,7 +426,14 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     }
 
     V <- W / (sum(weights) - gr)
-    iV <- solve(V)
+    iV <- tryCatch(solve(V), error = function(e)
+        {
+            warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
+            return(NULL)
+        }
+    )
+    if(is.null(iV))
+        return(NULL)
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
     colnames(class.funs) <- rownames(grp.means)
