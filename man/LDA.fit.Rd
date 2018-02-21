@@ -5,7 +5,8 @@
 \title{\code{LDA.fit} Fits linear discriminant analysis models.}
 \usage{
 LDA.fit(x, grouping, prior = proportions, tol = 1e-04,
-  method = c("moment", "mle"), weights = NULL, CV = FALSE, nu = 5, ...)
+  method = c("moment", "mle"), weights = NULL, CV = FALSE, nu = 5,
+  labels = NULL, ...)
 }
 \arguments{
 \item{x}{A matrix or data frame of explanatory variables.}
@@ -28,6 +29,8 @@ vector of probabilities can be provided.}
 \item{CV}{Not used.}
 
 \item{nu}{TODO}
+
+\item{labels}{The labels of the predictor variables.}
 
 \item{...}{Additional arguments.}
 }

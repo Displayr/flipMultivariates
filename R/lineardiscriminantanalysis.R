@@ -177,7 +177,8 @@ LDA <- function(formula,
                    grouping = group,
                    prior = prior,
                    method = variance,
-                   weights = .weights),
+                   weights = .weights,
+                   labels = labels),
                    variable.labels = labels,
                    outcome.label = outcome.label,
                    predictors.label = predictors.label)
@@ -253,6 +254,7 @@ LDA <- function(formula,
 #' @param weights TODO
 #' @param CV Not used.
 #' @param nu TODO
+#' @param labels The labels of the predictor variables.
 #' @param ... Additional arguments.
 #' @details This is a wrapper for MASS::lda and MASS::qda.
 #'   #### Linear discriminant analysis #####
@@ -267,7 +269,9 @@ LDA.fit = function (x,
                    tol = 1e-04,
                    method = c("moment", "mle"),
                    weights = NULL,
-                   CV = FALSE, nu = 5, ...)
+                   CV = FALSE,
+                   nu = 5,
+                   labels = NULL, ...)
 {
     # Generalization of MASS::lda
     if (is.null(dim(x)))
@@ -308,7 +312,7 @@ LDA.fit = function (x,
     al <- suppressWarnings(alias(grouping ~ . , data = data.frame(x)))
     if(!is.null(al$Complete))
         warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
-                    paste(rownames(al$Complete), collapse = ", "), " may help."))
+                    paste(labels(match(rownames(al$Complete), colnames(x))), collapse = ", "), " may help."))
 
     proportions <- prop.table(counts)
     ng <- length(proportions)
@@ -391,7 +395,10 @@ LDA.fit = function (x,
         dimnames(group.means)[[2L]] <- colnames(x)
     }
 
-    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+    discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
+                                       error = function(e) {warning("Discriminant functions could not be computed. ",
+                                                                    "This may sometimes be fixed by removing colinear variables.");
+                                                            NULL})
 
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
