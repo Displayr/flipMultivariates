@@ -312,8 +312,8 @@ LDA.fit = function (x,
     al <- suppressWarnings(alias(grouping ~ . , data = data.frame(x)))
     if(!is.null(al$Complete))
         warning(paste0("Variables are colinear which may cause LDA to fail. Removing variable(s) ",
-                       paste(rownames(al$Complete), collapse = ", "), " may help."))
-                       #paste(labels[match(rownames(al$Complete), colnames(x))]), collapse = ", "), " may help.")
+                       #paste(rownames(al$Complete), collapse = ", "), " may help."))
+                       paste(labels[match(rownames(al$Complete), colnames(x))]), collapse = ", "), " may help.")
 
     proportions <- prop.table(counts)
     ng <- length(proportions)
