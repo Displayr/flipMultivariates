@@ -395,10 +395,11 @@ LDA.fit = function (x,
         dimnames(group.means)[[2L]] <- colnames(x)
     }
 
-    discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
-                                       error = function(e) {warning("Discriminant functions could not be computed. ",
-                                                                   "This may sometimes be fixed by removing colinear variables.");
-                                                            NULL})
+    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+    #discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
+    #                                   error = function(e) {warning("Discriminant functions could not be computed. ",
+    #                                                               "This may sometimes be fixed by removing colinear variables.");
+    #                                                        NULL})
 
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
@@ -425,15 +426,14 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     }
 
     V <- W / (sum(weights) - gr)
-    iV <- solve(V)
-    #iV <- tryCatch(solve(V), error = function(e)
-    #    {
-    #        warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
-    #        return(NULL)
-    #    }
-    #)
-    #if(is.null(iV))
-    #    return(NULL)
+    iV <- tryCatch(solve(V), error = function(e)
+        {
+            warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
+            return(NULL)
+        }
+    )
+    if(is.null(iV))
+        return(NULL)
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
     colnames(class.funs) <- rownames(grp.means)
