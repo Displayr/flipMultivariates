@@ -10,5 +10,5 @@ DiscriminantVariables(x)
 \item{x}{A \code{LDA} object.}
 }
 \description{
-Computes discriminant varibales for the entire sample passed into the original analysis (including missing and filtered values).
+Computes discriminant variables for the entire sample passed into the original analysis (including missing and filtered values).
 }

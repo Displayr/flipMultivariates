@@ -61,9 +61,9 @@ test_that("System is computationally singular)",
                x <- rnorm(100)
                y <- rnorm(100)
                z <- x
-               #expect_error(expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "System is computationally."),
-                #            "system is exactly singular")
-                expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "Variables are colinear.")
+               expect_error(expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "System is computationally."),
+                            "system is exactly singular")
+                #expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "Variables are colinear.")
            })
 
 
