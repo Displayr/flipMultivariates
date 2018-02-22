@@ -426,15 +426,15 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     iV <- tryCatch(solve(V), error = function(e)
         {
             warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
+            warning(paste("iV is"), iV)
+            warning(num.var)
+            warning(gr)
+            warning(grp.means)
             return(NULL)
         }
     )
     if(is.null(iV))
         return(NULL)
-    warning(paste("iV is"), iV)
-    warning(num.var)
-    warning(gr)
-    warning(grp.means)
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
     colnames(class.funs) <- rownames(grp.means)
