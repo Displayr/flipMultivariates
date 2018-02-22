@@ -32,7 +32,7 @@ Probabilities.LDA <- function(x)
 
 #' \code{DiscriminantVariables}
 #'
-#' Computes discriminant varibales for the entire sample passed into the original analysis (including missing and filtered values).
+#' Computes discriminant variables for the entire sample passed into the original analysis (including missing and filtered values).
 #' @param x A \code{LDA} object.
 #' @importFrom stats na.pass
 #' @export
