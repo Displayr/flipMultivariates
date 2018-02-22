@@ -422,15 +422,21 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     }
 
     V <- W / (sum(weights) - gr)
-    #iV <- solve(V)
-    iV <- tryCatch(solve(V), error = function(e)
-        {
-            warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
-            return(NULL)
-        }
-    )
-    if(is.null(iV))
+    #iV <- tryCatch(solve(V), error = function(e)
+    #    {
+    #        warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
+    #        return(NULL)
+    #    }
+    #)
+    #if(is.null(iV))
+    #    return(NULL)
+    iV <- try(solve(V), TRUE)
+    if (inherits(iV, "try-error"))
+    {
+        warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
         return(NULL)
+    }
+
 
     class.funs <- matrix(NA, nrow = num.var + 1, ncol = gr)
     colnames(class.funs) <- rownames(grp.means)
