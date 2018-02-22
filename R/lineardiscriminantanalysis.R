@@ -395,7 +395,10 @@ LDA.fit = function (x,
         dimnames(group.means)[[2L]] <- colnames(x)
     }
 
-    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+    discriminant.functions <- tryCatch(lda.functions(x, grouping, group.means, prior, weights),
+                                       error = function(e) {warning("Discriminant functions could not be computed. ",
+                                                                   "This may sometimes be fixed by removing colinear variables.");
+                                                            NULL})
 
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
