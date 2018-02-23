@@ -220,7 +220,8 @@ LDA <- function(formula,
         #result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
         colnames(result$original$means) <- labels
         row.names(result$original$scaling) <- labels
-        rownames(result$original$discriminant.functions) <- c("Intercept", labels)
+        if (!is.null(result$original$discriminant.functions))
+            rownames(result$original$discriminant.functions) <- c("Intercept", labels)
     }
     else
         result$outcome.label <- outcome.name
@@ -422,14 +423,6 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     }
 
     V <- W / (sum(weights) - gr)
-    #iV <- tryCatch(solve(V), error = function(e)
-    #    {
-    #        warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
-    #        return(NULL)
-    #    }
-    #)
-    #if(is.null(iV))
-    #    return(NULL)
     iV <- try(solve(V), TRUE)
     if (inherits(iV, "try-error"))
     {
