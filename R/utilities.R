@@ -6,9 +6,14 @@ rowNamesOrNames <- function(x)
 }
 
 #' @importFrom flipFormat FormatAsPercent
-correctPredictionsText <- function(overall.accuracy, group.labels, group.accuracies, digits = 4)
+correctPredictionsText <- function(overall.accuracy, group.labels, group.accuracies, digits = 4, out.of.bag = FALSE)
 {
-    paste0("Correct predictions: ", FormatAsPercent(overall.accuracy, digits), " (",
+    prefix <- if (out.of.bag)
+        "Correct predictions (based on out-of-bag sample): "
+    else
+        "Correct predictions: "
+
+    paste0(prefix, FormatAsPercent(overall.accuracy, digits), " (",
            paste0(group.labels, ": " , FormatAsPercent(group.accuracies, digits), collapse = "; "),
            ")" )
 }
