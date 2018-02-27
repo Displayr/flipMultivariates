@@ -97,6 +97,9 @@ RandomForest <- function(formula,
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
     .weights <- processed.data$weights
+    if (numeric.outcome && nrow(unique(.estimation.data[outcome.name])) < 6)
+        warning("The outcome variable is numeric but contains less than 6 unique values. ",
+                "Convert the outcome to a categorical variable if you intend to perform a classification.")
 
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
@@ -109,8 +112,8 @@ RandomForest <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-    result <- list(original = randomForest(input.formula,
-                                           importance = TRUE, data = .estimation.data.1))
+    result <- list(original = suppressWarnings(randomForest(input.formula,
+                                           importance = TRUE, data = .estimation.data.1)))
     result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
@@ -180,7 +183,7 @@ print.RandomForest <- function(x, ...)
             err <- x$original$err.rate
             accuracies <- 1 - err[nrow(err), ]
             k <- length(accuracies)
-            correctPredictionsText(accuracies[1], colnames(err)[2:k], accuracies[2:k])
+            correctPredictionsText(accuracies[1], colnames(err)[2:k], accuracies[2:k], out.of.bag = TRUE)
         }
         tbl <- RandomForestTable(imp,
                                  x$z.statistics,
