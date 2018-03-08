@@ -418,7 +418,7 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
 
     for(i in 1:gr){
         filter <- groups == unique(groups)[i]
-        cov <- cov.wt(x[filter, ], wt = weights[filter], method = "ML")$cov * sum(weights[filter])
+        cov <- cov.wt(x[filter, , drop = FALSE], wt = weights[filter], method = "ML")$cov * sum(weights[filter])
         W <- W + cov
     }
 
