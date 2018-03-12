@@ -1,4 +1,4 @@
-#' Fit a gradient boosted ensemble of underlying tree or regression models
+#' Fit a neural network model
 #'
 #' @param formula A formula of the form \code{groups ~ x1 + x2 + ...}
 #' That is, the response is the grouping factor and the right hand side
@@ -11,42 +11,28 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @param output One of \code{"Accuracy"}, \code{"Importance"},
-#'   \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
+#' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"}.
-#' @param booster Whether the underlying model is a tree or linear regression. Options:
-#'   \code{"gbtree"},
-#'   \code{"gblinear"}.
-#' @param grid.search Whether to search the parameter space in order to tune the model.
+#'   \code{"Exclude cases with missing data"},
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @importFrom flipData GetData EstimationData DataFormula
-#' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName
-#' @importFrom xgboost xgboost xgb.cv
-#' @importFrom stats runif
-#' @importFrom flipTransformations AdjustDataToReflectWeights OneHot
+#' @param ... Other arguments to be supplied to \code{\link{svm}}.
 #' @export
-GradientBoost <- function(formula,
+DeepLearning <- function(formula,
                                  data = NULL,
                                  subset = NULL,
                                  weights = NULL,
                                  output = "Accuracy",
                                  missing  = "Exclude cases with missing data",
-                                 booster = "gbtree",
-                                 grid.search = FALSE,
                                  seed = 12321,
-                                 show.labels = FALSE)
+                                 show.labels = FALSE,
+                                 ...)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
-    if (booster == "gblinear" && output == "Importance")
-        stop("Importance is only available for gbtree booster.") # https://github.com/dmlc/xgboost/issues/2331
-
     cl <- match.call()
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
     subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
@@ -64,6 +50,7 @@ GradientBoost <- function(formula,
     weights <- eval(substitute(weights), data, parent.frame())
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
+
     outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
     outcome.variable <- data[, outcome.i]
@@ -72,7 +59,6 @@ GradientBoost <- function(formula,
     outcome.label <- variable.labels[outcome.i]
     #if (outcome.label == "data[, outcome.name]")
     #    outcome.label <- outcome.name
-
     if (!is.null(weights) & length(weights) != nrow(data))
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
@@ -87,7 +73,6 @@ GradientBoost <- function(formula,
     if (n < ncol(.estimation.data) + 1)
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula, data)
 
     # Resampling to generate a weighted sample, if necessary.
     .estimation.data.1 <- if (is.null(weights))
@@ -95,88 +80,17 @@ GradientBoost <- function(formula,
     else
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
-    numeric.data <- OneHot(.estimation.data.1, outcome.name)
-    n.class <- 1
-
-    if (numeric.outcome)
-    {
-        objective <- "reg:linear"
-        xval.metric <- "test_rmse_mean"
-    }
-    else if (length(numeric.data$outcome.levels) == 2)
-    {
-        objective <- "binary:logistic"
-        xval.metric <- "test_error_mean"
-    }
-    else
-    {
-        objective <- "multi:softprob"
-        n.class <- length(numeric.data$outcome.levels)
-        xval.metric <- "test_merror_mean"
-    }
-
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-
-    if (booster == "gbtree")
-        params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        max_depth = 6, eta = 0.3, gamma = 0, subsample = 1, colsample_bytree = 1,
-                        alpha = 0, lambda = 1)
-    else
-        params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        lambda = 0, alpha = 0, lambda_bias = 0, nthread = 1)
-
-
-    if (!grid.search)
-    {
-        xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, nrounds = 1000, nfold = 10,
-                       params = params.default, early_stopping_rounds = 8, maximize = FALSE, verbose = 0)
-        best.rounds <- which.min(xval$evaluation_log[, xval.metric])
-        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, params = params.default,
-                                          save_period = NULL, nrounds = best.rounds, verbose = 0))
-    }
-    else
-    {
-        cross.validate <- function(variable.params, all.params, seed){
-
-            for (param in names(variable.params))
-                all.params[param] <- variable.params[[param]]
-
-            xgbcv <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = all.params,
-                            nfold = cv.nfold, nrounds = n.rounds,
-                            verbose = 0, early_stopping_rounds = 8, maximize = FALSE, seed = seed)
-
-            return(c(min.error = min(xgbcv$evaluation_log[, xval.metric]), rounds = xgbcv$best_iteration, all.params))
-        }
-
-        n.rounds <- 1000
-        cv.nfold <- 5
-
-        if (booster == "gbtree")
-            search.grid <- expand.grid(subsample = c(0.7, 1),
-                                       colsample_bytree = c(0.7, 1),
-                                       eta = c(0.1, 0.2, 0.3),
-                                       max_depth = c(4, 6, 9))
-        else
-            search.grid <- expand.grid(lambda = c(0, 0.1, 1),
-                                       alpha = c(0, 0.1, 1),
-                                       lambda_bias = c(0))
-
-        search.results <- apply(search.grid, 1, cross.validate, params.default, seed)
-
-        search.results <- do.call(rbind.data.frame, search.results)
-        best.index <- which.min(search.results[, "min.error"])
-        best.error.rounds <- search.results[best.index, "rounds"]
-        best.param <- search.results[best.index, -(1:2)]
-        set.seed(seed)      # reset seed after searching
-        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, verbose = 0,
-                                          params = best.param, save_period = NULL, nrounds = best.error.rounds))
-    }
-    result$original$call <- cl
+    result <- list(original = neuralNetwork(as.matrix(.estimation.data.1[, -outcome.i]),
+                                            .estimation.data.1[[outcome.i]],
+                                            treat.numeric.as.categorical = TRUE,
+                                            iterations = 10))
+    #result$original$call <- cl  original is a python object and cannot be modified
 
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
@@ -185,18 +99,17 @@ GradientBoost <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+    #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
 
     # 2. Saving descriptive information.
-    class(result) <- c("GradientBoost", "MachineLearning", class(result))
+    class(result) <- c(class(result), "DeepLearning", "MachineLearning")
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
-    result$outcome.levels <- numeric.data$outcome.levels
-    result$prediction.columns <- colnames(numeric.data$X)
 
-    # 3. Names or labels
+    # 3. Replacing names with labels
     result$show.labels <- show.labels
     result$outcome.label <- outcome.label
     result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
@@ -209,19 +122,108 @@ GradientBoost <- function(formula,
     result
 }
 
+
+#' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical compile fit
+neuralNetwork <- function(X,
+                          Y,
+                          hidden.nodes = c(256, 128),
+                          iterations = 100,
+                          activation.functions = c('relu'),
+                          dropout.rates = c(),
+                          cost.function = 'categorical_crossentropy',
+                          optimizer = optimizer_rmsprop(),
+                          metrics = c('accuracy'),
+                          batch.size = 128,
+                          subset.values = c(),
+                          treat.numeric.as.categorical = FALSE) {
+    # verify the drop rates vector length is compatible with the number of hidden nodes
+    if (length(dropout.rates) >= length(hidden.nodes)) {
+        stop("Dropout length must be less than the number of layers");
+    }
+
+    # ensure if subset.values is set, it equals the length X
+    if (length(subset.values) > 0 && length(subset.values) != length(X)) {
+        stop("subset.values length must equal the length of X")
+    }
+
+    model <- keras_model_sequential()
+
+    # hidden layers
+    for (i in 1:(length(hidden.nodes) - 1)) {
+        if (i == 1) {
+            # input layer
+            model %>% layer_dense(units = hidden.nodes[1], activation = activation.functions[1], input_shape = ncol(X))
+        } else {
+            activation = if (i <= length(activation.functions)) activation.functions[i] else activation.functions[length(activation.functions)]
+            model %>% layer_dense(units = hidden.nodes[i], activation = activation)
+        }
+
+        if (i <= length(dropout.rates)) {
+            model %>% layer_dropout(rate = dropout.rates[i]);
+        }
+    }
+
+    output_shape = 1
+    if (treat.numeric.as.categorical || class(Y) != "numeric") {
+        output_shape = length(unique(Y))
+        Y <- to_categorical(Y)
+    }
+
+    # output layer
+    model %>% layer_dense(units = output_shape, activation = 'softmax')
+
+    model %>% compile(
+        loss = cost.function,
+        optimizer = optimizer,
+        metrics = metrics
+    )
+
+    print(model)
+
+    if (length(subset.values) > 0) {
+        subset.values <- as.logical(subset.values)
+        x_train <- X[subset.values]
+        y_train <- Y[subset.values]
+        x_test <- X[!subset.values]
+        y_test <- Y[!subset.values]
+    } else {
+        x_train <- X
+        y_train <- Y
+        x_test <- X
+        y_test <- Y
+    }
+
+    model %>% fit(
+        x_train,
+        y_train,
+        epochs = iterations,
+        batch_size = batch.size
+    )
+
+    #predictions <- predict_classes(model, X)
+    #fitted.weights <- get_weights(model)
+    #evaluation <- evaluate(model, x_test, y_test)
+
+    #output <- list(predictions = predictions,
+    #               fitted.weights = fitted.weights,
+    #               cost = evaluation$loss,
+    #               accuracy = evaluation$acc)
+
+    return(model)
+}
+
+
 #' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
 #' @importFrom flipData Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
-#' @importFrom xgboost xgb.importance xgb.ggplot.importance
-#' @importFrom ggplot2 ggtitle
 #' @export
-#' @method print GradientBoost
-print.GradientBoost <- function(x, ...)
+#' @method print DeepLearning
+print.DeepLearning <- function(x, ...)
 {
     if (x$output == "Accuracy")
     {
-        title <- paste0("Gradient Boost: ", x$outcome.label)
+        title <- paste0("Deep Learning: ", x$outcome.label)
         predictors <- x$variable.labels
         extracted <- ExtractCommonPrefix(predictors)
         if (!is.na(extracted$common.prefix))
@@ -265,18 +267,34 @@ print.GradientBoost <- function(x, ...)
     {
         print(x$confusion)
     }
-    else if (x$output == "Importance")
-    {
-        importance <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
-        #xgb.plot.importance(importance, rel_to_first = TRUE, xlab = "Relative importance") base graphics plot
-        gg <- xgb.ggplot.importance(importance, rel_to_first = TRUE, top_n = 10)
-        print(gg + ggtitle(paste0("Importance: ", x$outcome.label)))
-    }
     else
     {
         print(x$original)
         invisible(x)
     }
 }
+
+
+#' \code{predict.DeepLearning}
+#'
+#' Predicts values for numeric outcomes and group membership for categories based on \code{newdata}
+#' and a fitted DeepLearning \code{object}.  A value (which may be NA) is returned for every instance
+#' including those with missing data and for the fitted \code{data} before filtering in the case
+#' that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
+#' @param object A \code{DeepLearning} object.
+#' @param newdata Optionally, a data frame including the variables used to fit the model.
+#' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
+#' @param ... Additional arguments to pass to predict.DeepLearning.
+#' @importFrom flipData CheckPredictionVariables
+#' @importFrom keras predict_classes
+#' @export
+predict.DeepLearning <- function(object, newdata = object$model, ...)
+{
+    newdata <- CheckPredictionVariables(object, newdata)
+    predictions <- predict_classes(object$original, as.matrix(newdata))
+    return(predictions)
+}
+
+
 
 

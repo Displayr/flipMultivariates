@@ -59,7 +59,7 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' If omitted, the \code{data} supplied to \code{RandomForest()} is used before any filtering.
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
-#' @param ... Additional arguments to pass to predict.randomForest.
+#' @param ... Additional arguments to pass to predict.RandomForest.
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export

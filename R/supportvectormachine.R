@@ -115,7 +115,7 @@ SupportVectorMachine <- function(formula,
     #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
 
     # 2. Saving descriptive information.
-    class(result) <- "SupportVectorMachine"
+    class(result) <- c("SupportVectorMachine", "MachineLearning", class(result))
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.observations <- n

@@ -187,7 +187,7 @@ LDA <- function(formula,
     ####################################################################
     # 1. Setting the class and call.
     result$original$call <- cl
-    class(result) <- "LDA"
+    class(result) <- c("LDA", "MachineLearning", class(result))
 
     # 2. Saving data - generally applicable.
     if (missing == "Imputation (replace missing values with estimates)")

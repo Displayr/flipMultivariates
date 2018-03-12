@@ -124,7 +124,7 @@ RandomForest <- function(formula,
     result$model <- data
 
     # 2. Saving descriptive information.
-    class(result) <- "RandomForest"
+    class(result) <- c("RandomForest", "MachineLearning", class(result))
     result$outcome.name <- outcome.name
     result$sample.description <- processed.data$description
     result$n.observations <- n
