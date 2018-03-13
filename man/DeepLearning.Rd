@@ -6,7 +6,7 @@
 \usage{
 DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  seed = 12321, show.labels = FALSE, ...)
+  seed = 12321, show.labels = FALSE, hidden.nodes, iterations = 100)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -35,7 +35,10 @@ name of a variable in \code{data}. It may not be an expression.}
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
 
-\item{...}{Other arguments to be supplied to \code{\link{svm}}.}
+\item{hidden.nodes}{Numeric; a \code{\link{vector}} specfy the number of hidden nodes in each
+hideen layer.}
+
+\item{iterations}{Integer; the number of iterations to train the network.}
 }
 \description{
 Fit a neural network model

@@ -18,7 +18,9 @@
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param ... Other arguments to be supplied to \code{\link{svm}}.
+#' @param hidden.nodes Numeric; a \code{\link{vector}} specfy the number of hidden nodes in each
+#' hideen layer.
+#' @param iterations Integer; the number of iterations to train the network.
 #' @export
 DeepLearning <- function(formula,
                                  data = NULL,
@@ -28,7 +30,8 @@ DeepLearning <- function(formula,
                                  missing  = "Exclude cases with missing data",
                                  seed = 12321,
                                  show.labels = FALSE,
-                                 ...)
+                                 hidden.nodes,
+                                 iterations = 100)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
@@ -80,16 +83,28 @@ DeepLearning <- function(formula,
     else
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
+    # X is a numeric matrix with dummy encoding of factors
+    X <- as.matrix(AsNumeric(.estimation.data.1[, -outcome.i]))
+
+    Y <- .estimation.data.1[[outcome.i]]
+    # Binary factor encoded as a vector of 0s and 1s, multiclass is dummy encoded
+    if (!numeric.outcome)
+        if (length(levels(Y)) > 2)
+            Y <- as.matrix(AsNumeric(.estimation.data.1[[outcome.i]], name = outcome.name))
+        else
+            Y <- as.numeric(Y) - 1
+
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-    result <- list(original = neuralNetwork(as.matrix(.estimation.data.1[, -outcome.i]),
-                                            .estimation.data.1[[outcome.i]],
-                                            treat.numeric.as.categorical = TRUE,
-                                            iterations = 10))
+    result <- list(original = neuralNetwork(X,
+                                            Y,
+                                            numeric.outcome = numeric.outcome,
+                                            hidden.nodes = hidden.nodes,
+                                            iterations = iterations))
     #result$original$call <- cl  original is a python object and cannot be modified
 
     ####################################################################
@@ -108,6 +123,7 @@ DeepLearning <- function(formula,
     result$n.observations <- n
     result$estimation.data <- .estimation.data
     result$numeric.outcome <- numeric.outcome
+    result$outcome.levels <- levels(result$estimation.data[result$outcome.name][[1]])
 
     # 3. Replacing names with labels
     result$show.labels <- show.labels
@@ -130,26 +146,15 @@ neuralNetwork <- function(X,
                           iterations = 100,
                           activation.functions = c('relu'),
                           dropout.rates = c(),
-                          cost.function = 'categorical_crossentropy',
                           optimizer = optimizer_rmsprop(),
                           metrics = c('accuracy'),
                           batch.size = 128,
-                          subset.values = c(),
-                          treat.numeric.as.categorical = FALSE) {
-    # verify the drop rates vector length is compatible with the number of hidden nodes
-    if (length(dropout.rates) >= length(hidden.nodes)) {
-        stop("Dropout length must be less than the number of layers");
-    }
-
-    # ensure if subset.values is set, it equals the length X
-    if (length(subset.values) > 0 && length(subset.values) != length(X)) {
-        stop("subset.values length must equal the length of X")
-    }
+                          numeric.outcome = TRUE) {
 
     model <- keras_model_sequential()
 
     # hidden layers
-    for (i in 1:(length(hidden.nodes) - 1)) {
+    for (i in 1:(length(hidden.nodes))) {
         if (i == 1) {
             # input layer
             model %>% layer_dense(units = hidden.nodes[1], activation = activation.functions[1], input_shape = ncol(X))
@@ -163,14 +168,26 @@ neuralNetwork <- function(X,
         }
     }
 
-    output_shape = 1
-    if (treat.numeric.as.categorical || class(Y) != "numeric") {
-        output_shape = length(unique(Y))
-        Y <- to_categorical(Y)
+    # defaults for numeric outcome
+    output.shape <- 1
+    output.activation <- NULL
+    cost.function <- "mse"
+
+    if (!numeric.outcome) {
+        #if ((n.classes <- length(unique(Y))) > 2) {
+        if (NCOL(Y) > 1) {
+            output.shape <- NCOL(Y)
+            #Y <- to_categorical(Y - 1)
+            output.activation <- "softmax"
+            cost.function <- "categorical_crossentropy"
+        } else {
+            output.activation <- "sigmoid"
+            cost.function <- "binary_crossentropy"
+        }
     }
 
     # output layer
-    model %>% layer_dense(units = output_shape, activation = 'softmax')
+    model %>% layer_dense(units = output.shape, activation = output.activation)
 
     model %>% compile(
         loss = cost.function,
@@ -180,34 +197,12 @@ neuralNetwork <- function(X,
 
     print(model)
 
-    if (length(subset.values) > 0) {
-        subset.values <- as.logical(subset.values)
-        x_train <- X[subset.values]
-        y_train <- Y[subset.values]
-        x_test <- X[!subset.values]
-        y_test <- Y[!subset.values]
-    } else {
-        x_train <- X
-        y_train <- Y
-        x_test <- X
-        y_test <- Y
-    }
-
     model %>% fit(
-        x_train,
-        y_train,
+        X,
+        Y,
         epochs = iterations,
         batch_size = batch.size
     )
-
-    #predictions <- predict_classes(model, X)
-    #fitted.weights <- get_weights(model)
-    #evaluation <- evaluate(model, x_test, y_test)
-
-    #output <- list(predictions = predictions,
-    #               fitted.weights = fitted.weights,
-    #               cost = evaluation$loss,
-    #               accuracy = evaluation$acc)
 
     return(model)
 }
@@ -282,16 +277,31 @@ print.DeepLearning <- function(x, ...)
 #' including those with missing data and for the fitted \code{data} before filtering in the case
 #' that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
 #' @param object A \code{DeepLearning} object.
-#' @param newdata Optionally, a data frame including the variables used to fit the model.
+#' @param new.data Optionally, a data frame including the variables used to fit the model.
 #' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.DeepLearning.
 #' @importFrom flipData CheckPredictionVariables
 #' @importFrom keras predict_classes
 #' @export
-predict.DeepLearning <- function(object, newdata = object$model, ...)
+predict.DeepLearning <- function(object, new.data = object$model, ...)
 {
-    newdata <- CheckPredictionVariables(object, newdata)
-    predictions <- predict_classes(object$original, as.matrix(newdata))
+    new.data <- CheckPredictionVariables(object, new.data)
+    X <- as.matrix(AsNumeric(new.data))
+
+    if (!object$numeric.outcome)
+    {
+        if (length(object$outcome.levels) > 2)
+            predictions <- predict_classes(object$original, X)
+        else
+            predictions <- predict(object$original, X) > 0.5
+
+        predictions <- factor(predictions + 1,
+                              levels = seq(length(object$outcome.levels)),
+                              labels = object$outcome.levels)
+    }
+    else
+        predictions <- predict(object$original, X)
+
     return(predictions)
 }
 

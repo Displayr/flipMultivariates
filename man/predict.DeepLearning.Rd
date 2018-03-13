@@ -4,12 +4,12 @@
 \alias{predict.DeepLearning}
 \title{\code{predict.DeepLearning}}
 \usage{
-\method{predict}{DeepLearning}(object, newdata = object$model, ...)
+\method{predict}{DeepLearning}(object, new.data = object$model, ...)
 }
 \arguments{
 \item{object}{A \code{DeepLearning} object.}
 
-\item{newdata}{Optionally, a data frame including the variables used to fit the model.
+\item{new.data}{Optionally, a data frame including the variables used to fit the model.
 If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.}
 
 \item{...}{Additional arguments to pass to predict.DeepLearning.}
