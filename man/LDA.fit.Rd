@@ -6,7 +6,7 @@
 \usage{
 LDA.fit(x, grouping, prior = proportions, tol = 1e-04,
   method = c("moment", "mle"), weights = NULL, CV = FALSE, nu = 5,
-  labels = NULL, ...)
+  labels = NULL, functions.output = FALSE, ...)
 }
 \arguments{
 \item{x}{A matrix or data frame of explanatory variables.}
@@ -20,17 +20,21 @@ based on the observed data.  If set to "constant" the prior will be set to
 be equal for each group (this is the default in SPSS).  Alternatively, a
 vector of probabilities can be provided.}
 
-\item{tol}{TODO}
+\item{tol}{Tolerance to decide if a matrix is singular.}
 
-\item{method}{TODO}
+\item{method}{The method used to estimate the variance; either \code{"moment"} for
+the method of moments or \code{"mle"} for maximum likelihood estimaion.}
 
-\item{weights}{TODO}
+\item{weights}{An optional vector of sampling weights.}
 
 \item{CV}{Not used.}
 
-\item{nu}{TODO}
+\item{nu}{the number of left singular vectors to be computed.}
 
 \item{labels}{The labels of the predictor variables.}
+
+\item{functions.output}{Logical; whether the discriminant functions are the
+required output of \code{\link{LDA}}.}
 
 \item{...}{Additional arguments.}
 }

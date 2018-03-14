@@ -23,7 +23,7 @@ in formula are preferentially to be taken.}
 used in the fitting process, or, the name of a variable in \code{data}. It
 may not be an expression.}
 
-\item{weights}{An optional vector of sampling weights, or, the name or, the
+\item{weights}{An optional vector of sampling weights, or the
 name of a variable in \code{data}. It may not be an expression.}
 
 \item{prior}{The assumed probability of each value of y occurring in the

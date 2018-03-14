@@ -9,7 +9,7 @@
 #' @param subset An optional vector specifying a subset of observations to be
 #'   used in the fitting process, or, the name of a variable in \code{data}. It
 #'   may not be an expression.
-#' @param weights An optional vector of sampling weights, or, the name or, the
+#' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
 #' @param missing How missing data is to be treated in the regression. Options:
 #'   \code{"Error if missing data"}
@@ -178,7 +178,8 @@ LDA <- function(formula,
                    prior = prior,
                    method = variance,
                    weights = .weights,
-                   labels = labels),
+                   labels = labels,
+                   functions.output = output == "Discriminant Functions"),
                    variable.labels = labels,
                    outcome.label = outcome.label,
                    predictors.label = predictors.label)
@@ -250,12 +251,15 @@ LDA <- function(formula,
 #'   based on the observed data.  If set to "constant" the prior will be set to
 #'   be equal for each group (this is the default in SPSS).  Alternatively, a
 #'   vector of probabilities can be provided.
-#' @param tol TODO
-#' @param method TODO
-#' @param weights TODO
+#' @param tol Tolerance to decide if a matrix is singular.
+#' @param method The method used to estimate the variance; either \code{"moment"} for
+#' the method of moments or \code{"mle"} for maximum likelihood estimaion.
+#' @param weights An optional vector of sampling weights.
 #' @param CV Not used.
-#' @param nu TODO
+#' @param nu the number of left singular vectors to be computed.
 #' @param labels The labels of the predictor variables.
+#' @param functions.output Logical; whether the discriminant functions are the
+#'   required output of \code{\link{LDA}}.
 #' @param ... Additional arguments.
 #' @details This is a wrapper for MASS::lda and MASS::qda.
 #'   #### Linear discriminant analysis #####
@@ -272,7 +276,8 @@ LDA.fit = function (x,
                    weights = NULL,
                    CV = FALSE,
                    nu = 5,
-                   labels = NULL, ...)
+                   labels = NULL,
+                   functions.output = FALSE, ...)
 {
     # Generalization of MASS::lda
     if (is.null(dim(x)))
@@ -396,7 +401,7 @@ LDA.fit = function (x,
         dimnames(group.means)[[2L]] <- colnames(x)
     }
 
-    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights)
+    discriminant.functions <- lda.functions(x, grouping, group.means, prior, weights, functions.output)
 
     cl <- match.call()
     cl[[1L]] <- as.name("lda")
@@ -409,7 +414,7 @@ LDA.fit = function (x,
 
 # Calculate linear discriminant functions
 # as per equation 4.10 in Hastie, Elements of Statistical Learning
-lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
+lda.functions <- function(x, groups, grp.means, prior, weights, show.labels, functions.output){
 
     gr <- length(unique(groups))
     num.var <- ncol(x)
@@ -426,7 +431,10 @@ lda.functions <- function(x, groups, grp.means, prior, weights, show.labels){
     iV <- try(solve(V), TRUE)
     if (inherits(iV, "try-error"))
     {
-        warning("Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables.")
+        message <- "Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables."
+        if (functions.output)
+            stop(message)
+        warning(message)
         return(NULL)
     }
 
