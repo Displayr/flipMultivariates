@@ -294,7 +294,7 @@ print.DeepLearning <- function(x, ...)
 predict.DeepLearning <- function(object, new.data = object$model, ...)
 {
     if (py_is_null_xptr(object$original))
-        x$original <- unserialize_model(object$original.serial)
+        object$original <- unserialize_model(object$original.serial)
 
     new.data <- CheckPredictionVariables(object, new.data)
     X <- as.matrix(AsNumeric(new.data))
