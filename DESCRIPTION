@@ -23,6 +23,7 @@ Imports:
     MASS,
     methods,
     randomForest,
+    reticulate,
     rhtmlHeatmap,
     rhtmlLabeledScatter,
     rhtmlMoonPlot,

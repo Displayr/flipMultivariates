@@ -100,11 +100,12 @@ DeepLearning <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-    result <- list(original = neuralNetwork(X,
-                                            Y,
-                                            numeric.outcome = numeric.outcome,
-                                            hidden.nodes = hidden.nodes,
-                                            iterations = iterations))
+    nn <- neuralNetwork(X,
+                        Y,
+                        numeric.outcome = numeric.outcome,
+                        hidden.nodes = hidden.nodes,
+                        iterations = iterations)
+    result <- list(original = nn$original, original.serial = nn$original.serial)
     #result$original$call <- cl  original is a python object and cannot be modified
 
     ####################################################################
@@ -139,7 +140,8 @@ DeepLearning <- function(formula,
 }
 
 
-#' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical compile fit
+#' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical
+#' @importFrom keras compile fit serialize_model
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
@@ -204,7 +206,7 @@ neuralNetwork <- function(X,
         batch_size = batch.size
     )
 
-    return(model)
+    return(list(original = model, original.serial = serialize_model(model)))
 }
 
 
@@ -212,10 +214,15 @@ neuralNetwork <- function(X,
 #' @importFrom flipData Observed
 #' @importFrom flipU IsCount
 #' @importFrom utils read.table
+#' @importFrom keras unserialize_model
+#' @importFrom reticulate py_is_null_xptr
 #' @export
 #' @method print DeepLearning
 print.DeepLearning <- function(x, ...)
 {
+    if (py_is_null_xptr(x$original))
+        x$original <- unserialize_model(x$original.serial)
+
     if (x$output == "Accuracy")
     {
         title <- paste0("Deep Learning: ", x$outcome.label)
@@ -281,10 +288,14 @@ print.DeepLearning <- function(x, ...)
 #' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.DeepLearning.
 #' @importFrom flipData CheckPredictionVariables
-#' @importFrom keras predict_classes
+#' @importFrom keras predict_classes unserialize_model
+#' @importFrom reticulate py_is_null_xptr
 #' @export
 predict.DeepLearning <- function(object, new.data = object$model, ...)
 {
+    if (py_is_null_xptr(object$original))
+        x$original <- unserialize_model(object$original.serial)
+
     new.data <- CheckPredictionVariables(object, new.data)
     X <- as.matrix(AsNumeric(new.data))
 
