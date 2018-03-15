@@ -11,7 +11,8 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
-#' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
+#' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"}, \code{"Cross Validation"}
+#'   or \code{"Network Layers"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
@@ -21,6 +22,7 @@
 #' @param hidden.nodes Numeric; a \code{\link{vector}} specfy the number of hidden nodes in each
 #' hideen layer.
 #' @param iterations Integer; the number of iterations to train the network.
+#' @importFrom stats sd
 #' @export
 DeepLearning <- function(formula,
                                  data = NULL,
@@ -78,21 +80,26 @@ DeepLearning <- function(formula,
     .weights <- processed.data$weights
 
     # Resampling to generate a weighted sample, if necessary.
+    # TODO use sample_weight from keras
     .estimation.data.1 <- if (is.null(weights))
         .estimation.data
     else
         AdjustDataToReflectWeights(.estimation.data, .weights)
 
-    # X is a numeric matrix with dummy encoding of factors
+    # X is a normalized numeric matrix with dummy encoding of factors
     X <- as.matrix(AsNumeric(.estimation.data.1[, -outcome.i]))
+    means <- apply(X, 2, mean)
+    stdevs <- apply(X, 2, sd)
+    X <- scale(X, center = means, scale = stdevs)
 
     Y <- .estimation.data.1[[outcome.i]]
     # Binary factor encoded as a vector of 0s and 1s, multiclass is dummy encoded
     if (!numeric.outcome)
         if (length(levels(Y)) > 2)
-            Y <- as.matrix(AsNumeric(.estimation.data.1[[outcome.i]], name = outcome.name))
+            Y <- AsNumeric(.estimation.data.1[[outcome.i]], name = outcome.name)
         else
             Y <- as.numeric(Y) - 1
+    Y <- as.matrix(Y)
 
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
@@ -105,7 +112,7 @@ DeepLearning <- function(formula,
                         numeric.outcome = numeric.outcome,
                         hidden.nodes = hidden.nodes,
                         iterations = iterations)
-    result <- list(original = nn$original, original.serial = nn$original.serial)
+    result <- list(original = nn$original, original.serial = nn$original.serial, cross.validation = nn$cross.validation)
     #result$original$call <- cl  original is a python object and cannot be modified
 
     ####################################################################
@@ -115,6 +122,8 @@ DeepLearning <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
+    result$training.means <- means
+    result$training.stdevs <- stdevs
     #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
 
     # 2. Saving descriptive information.
@@ -141,7 +150,7 @@ DeepLearning <- function(formula,
 
 
 #' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical
-#' @importFrom keras compile fit serialize_model
+#' @importFrom keras compile fit serialize_model callback_early_stopping use_session_with_seed
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
@@ -149,64 +158,97 @@ neuralNetwork <- function(X,
                           activation.functions = c('relu'),
                           dropout.rates = c(),
                           optimizer = optimizer_rmsprop(),
-                          metrics = c('accuracy'),
+                          metrics = c(),
                           batch.size = 128,
-                          numeric.outcome = TRUE) {
+                          numeric.outcome = TRUE,
+                          seed = 12321) {
 
-    model <- keras_model_sequential()
+    # TODO below disables GPU computations and CPU parallelization by default, so slows performance
+    use_session_with_seed(seed)
 
-    # hidden layers
-    for (i in 1:(length(hidden.nodes))) {
-        if (i == 1) {
-            # input layer
-            model %>% layer_dense(units = hidden.nodes[1], activation = activation.functions[1], input_shape = ncol(X))
-        } else {
-            activation = if (i <= length(activation.functions)) activation.functions[i] else activation.functions[length(activation.functions)]
-            model %>% layer_dense(units = hidden.nodes[i], activation = activation)
+    # create a function that build the model one later at a time.
+    # called for cross-validation then again for the final mode
+    build.model <- function() {
+        model <- keras_model_sequential()
+
+        # hidden layers
+        for (i in 1:(length(hidden.nodes))) {
+            if (i == 1) {
+                # input layer
+                model %>% layer_dense(units = hidden.nodes[1], activation = activation.functions[1], input_shape = ncol(X))
+            } else {
+                activation = if (i <= length(activation.functions)) activation.functions[i] else activation.functions[length(activation.functions)]
+                model %>% layer_dense(units = hidden.nodes[i], activation = activation)
+            }
+
+            if (i <= length(dropout.rates)) {
+                model %>% layer_dropout(rate = dropout.rates[i]);
+            }
         }
 
-        if (i <= length(dropout.rates)) {
-            model %>% layer_dropout(rate = dropout.rates[i]);
+        # defaults for numeric outcome
+        output.shape <- 1
+        output.activation <- NULL
+        cost.function <- "mse"
+        metrics <- c("mae")
+
+        if (!numeric.outcome) {
+            metrics <- c("accuracy")
+            if (NCOL(Y) > 1) {
+                output.shape <- NCOL(Y)
+                output.activation <- "softmax"
+                cost.function <- "categorical_crossentropy"
+            } else {
+                output.activation <- "sigmoid"
+                cost.function <- "binary_crossentropy"
+            }
         }
+
+        # output layer
+        model %>% layer_dense(units = output.shape, activation = output.activation)
+
+        model %>% compile(
+            loss = cost.function,
+            optimizer = optimizer,
+            metrics = metrics
+        )
+        return(model)
     }
 
-    # defaults for numeric outcome
-    output.shape <- 1
-    output.activation <- NULL
-    cost.function <- "mse"
+    # randomly shuffle the data
+    shuffle <- sample(NROW(X))
+    X <- X[shuffle, ]
+    Y <- Y[shuffle, ]
 
-    if (!numeric.outcome) {
-        #if ((n.classes <- length(unique(Y))) > 2) {
-        if (NCOL(Y) > 1) {
-            output.shape <- NCOL(Y)
-            #Y <- to_categorical(Y - 1)
-            output.activation <- "softmax"
-            cost.function <- "categorical_crossentropy"
-        } else {
-            output.activation <- "sigmoid"
-            cost.function <- "binary_crossentropy"
-        }
-    }
-
-    # output layer
-    model %>% layer_dense(units = output.shape, activation = output.activation)
-
-    model %>% compile(
-        loss = cost.function,
-        optimizer = optimizer,
-        metrics = metrics
-    )
-
-    print(model)
-
-    model %>% fit(
+    # train until no improvement in validation loss for 3 iterations
+    model <- build.model()
+    history <- model %>% fit(
         X,
         Y,
         epochs = iterations,
+        batch_size = batch.size,
+        validation_split = 0.3,   # last 30% of samples are used for validation
+        callbacks = c(callback_early_stopping(patience = 3))
+    )
+
+    if ((optimal.iterations <- length(history$metrics$val_loss)) == iterations)
+        warning("Cross valiidation loss is still improving after maximum number of iterations.",
+                " Model may not have converged, consider increasing the number of iterations.")
+    else
+        optimal.iterations <- optimal.iterations - 3
+
+    # retrain on all data for optimal number of iterations
+    model <- build.model()
+    model %>% fit(
+        X,
+        Y,
+        epochs = optimal.iterations,
         batch_size = batch.size
     )
 
-    return(list(original = model, original.serial = serialize_model(model)))
+    return(list(original = model,
+                original.serial = serialize_model(model),
+                cross.validation = history))
 }
 
 
@@ -216,6 +258,7 @@ neuralNetwork <- function(X,
 #' @importFrom utils read.table
 #' @importFrom keras unserialize_model
 #' @importFrom reticulate py_is_null_xptr
+#' @importFrom graphics plot
 #' @export
 #' @method print DeepLearning
 print.DeepLearning <- function(x, ...)
@@ -269,6 +312,10 @@ print.DeepLearning <- function(x, ...)
     {
         print(x$confusion)
     }
+    else if (x$output == "Cross Validation")
+    {
+        plot(x$cross.validation)
+    }
     else
     {
         print(x$original)
@@ -298,6 +345,7 @@ predict.DeepLearning <- function(object, new.data = object$model, ...)
 
     new.data <- CheckPredictionVariables(object, new.data)
     X <- as.matrix(AsNumeric(new.data))
+    X <- scale(X, center = object$training.means, scale = object$training.stdevs)
 
     if (!object$numeric.outcome)
     {
