@@ -251,7 +251,7 @@ neuralNetwork <- function(X,
     )
 
     if ((optimal.iterations <- length(history$metrics$val_loss)) == max.iterations)
-        warning("Cross valiidation loss is still improving after maximum number of iterations.",
+        warning("Cross valiidation loss is still decreasing after maximum number of iterations.",
                 " Model may not have converged, consider increasing the maximum number of iterations.")
     else
         optimal.iterations <- optimal.iterations - 3
@@ -334,7 +334,7 @@ print.DeepLearning <- function(x, ...)
     }
     else if (x$output == "Cross Validation")
     {
-        plot(x$cross.validation)
+        print(plot(x$cross.validation))
     }
     else
     {
