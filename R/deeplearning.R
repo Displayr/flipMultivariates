@@ -11,17 +11,27 @@
 #'   may not be an expression.
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
+#' @param normalize Logical; if \code{TRUE} all predictor variables are normalized to have zero mean
+#'   and unit variance.
 #' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"}, \code{"Cross Validation"}
 #'   or \code{"Network Layers"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"},
+#'   \code{"Exclude cases with missing data"}, or
+#'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param hidden.nodes Numeric; a \code{\link{vector}} specfy the number of hidden nodes in each
-#' hideen layer.
-#' @param iterations Integer; the number of iterations to train the network.
+#' @param hidden.nodes Numeric; a \code{\link{vector}} that specifies the number of hidden nodes in each
+#' hidden layer (and hence implicitly the number of hidden layers).
+#' @param max.iterations Integer; the maximum number of iterations for which to train the network.
+#'
+#' @details Categorical predictor variables are converted to binary (dummy) variables.
+#' @details The model is trained first using a random 70% of the data (after any subset) while measuring the
+#' cross-validation loss on the remaining 30% of the data. Training is stopped at the sooner of
+#' \code{max.iterations} and 3 iterations of no improvement in cross-validation loss. The final model
+#' is then retrained on all data (after any \code{"subset"}).
+#'
 #' @importFrom stats sd
 #' @export
 DeepLearning <- function(formula,
@@ -30,17 +40,19 @@ DeepLearning <- function(formula,
                                  weights = NULL,
                                  output = "Accuracy",
                                  missing  = "Exclude cases with missing data",
+                                 normalize = TRUE,
                                  seed = 12321,
                                  show.labels = FALSE,
                                  hidden.nodes,
-                                 iterations = 100)
+                                 max.iterations = 100)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
     cl <- match.call()
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE) # We don't know whether subset is a variable in the environment or in data.
     subset <- eval(substitute(subset), data, parent.frame())
     if (!is.null(subset))
     {
@@ -49,10 +61,17 @@ DeepLearning <- function(formula,
         if (is.null(attr(subset, "name")))
             attr(subset, "name") <- subset.description
     }
-    if(!is.null(weights))
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- deparse(substitute(weights))
+
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
     weights <- eval(substitute(weights), data, parent.frame())
+    if(!is.null(weights))
+    {
+        if (is.null(weights.description) | (class(weights.description) == "try-error") | !is.null(attr(weights, "name")))
+            subset.description <- Labels(weights)
+        if (is.null(attr(weights, "name")))
+            attr(weights, "name") <- weights.description
+    }
+
     data <- GetData(input.formula, data, auxiliary.data = NULL)
     row.names <- rownames(data)
 
@@ -62,8 +81,7 @@ DeepLearning <- function(formula,
     numeric.outcome <- !is.factor(outcome.variable)
     variable.labels <- if (show.labels) Labels(data) else names(data)
     outcome.label <- variable.labels[outcome.i]
-    #if (outcome.label == "data[, outcome.name]")
-    #    outcome.label <- outcome.name
+
     if (!is.null(weights) & length(weights) != nrow(data))
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
@@ -77,26 +95,24 @@ DeepLearning <- function(formula,
     n <- nrow(.estimation.data)
     if (n < ncol(.estimation.data) + 1)
         stop("The sample size is too small for it to be possible to conduct the analysis.")
+
+    # No need to resample weights because keras uses sample_weight for each sample's loss
     .weights <- processed.data$weights
 
-    # Resampling to generate a weighted sample, if necessary.
-    # TODO use sample_weight from keras
-    .estimation.data.1 <- if (is.null(weights))
-        .estimation.data
-    else
-        AdjustDataToReflectWeights(.estimation.data, .weights)
-
     # X is a normalized numeric matrix with dummy encoding of factors
-    X <- as.matrix(AsNumeric(.estimation.data.1[, -outcome.i]))
-    means <- apply(X, 2, mean)
-    stdevs <- apply(X, 2, sd)
-    X <- scale(X, center = means, scale = stdevs)
+    X <- as.matrix(AsNumeric(.estimation.data[, -outcome.i]))
+    if (normalize)
+    {
+        means <- apply(X, 2, mean)
+        stdevs <- apply(X, 2, sd)
+        X[, stdevs != 0] <- scale(X[, stdevs != 0], center = means[stdevs != 0], scale = stdevs[stdevs != 0])
+    }
 
-    Y <- .estimation.data.1[[outcome.i]]
+    Y <- .estimation.data[[outcome.i]]
     # Binary factor encoded as a vector of 0s and 1s, multiclass is dummy encoded
     if (!numeric.outcome)
         if (length(levels(Y)) > 2)
-            Y <- AsNumeric(.estimation.data.1[[outcome.i]], name = outcome.name)
+            Y <- AsNumeric(.estimation.data[[outcome.i]], name = outcome.name)
         else
             Y <- as.numeric(Y) - 1
     Y <- as.matrix(Y)
@@ -111,9 +127,9 @@ DeepLearning <- function(formula,
                         Y,
                         numeric.outcome = numeric.outcome,
                         hidden.nodes = hidden.nodes,
-                        iterations = iterations)
+                        max.iterations = max.iterations,
+                        weights = .weights)
     result <- list(original = nn$original, original.serial = nn$original.serial, cross.validation = nn$cross.validation)
-    #result$original$call <- cl  original is a python object and cannot be modified
 
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
@@ -122,9 +138,9 @@ DeepLearning <- function(formula,
     result$subset <- subset <- row.names %in% rownames(.estimation.data)
     result$weights <- unfiltered.weights
     result$model <- data
-    result$training.means <- means
-    result$training.stdevs <- stdevs
-    #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
+    result$normalize <- normalize
+    result$training.means <- if (normalize) means else NULL
+    result$training.stdevs <- if (normalize) stdevs else NULL
 
     # 2. Saving descriptive information.
     class(result) <- c(class(result), "DeepLearning", "MachineLearning")
@@ -154,14 +170,15 @@ DeepLearning <- function(formula,
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
-                          iterations = 100,
+                          max.iterations = 100,
                           activation.functions = c('relu'),
                           dropout.rates = c(),
                           optimizer = optimizer_rmsprop(),
                           metrics = c(),
                           batch.size = 128,
                           numeric.outcome = TRUE,
-                          seed = 12321) {
+                          seed = 12321,
+                          weights = NULL) {
 
     # TODO below disables GPU computations and CPU parallelization by default, so slows performance
     use_session_with_seed(seed)
@@ -225,15 +242,17 @@ neuralNetwork <- function(X,
     history <- model %>% fit(
         X,
         Y,
-        epochs = iterations,
+        epochs = max.iterations,
         batch_size = batch.size,
         validation_split = 0.3,   # last 30% of samples are used for validation
-        callbacks = c(callback_early_stopping(patience = 3))
+        sample_weight = weights,
+        callbacks = c(callback_early_stopping(patience = 3)),
+        verbose = 0
     )
 
-    if ((optimal.iterations <- length(history$metrics$val_loss)) == iterations)
+    if ((optimal.iterations <- length(history$metrics$val_loss)) == max.iterations)
         warning("Cross valiidation loss is still improving after maximum number of iterations.",
-                " Model may not have converged, consider increasing the number of iterations.")
+                " Model may not have converged, consider increasing the maximum number of iterations.")
     else
         optimal.iterations <- optimal.iterations - 3
 
@@ -243,7 +262,8 @@ neuralNetwork <- function(X,
         X,
         Y,
         epochs = optimal.iterations,
-        batch_size = batch.size
+        batch_size = batch.size,
+        verbose = 0
     )
 
     return(list(original = model,
@@ -345,7 +365,11 @@ predict.DeepLearning <- function(object, new.data = object$model, ...)
 
     new.data <- CheckPredictionVariables(object, new.data)
     X <- as.matrix(AsNumeric(new.data))
-    X <- scale(X, center = object$training.means, scale = object$training.stdevs)
+    constants <- object$training.stdevs == 0
+    if (object$normalize)
+        X[, !constants] <- scale(X[, !constants],
+                                center = object$training.means[!constants],
+                                scale = object$training.stdevs[!constants])
 
     if (!object$numeric.outcome)
     {
@@ -362,6 +386,39 @@ predict.DeepLearning <- function(object, new.data = object$model, ...)
         predictions <- predict(object$original, X)
 
     return(predictions)
+}
+
+
+#' \code{Probabilities.DeepLearning}
+#'
+#' Estimates probabilities of class membership for the entire sample passed into the original
+#' analysis (including missing and filtered values).
+#' @param object A \code{DeepLearning} object.
+#' @importFrom flipData CheckPredictionVariables
+#' @importFrom keras predict_proba unserialize_model
+#' @importFrom reticulate py_is_null_xptr
+#' @export
+Probabilities.DeepLearning <- function(object)
+{
+    if(object$numeric.outcome)
+        stop("Probabilities are only applicable to models with categorical outcome variables.")
+
+    if (py_is_null_xptr(object$original))
+        object$original <- unserialize_model(object$original.serial)
+
+    data <- CheckPredictionVariables(object, object$model)
+    X <- as.matrix(AsNumeric(data))
+    constants <- object$training.stdevs == 0
+    if (object$normalize)
+        X[, !constants] <- scale(X[, !constants],
+                                 center = object$training.means[!constants],
+                                 scale = object$training.stdevs[!constants])
+
+    probabilities <- predict_proba(object$original, X)
+    if (length(object$outcome.levels) == 2)
+        probabilities <- cbind(1 - probabilities,probabilities)
+    colnames(probabilities) <- object$outcome.levels
+    return(probabilities)
 }
 
 

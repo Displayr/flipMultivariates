@@ -6,7 +6,8 @@
 \usage{
 DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  seed = 12321, show.labels = FALSE, hidden.nodes, iterations = 100)
+  normalize = TRUE, seed = 12321, show.labels = FALSE, hidden.nodes,
+  max.iterations = 100)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -29,18 +30,30 @@ or \code{"Network Layers"}.}
 
 \item{missing}{How missing data is to be treated. Options:
 \code{"Error if missing data"},
-\code{"Exclude cases with missing data"},}
+\code{"Exclude cases with missing data"}, or
+\code{"Imputation (replace missing values with estimates)"}.}
+
+\item{normalize}{Logical; if \code{TRUE} all predictor variables are normalized to have zero mean
+and unit variance.}
 
 \item{seed}{The random number seed used in imputation.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
 
-\item{hidden.nodes}{Numeric; a \code{\link{vector}} specfy the number of hidden nodes in each
-hideen layer.}
+\item{hidden.nodes}{Numeric; a \code{\link{vector}} that specifies the number of hidden nodes in each
+hidden layer (and hence implicitly the number of hidden layers).}
 
-\item{iterations}{Integer; the number of iterations to train the network.}
+\item{max.iterations}{Integer; the maximum number of iterations for which to train the network.}
 }
 \description{
 Fit a neural network model
+}
+\details{
+Categorical predictor variables are converted to binary (dummy) variables.
+
+The model is trained first using a random 70% of the data (after any subset) while measuring the
+cross-validation loss on the remaining 30% of the data. Training is stopped at the sooner of
+\code{max.iterations} and 3 iterations of no improvement in cross-validation loss. The final model
+is then retrained on all data (after any \code{"subset"}).
 }

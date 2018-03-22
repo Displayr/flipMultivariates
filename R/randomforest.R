@@ -113,7 +113,7 @@ RandomForest <- function(formula,
     ####################################################################
     set.seed(seed)
     result <- list(original = suppressWarnings(randomForest(input.formula,
-                                           importance = TRUE, data = .estimation.data.1)))
+                                           importance = TRUE, data = .estimation.data.1, ...)))
     result$original$call <- cl
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
