@@ -111,7 +111,7 @@ DeepLearning <- function(formula,
     Y <- .estimation.data[[outcome.i]]
     # Binary factor encoded as a vector of 0s and 1s, multiclass is dummy encoded
     if (!numeric.outcome)
-        if (length(levels(Y)) > 2)
+        if (nlevels(Y) > 2)
             Y <- AsNumeric(.estimation.data[[outcome.i]], name = outcome.name)
         else
             Y <- as.numeric(Y) - 1
