@@ -77,7 +77,7 @@ DeepLearning <- function(formula,
     if (!is.numeric(hidden.nodes))
     {
         hidden.nodes <- ConvertCommaSeparatedStringToVector(hidden.nodes)
-        hidden.nodes <- as.integer(hidden.nodes)
+        hidden.nodes <- suppressWarnings(as.integer(hidden.nodes))
         if (any(is.na(hidden.nodes)) || any(hidden.nodes <= 0))
             stop("Nodes of hidden layers must be specified as comma separated positive integers.")
     }
