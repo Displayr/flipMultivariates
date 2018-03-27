@@ -53,3 +53,12 @@ test_that("Deep Learning: predictions and probabilities",
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
               expect_error(suppressWarnings(flipData::Probabilities(dl)), NA)
 })
+
+test_that("Deep Learning: errors",{
+
+    expect_error(DeepLearning(income ~ ., data = adult.2000,
+                                                     hidden.nodes = "10, hello"), "Nodes of hidden layers.")
+    expect_error(DeepLearning(income ~ ., data = adult.2000,
+                                                     hidden.nodes = "20, -5"), "Nodes of hidden layers.")
+})
+

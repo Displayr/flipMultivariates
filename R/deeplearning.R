@@ -22,8 +22,9 @@
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param hidden.nodes Numeric; a \code{\link{vector}} that specifies the number of hidden nodes in each
-#' hidden layer (and hence implicitly the number of hidden layers).
+#' @param hidden.nodes A \code{\link{vector}} that specifies the number of hidden nodes in each
+#' hidden layer (and hence implicitly the number of hidden layers). Alternatively, a comma-delimited
+#' string of integers may be provided.
 #' @param max.epochs Integer; the maximum number of epochs for which to train the network.
 #'
 #' @details Categorical predictor variables are converted to binary (dummy) variables.
@@ -33,6 +34,7 @@
 #' is then retrained on all data (after any \code{"subset"}).
 #'
 #' @importFrom stats sd
+#' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
 DeepLearning <- function(formula,
                                  data = NULL,
@@ -43,7 +45,7 @@ DeepLearning <- function(formula,
                                  normalize = TRUE,
                                  seed = 12321,
                                  show.labels = FALSE,
-                                 hidden.nodes,
+                                 hidden.nodes = 10,
                                  max.epochs = 100)
 {
     ####################################################################
@@ -70,6 +72,14 @@ DeepLearning <- function(formula,
             subset.description <- Labels(weights)
         if (is.null(attr(weights, "name")))
             attr(weights, "name") <- weights.description
+    }
+
+    if (!is.numeric(hidden.nodes))
+    {
+        hidden.nodes <- ConvertCommaSeparatedStringToVector(hidden.nodes)
+        hidden.nodes <- as.integer(hidden.nodes)
+        if (any(is.na(hidden.nodes)) || any(hidden.nodes <= 0))
+            stop("Nodes of hidden layers must be specified as comma separated positive integers.")
     }
 
     data <- GetData(input.formula, data, auxiliary.data = NULL)

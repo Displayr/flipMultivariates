@@ -6,8 +6,8 @@
 \usage{
 DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Accuracy", missing = "Exclude cases with missing data",
-  normalize = TRUE, seed = 12321, show.labels = FALSE, hidden.nodes,
-  max.epochs = 100)
+  normalize = TRUE, seed = 12321, show.labels = FALSE,
+  hidden.nodes = 10, max.epochs = 100)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -41,8 +41,9 @@ and unit variance.}
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
 
-\item{hidden.nodes}{Numeric; a \code{\link{vector}} that specifies the number of hidden nodes in each
-hidden layer (and hence implicitly the number of hidden layers).}
+\item{hidden.nodes}{A \code{\link{vector}} that specifies the number of hidden nodes in each
+hidden layer (and hence implicitly the number of hidden layers). Alternatively, a comma-delimited
+string of integers may be provided.}
 
 \item{max.epochs}{Integer; the maximum number of epochs for which to train the network.}
 }
