@@ -11,45 +11,45 @@ test_that("Print Deep Learning: outcome types", {
 
     # binary outcome, confusion output
     dl <- suppressWarnings(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
-                       hidden.nodes = 15, max.iterations = 10, output = "Prediction-Accuracy Table"))
+                       hidden.nodes = 15, max.epochs = 10, output = "Prediction-Accuracy Table"))
     expect_error(capture.output(print(dl)), NA)
 
     # multiclass outcoume, xval output, 2 layer
     dl <- suppressWarnings(DeepLearning(workclass ~ occupation + relationship + race + sex + hrs_per_week, data = adult.2000,
-                        hidden.nodes = c(20, 10), max.iterations = 10, output = "Cross Validation"))
+                        hidden.nodes = c(20, 10), max.epochs = 10, output = "Cross Validation"))
     expect_error(capture.output(print(dl)), NA)
 
     # numeric outcome, accuracy output, no normalization
     dl <- suppressWarnings(DeepLearning(hrs_per_week ~ occupation + relationship + race + workclass + sex, data = adult.2000,
-                       hidden.nodes = 8, max.iterations = 10, output = "Accuracy", normalize = FALSE))
+                       hidden.nodes = 8, max.epochs = 10, output = "Accuracy", normalize = FALSE))
     expect_error(capture.output(print(dl)), NA)
 
     # imbalanced multiclass (90% of country is USA), layers output, 3 layer
     dl <- suppressWarnings(DeepLearning(country ~ ., data = adult.2000,
-                        hidden.nodes = c(50, 35, 20), max.iterations = 10, output = "Network Layers"))
+                        hidden.nodes = c(50, 35, 20), max.epochs = 10, output = "Network Layers"))
     expect_error(capture.output(print(dl)), NA)
 })
 
 test_that("Deep Learning: Weights and Filters",{
 
     expect_error(dl <- suppressWarnings(DeepLearning(hrs_per_week ~ ., data = adult.2000,
-                                    hidden.nodes = 15, max.iterations = 10, subset = subset)), NA)
+                                    hidden.nodes = 15, max.epochs = 10, subset = subset)), NA)
     expect_error(dl <- suppressWarnings(DeepLearning(income ~ ., data = adult.2000,
-                                    hidden.nodes = 15, max.iterations = 10, weights = wgt)), NA)
+                                    hidden.nodes = 15, max.epochs = 10, weights = wgt)), NA)
     expect_error(dl <- suppressWarnings(DeepLearning(occupation ~ ., data = adult.2000,
-                                    hidden.nodes = 15, max.iterations = 10, subset = subset, weights = wgt)), NA)
+                                    hidden.nodes = 15, max.epochs = 10, subset = subset, weights = wgt)), NA)
 })
 
 
 test_that("Deep Learning: predictions and probabilities",
           {
               dl <- suppressWarnings(DeepLearning(age ~ ., data = adult.2000,
-                                              hidden.nodes = 20, max.iterations = 10, subset = subset, weights = wgt))
+                                              hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt))
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
               expect_error(flipData::Probabilities(dl), "Probabilities are only applicable to models with categorical outcome variables.")
 
               dl <- suppressWarnings(DeepLearning(marital ~ ., data = adult.2000,
-                                 hidden.nodes = 20, max.iterations = 10, subset = subset, weights = wgt))
+                                 hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt))
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
               expect_error(suppressWarnings(flipData::Probabilities(dl)), NA)
 })

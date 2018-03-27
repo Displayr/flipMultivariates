@@ -24,12 +24,12 @@
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param hidden.nodes Numeric; a \code{\link{vector}} that specifies the number of hidden nodes in each
 #' hidden layer (and hence implicitly the number of hidden layers).
-#' @param max.iterations Integer; the maximum number of iterations for which to train the network.
+#' @param max.epochs Integer; the maximum number of epochs for which to train the network.
 #'
 #' @details Categorical predictor variables are converted to binary (dummy) variables.
 #' @details The model is trained first using a random 70% of the data (after any subset) while measuring the
 #' cross-validation loss on the remaining 30% of the data. Training is stopped at the sooner of
-#' \code{max.iterations} and 3 iterations of no improvement in cross-validation loss. The final model
+#' \code{max.epochs} and 3 epochs of no improvement in cross-validation loss. The final model
 #' is then retrained on all data (after any \code{"subset"}).
 #'
 #' @importFrom stats sd
@@ -44,7 +44,7 @@ DeepLearning <- function(formula,
                                  seed = 12321,
                                  show.labels = FALSE,
                                  hidden.nodes,
-                                 max.iterations = 100)
+                                 max.epochs = 100)
 {
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
@@ -127,7 +127,7 @@ DeepLearning <- function(formula,
                         Y,
                         numeric.outcome = numeric.outcome,
                         hidden.nodes = hidden.nodes,
-                        max.iterations = max.iterations,
+                        max.epochs = max.epochs,
                         weights = .weights)
     result <- list(original = nn$original, original.serial = nn$original.serial, cross.validation = nn$cross.validation)
 
@@ -170,7 +170,7 @@ DeepLearning <- function(formula,
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
-                          max.iterations = 100,
+                          max.epochs = 100,
                           activation.functions = c('relu'),
                           dropout.rates = c(),
                           optimizer = optimizer_rmsprop(),
@@ -237,12 +237,12 @@ neuralNetwork <- function(X,
     X <- X[shuffle, ]
     Y <- Y[shuffle, ]
 
-    # train until no improvement in validation loss for 3 iterations
+    # train until no improvement in validation loss for 3 epochs
     model <- build.model()
     history <- model %>% fit(
         X,
         Y,
-        epochs = max.iterations,
+        epochs = max.epochs,
         batch_size = batch.size,
         validation_split = 0.3,   # last 30% of samples are used for validation
         sample_weight = weights,
@@ -250,18 +250,18 @@ neuralNetwork <- function(X,
         verbose = 0
     )
 
-    if ((optimal.iterations <- length(history$metrics$val_loss)) == max.iterations)
-        warning("Cross valiidation loss is still decreasing after maximum number of iterations.",
-                " Model may not have converged, consider increasing the maximum number of iterations.")
+    if ((optimal.epochs <- length(history$metrics$val_loss)) == max.epochs)
+        warning("Cross valiidation loss is still decreasing after maximum number of epochs.",
+                " Model may not have converged, consider increasing the maximum number of epochs.")
     else
-        optimal.iterations <- optimal.iterations - 3
+        optimal.epochs <- optimal.epochs - 3
 
-    # retrain on all data for optimal number of iterations
+    # retrain on all data for optimal number of epochs
     model <- build.model()
     model %>% fit(
         X,
         Y,
-        epochs = optimal.iterations,
+        epochs = optimal.epochs,
         batch_size = batch.size,
         verbose = 0
     )
