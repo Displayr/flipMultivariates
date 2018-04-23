@@ -28,6 +28,12 @@ test_that("Print Deep Learning: outcome types", {
     dl <- suppressWarnings(DeepLearning(country ~ ., data = adult.2000,
                         hidden.nodes = c(50, 35, 20), max.epochs = 10, output = "Network Layers"))
     expect_error(capture.output(print(dl)), NA)
+
+    # single predictor
+    dl <- suppressWarnings(DeepLearning(occupation ~ age, data = adult.2000,
+                                        hidden.nodes = 5, max.epochs = 10, output = "Accuracy"))
+    expect_error(capture.output(print(dl)), NA)
+
 })
 
 test_that("Deep Learning: Weights and Filters",{

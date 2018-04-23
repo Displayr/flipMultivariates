@@ -244,7 +244,7 @@ neuralNetwork <- function(X,
 
     # randomly shuffle the data
     shuffle <- sample(NROW(X))
-    X <- X[shuffle, ]
+    X <- X[shuffle, , drop = FALSE]
     Y <- Y[shuffle, ]
 
     # train until no improvement in validation loss for 3 epochs
