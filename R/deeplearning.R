@@ -190,10 +190,11 @@ neuralNetwork <- function(X,
                           seed = 12321,
                           weights = NULL) {
 
-    # TODO below disables GPU computations and CPU parallelization by default, so slows performance
+    # Note - below disables GPU computations and CPU parallelization by default, so slows performance
+    # This should be removed when we require more speed
     use_session_with_seed(seed)
 
-    # create a function that build the model one later at a time.
+    # create a function that builds the model one later at a time.
     # called for cross-validation then again for the final mode
     build.model <- function() {
         model <- keras_model_sequential()
@@ -259,6 +260,7 @@ neuralNetwork <- function(X,
         callbacks = c(callback_early_stopping(patience = 3)),
         verbose = 0
     )
+    history$metrics <- history$metrics[sort(names(history$metrics))] # fix random ordering (on server, not in R studio)
 
     if ((optimal.epochs <- length(history$metrics$val_loss)) == max.epochs)
         warning("Cross valiidation loss is still decreasing after maximum number of epochs.",
