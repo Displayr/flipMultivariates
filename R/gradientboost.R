@@ -168,7 +168,7 @@ GradientBoost <- function(formula,
 
         search.results <- apply(search.grid, 1, cross.validate, params.default, seed)
 
-        search.results <- do.call(rbind.data.frame, search.results)
+        search.results <- do.call(rbind.data.frame, c(search.results, stringsAsFactors = FALSE))
         best.index <- which.min(search.results[, "min.error"])
         best.error.rounds <- search.results[best.index, "rounds"]
         best.param <- search.results[best.index, -(1:2)]
