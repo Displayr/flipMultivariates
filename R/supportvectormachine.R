@@ -22,12 +22,7 @@
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param ... Other arguments to be supplied to \code{\link{svm}}.
-#' @importFrom flipData GetData CleanSubset CleanWeights EstimationData DataFormula
-#' @importFrom stats pnorm
-#' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName
 #' @importFrom e1071 svm
-#' @importFrom flipTransformations AdjustDataToReflectWeights
 #' @export
 SupportVectorMachine <- function(formula,
                                  data = NULL,
@@ -42,58 +37,27 @@ SupportVectorMachine <- function(formula,
                                  ...)
 {
     ####################################################################
-    ##### Reading in the data and doing some basic tidying        ######
+    ##### Processing specific to this function                    ######
     ####################################################################
-    cl <- match.call()
-    if(!missing(statistical.assumptions))
-        stop("'statistical.assumptions' objects are not yet supported.")
     if (cost <= 0)
         stop("cost must be positive")
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+
+    ####################################################################
+    ##### Reading in the data and doing some basic tidying        ######
+    ####################################################################
+
+    # Identify whether subset and weights are variables in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE)
     subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset))
-    {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
-            subset.description <- Labels(subset)
-        if (is.null(attr(subset, "name")))
-            attr(subset, "name") <- subset.description
-    }
-    if(!is.null(weights))
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- deparse(substitute(weights))
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
     weights <- eval(substitute(weights), data, parent.frame())
-    data <- GetData(input.formula, data, auxiliary.data = NULL)
-    row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula, data)
-    outcome.i <- match(outcome.name, names(data))
-    outcome.variable <- data[, outcome.i]
-    numeric.outcome <- !is.factor(outcome.variable)
-    variable.labels <- Labels(data)
-    outcome.label <- variable.labels[outcome.i]
-    if (outcome.label == "data[, outcome.name]")
-        outcome.label <- outcome.name
-    if (!is.null(weights) & length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
 
-    # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
-    .estimation.data <- processed.data$estimation.data
-    n.predictors <- ncol(.estimation.data)
-    n <- nrow(.estimation.data)
-    if (n < ncol(.estimation.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
-    .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula, data)
+    prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
+                                                weights, weights.description, missing, seed)
 
-    # Resampling to generate a weighted sample, if necessary.
-    .estimation.data.1 <- if (is.null(weights))
-        .estimation.data
-    else
-        AdjustDataToReflectWeights(.estimation.data, .weights)
+    unweighted.training.data <- prepared.data$unweighted.training.data
+    weighted.training.data <- prepared.data$weighted.training.data
+    data.formula <- prepared.data$data.formula
 
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
@@ -101,43 +65,45 @@ SupportVectorMachine <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
-    result <- list(original = svm(.formula, data = .estimation.data.1,
+    result <- list(original = svm(data.formula, data = weighted.training.data,
                                   probability = TRUE, cost = cost, ...))
-    result$original$call <- cl
+    result$original$call <- match.call()
 
     ####################################################################
-    ##### Saving results, parameters, and tidying up               #####
+    ##### Saving results, parameters and tidying up                #####
     ####################################################################
     # 1. Saving data.
-    result$subset <- subset <- row.names %in% rownames(.estimation.data)
-    result$weights <- unfiltered.weights
+    result$subset <- subset <- prepared.data$row.names %in% rownames(unweighted.training.data)
+    result$weights <- prepared.data$unfiltered.weights
     result$model <- data
-    #result$post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
 
     # 2. Saving descriptive information.
     class(result) <- c("SupportVectorMachine", "MachineLearning", class(result))
-    result$outcome.name <- outcome.name
-    result$sample.description <- processed.data$description
-    result$n.observations <- n
-    result$estimation.data <- .estimation.data
-    result$numeric.outcome <- numeric.outcome
+    result$outcome.name <- prepared.data$outcome.name
+    result$sample.description <- prepared.data$sample.description
+    result$n.observations <- prepared.data$n
+    result$estimation.data <- unweighted.training.data
+    result$numeric.outcome <- prepared.data$numeric.outcome
 
     # 3. Replacing names with labels
     if (result$show.labels <- show.labels)
     {
-        result$outcome.label <- outcome.label
-        result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
+        result$outcome.label <- prepared.data$outcome.label
+        result$variable.labels <- prepared.data$variable.labels[-prepared.data$outcome.i]
     }
     else
-        result$outcome.label <- outcome.name
+        result$outcome.label <- result$outcome.name
 
     # 4. Saving parameters and confusion matrix
-    result$formula <- input.formula
+    result$formula <- prepared.data$input.formula
     result$output <- output
     result$missing <- missing
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
     result
 }
+
+
+
 
 #' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
 #' @importFrom flipData Observed
