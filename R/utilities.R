@@ -1,27 +1,11 @@
-rowNamesOrNames <- function(x)
-{
-    if (is.matrix(x))
-        return(rownames(x))
-    names(x)
-}
 
-#' @importFrom flipFormat FormatAsPercent
-correctPredictionsText <- function(overall.accuracy, group.labels, group.accuracies, digits = 4, out.of.bag = FALSE)
-{
-    prefix <- if (out.of.bag)
-        "Correct predictions (based on out-of-bag sample): "
-    else
-        "Correct predictions: "
-
-    paste0(prefix, FormatAsPercent(overall.accuracy, digits), " (",
-           paste0(group.labels, ": " , FormatAsPercent(group.accuracies, digits), collapse = "; "),
-           ")" )
-}
-
+#' Perform standard data checking and tidying actions before fitting a machine learning model
+#'
 #' @importFrom flipData GetData EstimationData DataFormula
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom flipTransformations AdjustDataToReflectWeights
+#' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed)
 {
@@ -88,3 +72,51 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
                 outcome.i = outcome.i,
                 input.formula = input.formula))
 }
+
+#' Save standard data after fitting a machine learning model
+#'
+#' @noRd
+saveMachineLearningResults <- function(result, prepared.data, show.labels)
+{
+    # Save subset and weights
+    result$subset <- subset <- prepared.data$row.names %in% rownames(prepared.data$unweighted.training.data)
+    result$weights <- prepared.data$unfiltered.weights
+    result$formula <- prepared.data$input.formula
+
+    # Save descriptive information.
+    class(result) <- c("MachineLearning", class(result))
+    result$outcome.name <- prepared.data$outcome.name
+    result$sample.description <- prepared.data$sample.description
+    result$n.observations <- prepared.data$n
+    result$estimation.data <- prepared.data$unweighted.training.data
+    result$numeric.outcome <- prepared.data$numeric.outcome
+
+    # Replacing names with labels
+    if (result$show.labels <- show.labels)
+    {
+        result$outcome.label <- prepared.data$outcome.label
+        result$variable.labels <- prepared.data$variable.labels[-prepared.data$outcome.i]
+    }
+    else
+        result$outcome.label <- result$outcome.name
+
+    # Save confusion matrix
+    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
+
+    return(result)
+}
+
+
+#' @importFrom flipFormat FormatAsPercent
+correctPredictionsText <- function(overall.accuracy, group.labels, group.accuracies, digits = 4, out.of.bag = FALSE)
+{
+    prefix <- if (out.of.bag)
+        "Correct predictions (based on out-of-bag sample): "
+    else
+        "Correct predictions: "
+
+    paste0(prefix, FormatAsPercent(overall.accuracy, digits), " (",
+           paste0(group.labels, ": " , FormatAsPercent(group.accuracies, digits), collapse = "; "),
+           ")" )
+}
+

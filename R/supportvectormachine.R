@@ -67,38 +67,27 @@ SupportVectorMachine <- function(formula,
     set.seed(seed)
     result <- list(original = svm(data.formula, data = weighted.training.data,
                                   probability = TRUE, cost = cost, ...))
+
+    ####################################################################
+    ##### Saving direct input parameters                           #####
+    ####################################################################
+
     result$original$call <- match.call()
-
-    ####################################################################
-    ##### Saving results, parameters and tidying up                #####
-    ####################################################################
-    # 1. Saving data.
-    result$subset <- subset <- prepared.data$row.names %in% rownames(unweighted.training.data)
-    result$weights <- prepared.data$unfiltered.weights
     result$model <- data
-
-    # 2. Saving descriptive information.
-    class(result) <- c("SupportVectorMachine", "MachineLearning", class(result))
-    result$outcome.name <- prepared.data$outcome.name
-    result$sample.description <- prepared.data$sample.description
-    result$n.observations <- prepared.data$n
-    result$estimation.data <- unweighted.training.data
-    result$numeric.outcome <- prepared.data$numeric.outcome
-
-    # 3. Replacing names with labels
-    if (result$show.labels <- show.labels)
-    {
-        result$outcome.label <- prepared.data$outcome.label
-        result$variable.labels <- prepared.data$variable.labels[-prepared.data$outcome.i]
-    }
-    else
-        result$outcome.label <- result$outcome.name
-
-    # 4. Saving parameters and confusion matrix
-    result$formula <- prepared.data$input.formula
     result$output <- output
     result$missing <- missing
-    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
+
+    ####################################################################
+    ##### Model-specific parameters                                #####
+    ####################################################################
+
+    class(result) <- c("SupportVectorMachine", class(result))
+
+    ####################################################################
+    ##### Saving processed information                             #####
+    ####################################################################
+
+    result <- saveMachineLearningResults(result, prepared.data, show.labels)
     result
 }
 
