@@ -23,12 +23,9 @@
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @importFrom flipData GetData EstimationData DataFormula
-#' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName
+#'
 #' @importFrom xgboost xgboost xgb.cv
-#' @importFrom stats runif
-#' @importFrom flipTransformations AdjustDataToReflectWeights OneHot
+#' @importFrom flipTransformations OneHot
 #' @export
 GradientBoost <- function(formula,
                                  data = NULL,
@@ -42,63 +39,36 @@ GradientBoost <- function(formula,
                                  show.labels = FALSE)
 {
     ####################################################################
-    ##### Reading in the data and doing some basic tidying        ######
+    ##### Error checking specific to this function                ######
     ####################################################################
+
     if (booster == "gblinear" && output == "Importance")
         stop("Importance is only available for gbtree booster.") # https://github.com/dmlc/xgboost/issues/2331
 
-    cl <- match.call()
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+    ####################################################################
+    ##### Reading in the data and doing some basic tidying        ######
+    ####################################################################
+
+    # Identify whether subset and weights are variables in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE)
     subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset))
-    {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
-            subset.description <- Labels(subset)
-        if (is.null(attr(subset, "name")))
-            attr(subset, "name") <- subset.description
-    }
-    if(!is.null(weights))
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- deparse(substitute(weights))
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
     weights <- eval(substitute(weights), data, parent.frame())
-    data <- GetData(input.formula, data, auxiliary.data = NULL)
-    row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula, data)
-    outcome.i <- match(outcome.name, names(data))
-    outcome.variable <- data[, outcome.i]
-    numeric.outcome <- !is.factor(outcome.variable)
-    variable.labels <- if (show.labels) Labels(data) else names(data)
-    outcome.label <- variable.labels[outcome.i]
-    #if (outcome.label == "data[, outcome.name]")
-    #    outcome.label <- outcome.name
 
-    if (!is.null(weights) & length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+    prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
+                                                weights, weights.description, missing, seed)
 
-    # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
-    .estimation.data <- processed.data$estimation.data
-    n.predictors <- ncol(.estimation.data)
-    n <- nrow(.estimation.data)
-    if (n < ncol(.estimation.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
-    .weights <- processed.data$weights
-    .formula <- DataFormula(input.formula, data)
+    unweighted.training.data <- prepared.data$unweighted.training.data
+    weighted.training.data <- prepared.data$weighted.training.data
 
-    # Resampling to generate a weighted sample, if necessary.
-    .estimation.data.1 <- if (is.null(weights))
-        .estimation.data
-    else
-        AdjustDataToReflectWeights(.estimation.data, .weights)
+    ####################################################################
+    ##### Processing specific to this function                    ######
+    ####################################################################
 
-    numeric.data <- OneHot(.estimation.data.1, outcome.name)
+    numeric.data <- OneHot(weighted.training.data, prepared.data$outcome.name)
     n.class <- 1
 
-    if (numeric.outcome)
+    if (prepared.data$numeric.outcome)
     {
         objective <- "reg:linear"
         xval.metric <- "test_rmse_mean"
@@ -129,7 +99,6 @@ GradientBoost <- function(formula,
     else
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
                         lambda = 0, alpha = 0, lambda_bias = 0, nthread = 1)
-
 
     if (!grid.search)
     {
@@ -173,39 +142,28 @@ GradientBoost <- function(formula,
         best.error.rounds <- search.results[best.index, "rounds"]
         best.param <- search.results[best.index, -(1:2)]
         set.seed(seed)      # reset seed after searching
-        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, verbose = 0,
-                                          params = best.param, save_period = NULL, nrounds = best.error.rounds))
+        result <- list(original = xgboost(data = numeric.data$X,
+                                          label = numeric.data$y,
+                                          verbose = 0,
+                                          params = best.param,
+                                          save_period = NULL,
+                                          nrounds = best.error.rounds))
     }
-    result$original$call <- cl
 
     ####################################################################
-    ##### Saving results, parameters, and tidying up               #####
+    ##### Saving direct input parameters                           #####
     ####################################################################
-    # 1. Saving data.
-    result$subset <- subset <- row.names %in% rownames(.estimation.data)
-    result$weights <- unfiltered.weights
-    result$model <- data
 
-    # 2. Saving descriptive information.
-    class(result) <- c("GradientBoost", "MachineLearning", class(result))
-    result$outcome.name <- outcome.name
-    result$sample.description <- processed.data$description
-    result$n.observations <- n
-    result$estimation.data <- .estimation.data
-    result$numeric.outcome <- numeric.outcome
-    result$outcome.levels <- numeric.data$outcome.levels
-    result$prediction.columns <- colnames(numeric.data$X)
-
-    # 3. Names or labels
-    result$show.labels <- show.labels
-    result$outcome.label <- outcome.label
-    result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-
-    # 4. Saving parameters and confusion matrix
-    result$formula <- input.formula
+    result$original$call <- match.call()
     result$output <- output
     result$missing <- missing
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    class(result) <- c("GradientBoost", class(result))
+
+    ####################################################################
+    ##### Saving processed information                             #####
+    ####################################################################
+
+    result <- saveMachineLearningResults(result, prepared.data, show.labels)
     result
 }
 
