@@ -6,8 +6,7 @@
 \usage{
 RandomForest(formula, data = NULL, subset = NULL, weights = NULL,
   output = "Importance", missing = "Exclude cases with missing data",
-  seed = 12321, statistical.assumptions, show.labels = FALSE,
-  sort.by.importance = TRUE, ...)
+  seed = 12321, show.labels = FALSE, sort.by.importance = TRUE, ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -32,8 +31,6 @@ name of a variable in \code{data}. It may not be an expression.}
 \code{"Exclude cases with missing data"},}
 
 \item{seed}{The random number seed used in imputation.}
-
-\item{statistical.assumptions}{A Statistical Assumptions object.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}

@@ -16,7 +16,6 @@
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"},
 #' @param seed The random number seed used in imputation.
-#' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param sort.by.importance Sort the last column of the importance table
@@ -36,126 +35,71 @@ RandomForest <- function(formula,
                          output = "Importance",
                          missing  = "Exclude cases with missing data",
                          seed = 12321,
-                         statistical.assumptions,
                          show.labels = FALSE,
                          sort.by.importance = TRUE,
                          ...)
 {
     ####################################################################
-    ##### Reading in the data and doing some basic tidying        ######
+    ##### Error checking specific to this function                ######
     ####################################################################
-    cl <- match.call()
-    if(!missing(statistical.assumptions))
-        stop("'statistical.assumptions' objects are not yet supported.")
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
-    subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset))
-    {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
-            subset.description <- Labels(subset)
-        if (is.null(attr(subset, "name")))
-            attr(subset, "name") <- subset.description
-    }
-    if(!is.null(weights))
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- deparse(substitute(weights))
-    weights <- eval(substitute(weights), data, parent.frame())
-    data <- GetData(input.formula, data, auxiliary.data = NULL)
 
     # randomForest fails when variable names contain "$" even if surrounded by backticks, so replace with "."
-    input.formula <- gsub("\\$", "\\.", deparse(input.formula))
-    input.formula <- formula(gsub("\\`", "", input.formula))
+    formula <- gsub("\\$", "\\.", deparse(formula))
+    formula <- formula(gsub("\\`", "", formula))
     if (!is.null(data)) {
         colnames(data) <- gsub("\\$", "\\.", colnames(data))
         colnames(data) <- gsub("\\`", "", colnames(data))
     }
 
-    row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula, data)
-    outcome.i <- match(outcome.name, names(data))
-    if (setequal(data[!is.na(data[, outcome.i]), outcome.i], c(0, 1)))
-        data[, outcome.i] <- as.factor(data[, outcome.i])
-    outcome.variable <- data[, outcome.i]
-    numeric.outcome <- !is.factor(outcome.variable)
-    variable.labels <- Labels(data)
-    outcome.label <- variable.labels[outcome.i]
-    if (outcome.label == "data[, outcome.name]")
-        outcome.label <- outcome.name
-    if (!is.null(weights) & length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+    ####################################################################
+    ##### Reading in the data and doing some basic tidying        ######
+    ####################################################################
 
-    # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
-    .estimation.data <- processed.data$estimation.data
-    n.predictors <- ncol(.estimation.data)
-    n <- nrow(.estimation.data)
-    if (n < ncol(.estimation.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
-    post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
-    .weights <- processed.data$weights
-    if (numeric.outcome && nrow(unique(.estimation.data[outcome.name])) < 6)
-        warning("The outcome variable is numeric but contains less than 6 unique values. ",
-                "Convert the outcome to a categorical variable if you intend to perform a classification.")
+    # Identify whether subset and weights are variables in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE)
+    subset <- eval(substitute(subset), data, parent.frame())
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
+    weights <- eval(substitute(weights), data, parent.frame())
 
-    # Resampling to generate a weighted sample, if necessary.
-    .estimation.data.1 <- if (is.null(weights))
-        .estimation.data
-    else
-        AdjustDataToReflectWeights(.estimation.data, .weights)
+    prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
+                                                weights, weights.description, missing, seed)
+
+    unweighted.training.data <- prepared.data$unweighted.training.data
+    weighted.training.data <- prepared.data$weighted.training.data
+
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
+
     set.seed(seed)
-    result <- list(original = suppressWarnings(randomForest(input.formula,
-                                           importance = TRUE, data = .estimation.data.1, ...)))
-    result$original$call <- cl
+    result <- list(original = suppressWarnings(randomForest(prepared.data$input.formula,
+                                                            importance = TRUE,
+                                                            data = weighted.training.data
+                                                            , ...)))
+
     ####################################################################
-    ##### Saving results, parameters, and tidying up               #####
+    ##### Saving direct input and model-specific parameters        #####
     ####################################################################
-    # 1. Saving data.
-    result$subset <- subset <- row.names %in% rownames(.estimation.data)
-    result$weights <- unfiltered.weights
-    result$model <- data
 
-    # 2. Saving descriptive information.
-    class(result) <- c("RandomForest", "MachineLearning", class(result))
-    result$outcome.name <- outcome.name
-    result$sample.description <- processed.data$description
-    result$n.observations <- n
-    result$estimation.data <- .estimation.data
-    result$numeric.outcome <- numeric.outcome
-
-    # 3. Replacing names with labels
-    if (result$show.labels <- show.labels)
-    {
-        result$outcome.label <- outcome.label
-        # Removing the outcome variable
-        result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-        if (numeric.outcome)
-            names(result$original$importanceSD) <- variable.labels
-        else
-            rownames(result$original$importanceSD) <- variable.labels
-        # As predict.lda uses the variable labels as an input, the final swap to labels for the importance tables appears in print.RandomForest
-    }
-    else
-        result$outcome.label <- outcome.name
-
-    # 4.Saving parameters and confusion matrix
-    result$formula <- input.formula
+    result$original$call <- match.call()
     result$output <- output
     result$missing <- missing
     result$sort.by.importance <- sort.by.importance
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
-
-    # 5. Statistics
     result$z.statistics <- result$original$importance[, 1:(ncol(result$original$importance) - 1)] / result$original$importanceSD
     result$p.values <- 2 * (1 - pnorm(abs(result$z.statistics)))
+    class(result) <- c("RandomForest", class(result))
+
+    ####################################################################
+    ##### Saving processed information                             #####
+    ####################################################################
+
+    result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    if (result$show.labels && result$numeric.outcome)
+        names(result$original$importanceSD) <- result$variable.labels
+    else
+        rownames(result$original$importanceSD) <- result$variable.labels
     result
 }
 
