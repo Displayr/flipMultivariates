@@ -37,42 +37,20 @@
 #' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
 DeepLearning <- function(formula,
-                                 data = NULL,
-                                 subset = NULL,
-                                 weights = NULL,
-                                 output = "Accuracy",
-                                 missing  = "Exclude cases with missing data",
-                                 normalize = TRUE,
-                                 seed = 12321,
-                                 show.labels = FALSE,
-                                 hidden.nodes = 10,
-                                 max.epochs = 100)
+                         data = NULL,
+                         subset = NULL,
+                         weights = NULL,
+                         output = "Accuracy",
+                         missing  = "Exclude cases with missing data",
+                         normalize = TRUE,
+                         seed = 12321,
+                         show.labels = FALSE,
+                         hidden.nodes = 10,
+                         max.epochs = 100)
 {
     ####################################################################
-    ##### Reading in the data and doing some basic tidying        ######
+    ##### Error checking specific to this function                ######
     ####################################################################
-    cl <- match.call()
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) # We don't know whether subset is a variable in the environment or in data.
-    subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset))
-    {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
-            subset.description <- Labels(subset)
-        if (is.null(attr(subset, "name")))
-            attr(subset, "name") <- subset.description
-    }
-
-    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
-    weights <- eval(substitute(weights), data, parent.frame())
-    if(!is.null(weights))
-    {
-        if (is.null(weights.description) | (class(weights.description) == "try-error") | !is.null(attr(weights, "name")))
-            subset.description <- Labels(weights)
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- weights.description
-    }
 
     if (!is.numeric(hidden.nodes))
     {
@@ -82,35 +60,31 @@ DeepLearning <- function(formula,
             stop("Nodes of hidden layers must be specified as comma separated positive integers.")
     }
 
-    data <- GetData(input.formula, data, auxiliary.data = NULL)
-    row.names <- rownames(data)
+    ####################################################################
+    ##### Reading in the data and doing some basic tidying        ######
+    ####################################################################
 
-    outcome.name <- OutcomeName(input.formula, data)
-    outcome.i <- match(outcome.name, names(data))
-    outcome.variable <- data[, outcome.i]
-    numeric.outcome <- !is.factor(outcome.variable)
-    variable.labels <- if (show.labels) Labels(data) else names(data)
-    outcome.label <- variable.labels[outcome.i]
+    # Identify whether subset and weights are variables in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE)
+    subset <- eval(substitute(subset), data, parent.frame())
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
+    weights <- eval(substitute(weights), data, parent.frame())
 
-    if (!is.null(weights) & length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+    prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
+                                                weights, weights.description, missing, seed)
 
-    # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
-    .estimation.data <- processed.data$estimation.data
-    n.predictors <- ncol(.estimation.data)
-    n <- nrow(.estimation.data)
-    if (n < ncol(.estimation.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
+    unweighted.training.data <- prepared.data$unweighted.training.data
+    weighted.training.data <- prepared.data$weighted.training.data
+
+    ####################################################################
+    ##### Processing specific to this function                    ######
+    ####################################################################
 
     # No need to resample weights because keras uses sample_weight for each sample's loss
-    .weights <- processed.data$weights
+    cleaned.weights <- prepared.data$cleaned.weights
 
     # X is a normalized numeric matrix with dummy encoding of factors
-    X <- as.matrix(AsNumeric(.estimation.data[, -outcome.i]))
+    X <- as.matrix(AsNumeric(unweighted.training.data[, -prepared.data$outcome.i]))
     if (normalize)
     {
         means <- apply(X, 2, mean)
@@ -118,13 +92,14 @@ DeepLearning <- function(formula,
         X[, stdevs != 0] <- scale(X[, stdevs != 0], center = means[stdevs != 0], scale = stdevs[stdevs != 0])
     }
 
-    Y <- .estimation.data[[outcome.i]]
+    Y <- unweighted.training.data[[prepared.data$outcome.i]]
     # Binary factor encoded as a vector of 0s and 1s, multiclass is dummy encoded
-    if (!numeric.outcome)
+    if (!prepared.data$numeric.outcome)
         if (nlevels(Y) > 2)
-            Y <- AsNumeric(.estimation.data[[outcome.i]], name = outcome.name)
-        else
-            Y <- as.numeric(Y) - 1
+            Y <- AsNumeric(unweighted.training.data[[prepared.data$outcome.i]],
+                           name = prepared.data$outcome.name)
+    else
+        Y <- as.numeric(Y) - 1
     Y <- as.matrix(Y)
 
     ####################################################################
@@ -132,45 +107,34 @@ DeepLearning <- function(formula,
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
+
     set.seed(seed)
     nn <- neuralNetwork(X,
                         Y,
-                        numeric.outcome = numeric.outcome,
+                        numeric.outcome = prepared.data$numeric.outcome,
                         hidden.nodes = hidden.nodes,
                         max.epochs = max.epochs,
-                        weights = .weights)
-    result <- list(original = nn$original, original.serial = nn$original.serial, cross.validation = nn$cross.validation)
+                        weights = cleaned.weights)
+    result <- list(original = nn$original,
+                   original.serial = nn$original.serial,
+                   cross.validation = nn$cross.validation)
 
     ####################################################################
-    ##### Saving results, parameters, and tidying up               #####
+    ##### Saving direct input parameters                           #####
     ####################################################################
-    # 1. Saving data.
-    result$subset <- subset <- row.names %in% rownames(.estimation.data)
-    result$weights <- unfiltered.weights
-    result$model <- data
+
+    result$output <- output
+    result$missing <- missing
     result$normalize <- normalize
     result$training.means <- if (normalize) means else NULL
     result$training.stdevs <- if (normalize) stdevs else NULL
+    class(result) <- c("DeepLearning", class(result))
 
-    # 2. Saving descriptive information.
-    class(result) <- c(class(result), "DeepLearning", "MachineLearning")
-    result$outcome.name <- outcome.name
-    result$sample.description <- processed.data$description
-    result$n.observations <- n
-    result$estimation.data <- .estimation.data
-    result$numeric.outcome <- numeric.outcome
-    result$outcome.levels <- levels(result$estimation.data[result$outcome.name][[1]])
+    ####################################################################
+    ##### Saving processed information                             #####
+    ####################################################################
 
-    # 3. Replacing names with labels
-    result$show.labels <- show.labels
-    result$outcome.label <- outcome.label
-    result$variable.labels <- variable.labels <- variable.labels[-outcome.i]
-
-    # 4. Saving parameters and confusion matrix
-    result$formula <- input.formula
-    result$output <- output
-    result$missing <- missing
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result <- saveMachineLearningResults(result, prepared.data, show.labels)
     result
 }
 
@@ -380,8 +344,8 @@ predict.DeepLearning <- function(object, new.data = object$model, ...)
     constants <- object$training.stdevs == 0
     if (object$normalize)
         X[, !constants] <- scale(X[, !constants],
-                                center = object$training.means[!constants],
-                                scale = object$training.stdevs[!constants])
+                                 center = object$training.means[!constants],
+                                 scale = object$training.stdevs[!constants])
 
     if (!object$numeric.outcome)
     {

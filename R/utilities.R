@@ -93,6 +93,7 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     result$n.observations <- prepared.data$n
     result$estimation.data <- prepared.data$unweighted.training.data
     result$numeric.outcome <- prepared.data$numeric.outcome
+    result$outcome.levels <- levels(result$estimation.data[result$outcome.name][[1]])
 
     # Replacing names with labels
     if (result$show.labels <- show.labels)
