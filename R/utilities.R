@@ -60,6 +60,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     return(list(unweighted.training.data = unweighted.training.data,
                 weighted.training.data = weighted.training.data,
+                required.data = data,
+                cleaned.weights = cleaned.weights,
                 data.formula = data.formula,
                 row.names = row.names,
                 unfiltered.weights = unfiltered.weights,
@@ -78,7 +80,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 #' @noRd
 saveMachineLearningResults <- function(result, prepared.data, show.labels)
 {
-    # Save subset and weights
+    # Save data, subset and weights
+    result$model <- prepared.data$required.data
     result$subset <- subset <- prepared.data$row.names %in% rownames(prepared.data$unweighted.training.data)
     result$weights <- prepared.data$unfiltered.weights
     result$formula <- prepared.data$input.formula

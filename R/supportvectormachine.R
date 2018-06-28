@@ -37,8 +37,9 @@ SupportVectorMachine <- function(formula,
                                  ...)
 {
     ####################################################################
-    ##### Processing specific to this function                    ######
+    ##### Error checking specific to this function                ######
     ####################################################################
+
     if (cost <= 0)
         stop("cost must be positive")
 
@@ -64,23 +65,18 @@ SupportVectorMachine <- function(formula,
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
+
     set.seed(seed)
     result <- list(original = svm(data.formula, data = weighted.training.data,
                                   probability = TRUE, cost = cost, ...))
 
     ####################################################################
-    ##### Saving direct input parameters                           #####
+    ##### Saving direct input and model-specific parameters        #####
     ####################################################################
 
     result$original$call <- match.call()
-    result$model <- data
     result$output <- output
     result$missing <- missing
-
-    ####################################################################
-    ##### Model-specific parameters                                #####
-    ####################################################################
-
     class(result) <- c("SupportVectorMachine", class(result))
 
     ####################################################################
