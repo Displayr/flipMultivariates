@@ -92,10 +92,13 @@ RandomForest <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
-    if (result$show.labels && result$numeric.outcome)
-        names(result$original$importanceSD) <- result$variable.labels
-    else
-        rownames(result$original$importanceSD) <- result$variable.labels
+    if (result$show.labels)
+    {
+        if (result$numeric.outcome)
+            names(result$original$importanceSD) <- result$variable.labels
+        else
+            rownames(result$original$importanceSD) <- result$variable.labels
+    }
     result
 }
 
