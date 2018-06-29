@@ -21,12 +21,8 @@
 #' @param sort.by.importance Sort the last column of the importance table
 #' in descending order.
 #' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
-#' @importFrom flipData GetData CleanSubset CleanWeights EstimationData
 #' @importFrom stats pnorm
-#' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName
 #' @importFrom randomForest randomForest
-#' @importFrom flipTransformations AdjustDataToReflectWeights
 #' @export
 RandomForest <- function(formula,
                          data = NULL,

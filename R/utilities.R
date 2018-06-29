@@ -102,7 +102,10 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
         result$variable.labels <- prepared.data$variable.labels[-prepared.data$outcome.i]
     }
     else
+    {
         result$outcome.label <- result$outcome.name
+        result$variable.labels <- names(prepared.data$required.data[-prepared.data$outcome.i])
+    }
 
     # Save confusion matrix
     result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
