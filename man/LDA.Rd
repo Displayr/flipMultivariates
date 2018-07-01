@@ -8,7 +8,7 @@ LDA(formula, data = NULL, subset = NULL, weights = NULL,
   prior = "Observed", missing = "Exclude cases with missing data",
   output = "Means", outcome.color = "#5B9BD5",
   predictors.color = "#ED7D31", variance = "moment", seed = 12321,
-  statistical.assumptions, auxiliary.data = NULL, show.labels = FALSE, ...)
+  auxiliary.data = NULL, show.labels = FALSE, ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -48,8 +48,6 @@ vector of probabilities can be provided.}
 the method of moments or \code{"mle"} for maximum likelihood estimaion.}
 
 \item{seed}{The random number seed used in imputation.}
-
-\item{statistical.assumptions}{Not supported.}
 
 \item{auxiliary.data}{A \code{\link{data.frame}} containing additional variables
 to be used in imputation (if required). While adding more variables will improve

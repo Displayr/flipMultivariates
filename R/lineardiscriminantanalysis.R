@@ -27,7 +27,6 @@
 #' @param variance The method used to estimate the variance; either \code{"moment"} for
 #' the method of moments or \code{"mle"} for maximum likelihood estimaion.
 #' @param seed The random number seed used in imputation.
-#' @param statistical.assumptions Not supported.
 #' @param auxiliary.data A \code{\link{data.frame}} containing additional variables
 #'  to be used in imputation (if required). While adding more variables will improve
 #'  the quality of the imputation, it will dramatically slow down the time to estimate.
@@ -68,7 +67,6 @@ LDA <- function(formula,
                 predictors.color = '#ED7D31',
                 variance = "moment",
                 seed = 12321,
-                statistical.assumptions,
                 auxiliary.data = NULL,
                 show.labels = FALSE,
                 ...)
@@ -76,63 +74,47 @@ LDA <- function(formula,
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
-    cl <- match.call()
-    if(!missing(statistical.assumptions))
-        stop("'statistical.assumptions' objects are not yet supported.")
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
-    subset.description <- try(deparse(substitute(subset)), silent = TRUE) #We don't know whether subset is a variable in the environment or in data.
+
+    # Identify whether subset and weights are variables in the environment or in data.
+    subset.description <- try(deparse(substitute(subset)), silent = TRUE)
     subset <- eval(substitute(subset), data, parent.frame())
-    if (!is.null(subset))
-    {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name")))
-            subset.description <- Labels(subset)
-        if (is.null(attr(subset, "name")))
-            attr(subset, "name") <- subset.description
-    }
-    if(!is.null(weights))
-        if (is.null(attr(weights, "name")))
-            attr(weights, "name") <- deparse(substitute(weights))
+    weights.description <- try(deparse(substitute(weights)), silent = TRUE)
     weights <- eval(substitute(weights), data, parent.frame())
-    data <- GetData(input.formula, data, auxiliary.data)
-    row.names <- rownames(data)
-    outcome.name <- OutcomeName(input.formula, data)
-    if (!is.factor(data[, outcome.name]) &!IsCount(data[, outcome.name]))
-        stop("LDA requires the outcome variable to be categorical or a count.")
-    data <- CreatingFactorDependentVariableIfNecessary(formula, data)
+
+    prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
+                                                weights, weights.description, missing, seed)
+
+    unweighted.training.data <- prepared.data$unweighted.training.data
+    required.data <- prepared.data$required.data
+    outcome.i <- prepared.data$outcome.i
+    outcome.name <- prepared.data$outcome.name
+
     ####################################################################
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
-    i.outcome <- match(outcome.name, names(data))
-    data.labels <- Labels(data)
-    extracted <- ExtractCommonPrefix(data.labels[-i.outcome])
+
+    if (!is.factor(required.data[, outcome.name]) & !IsCount(required.data[, outcome.name]))
+        stop("LDA requires the outcome variable to be categorical or a count.")
+    required.data <- CreatingFactorDependentVariableIfNecessary(formula, required.data)
+    unweighted.training.data <- CreatingFactorDependentVariableIfNecessary(formula, unweighted.training.data)
+
+    extracted <- ExtractCommonPrefix(prepared.data$variable.labels[-outcome.i])
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
     predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
     labels <- extracted$shortened.labels
-    data[, -i.outcome] <- AsNumeric(data[, -i.outcome], binary = FALSE)
-    outcome.variable <- data[, outcome.name]
-    outcome.label <- paste0(data.labels[i.outcome], if (output == "Scatterplot") "" else by.label)
-    if (outcome.label == "data[, outcome.name]")
-        outcome.label <- outcome.name
-    if (!is.null(weights) & length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
-    # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing,seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
-    .estimation.data <- processed.data$estimation.data
-    n <- nrow(.estimation.data)
-    if (n < ncol(.estimation.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
-    post.missing.data.estimation.sample <- processed.data$post.missing.data.estimation.sample
-    .weights <- processed.data$weights
+    required.data[, -outcome.i] <- AsNumeric(required.data[, -outcome.i], binary = FALSE)
+    unweighted.training.data[, -outcome.i] <- AsNumeric(unweighted.training.data[, -outcome.i], binary = FALSE)
+    outcome.label <- paste0(prepared.data$variable.labels[outcome.i], if (output == "Scatterplot") "" else by.label)
+
+
+
     # Computing and checking the prior.
-    filtered.outcome.variable <- Factor(.estimation.data[,outcome.name])
+    filtered.outcome.variable <- Factor(unweighted.training.data[, outcome.name])
     if (is.null(weights))
         observed.prior <- as.numeric(prop.table(table(filtered.outcome.variable)))
     else
     {
-        df <- data.frame(x = filtered.outcome.variable, w = .weights)
+        df <- data.frame(x = filtered.outcome.variable, w = prepared.data$cleaned.weights)
         observed.prior <- aggregate(w ~ x, data = df, FUN = sum)
         observed.prior <- as.numeric(prop.table(observed.prior[, 2]))
     }
@@ -141,10 +123,10 @@ LDA <- function(formula,
         warning(paste("The outcome variable contains", n.levels, "categories. Consider either merging categories, or, using a model more appropriate for such data (e.g., Linear Regression)."))
     if (n.levels == 1)
         stop("The outcome variable contains only one category, after applying any filter. At least 2 categories are required to produce a model.")
-    n.smallest <- round((min.o <- min(observed.prior)) * n)
+    n.smallest <- round((min.o <- min(observed.prior)) * prepared.data$n)
     if (n.smallest < 30)
     {
-        smallest.category <- levels(outcome.variable)[match(min.o, observed.prior)[1]]
+        smallest.category <- levels(required.data[, outcome.i])[match(min.o, observed.prior)[1]]
         warning(paste0("The smallest category of the outcome variable (", smallest.category, ") contains ",
                        n.smallest, " observations; a robust model is unlikely."))
     }
@@ -164,54 +146,57 @@ LDA <- function(formula,
         stop(error)
     else if (abs(sum(prior) - 1) > 1e-10 | min(prior) <= 0 | max(prior) >= 1)
         stop(error)
+
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
     ##### another function, with the output of that function       #####
     ##### called 'original'.                                       #####
     ####################################################################
-    x <- .estimation.data[, -i.outcome]
-    group <- .estimation.data[, outcome.name]
+
+    x <- unweighted.training.data[, -outcome.i]
+    group <- unweighted.training.data[, outcome.name]
     labels <- labels[match(names(x), names(labels))]
-    result <- list(call = cl,
+    result <- list(call = match.call(),
                    original = LDA.fit(x,
                    grouping = group,
                    prior = prior,
                    method = variance,
-                   weights = .weights,
+                   weights = prepared.data$cleaned.weights,
                    labels = labels,
                    functions.output = output == "Discriminant Functions"),
                    variable.labels = labels,
-                   outcome.label = outcome.label,
+                   outcome.label = prepared.data$outcome.label,
                    predictors.label = predictors.label)
+
     ####################################################################
     ##### Saving results, parameters, and tidying up               #####
     ####################################################################
     # 1. Setting the class and call.
-    result$original$call <- cl
+    result$original$call <- match.call()
     class(result) <- c("LDA", "MachineLearning", class(result))
 
     # 2. Saving data - generally applicable.
     if (missing == "Imputation (replace missing values with estimates)")
-        data <- processed.data$data
-    result$subset <- subset <- row.names %in% rownames(.estimation.data)
-    result$weights <- unfiltered.weights
-    result$model <- data
+        data <- prepared.data$imputed.data
+    result$subset <- subset <- prepared.data$row.names %in% rownames(unweighted.training.data)
+    result$weights <- prepared.data$unfiltered.weights
+    result$model <- required.data
 
     # 3. Saving data - applicable only to LDA
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
     result$prior <- prior
     dv <- predict(result$original,prior = observed.prior, newdata = x, na.action = na.pass)[["x"]]
-    result$centroids <- MeanByGroup(dv, group, .weights)
+    result$centroids <- MeanByGroup(dv, group, prepared.data$cleaned.weights)
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
 
     # 4. Saving descriptive information.
     result$outcome.name <- outcome.name
-    result$sample.description <- processed.data$description
-    result$n.predictors <- ncol(.estimation.data) - 1
-    result$n.observations <- n
-    result$estimation.data <- .estimation.data
+    result$sample.description <- prepared.data$sample.description
+    result$n.predictors <- ncol(unweighted.training.data) - 1
+    result$n.observations <- prepared.data$n
+    result$estimation.data <- unweighted.training.data
 
     # 5. Replacing names with labels
     if (result$show.labels <- show.labels)
@@ -228,14 +213,14 @@ LDA <- function(formula,
         result$outcome.label <- outcome.name
 
     # 6.Saving parameters
-    result$formula <- input.formula
+    result$formula <- prepared.data$input.formula
     result$output <- output
     result$outcome.color <- outcome.color
     result$predictors.color <- predictors.color
     result$missing <- missing
 
     # 7. Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
 
     result
 }

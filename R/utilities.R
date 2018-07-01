@@ -46,13 +46,11 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     # Treatment of missing values.
     processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
-    unfiltered.weights <- processed.data$unfiltered.weights
     unweighted.training.data <- processed.data$estimation.data
     n <- nrow(unweighted.training.data)
     if (n < ncol(unweighted.training.data) + 1)
         stop("The sample size is too small for it to be possible to conduct the analysis.")
     cleaned.weights <- processed.data$weights
-    data.formula <- DataFormula(input.formula, data)
 
     # Resampling to generate a weighted sample, if necessary.
     weighted.training.data <- if (is.null(weights))
@@ -63,10 +61,11 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     return(list(unweighted.training.data = unweighted.training.data,
                 weighted.training.data = weighted.training.data,
                 required.data = data,
+                imputed.data = processed.data$data,
                 cleaned.weights = cleaned.weights,
-                data.formula = data.formula,
+                data.formula = DataFormula(input.formula, data),
                 row.names = row.names,
-                unfiltered.weights = unfiltered.weights,
+                unfiltered.weights = processed.data$unfiltered.weights,
                 outcome.name = outcome.name,
                 sample.description = processed.data$description,
                 n = n,
