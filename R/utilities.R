@@ -48,8 +48,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
     n <- nrow(unweighted.training.data)
-    if (n < ncol(unweighted.training.data) + 1)
-        stop("The sample size is too small for it to be possible to conduct the analysis.")
+    if (n <= ncol(unweighted.training.data))
+        stop("The sample size is too small. There should be more samples than predictor variables, but there are ",
+             n, " samples and ", ncol(unweighted.training.data), " predictors.")
     cleaned.weights <- processed.data$weights
 
     # Resampling to generate a weighted sample, if necessary.

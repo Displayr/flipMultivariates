@@ -42,7 +42,7 @@ SupportVectorMachine <- function(formula,
     ####################################################################
 
     if (cost <= 0)
-        stop("cost must be positive")
+        stop("cost must be positive but is ", cost)
 
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######

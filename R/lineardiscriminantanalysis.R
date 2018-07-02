@@ -71,6 +71,8 @@ LDA <- function(formula,
                 show.labels = FALSE,
                 ...)
 {
+
+
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
@@ -81,12 +83,24 @@ LDA <- function(formula,
     weights.description <- try(deparse(substitute(weights)), silent = TRUE)
     weights <- eval(substitute(weights), data, parent.frame())
 
+    ####################################################################
+    ##### Data manipulation specific to LDA                        #####
+    ####################################################################
+
+    # Convert predictor variables to numeric
+    data <- GetData(formula, data, auxiliary.data = NULL)
+    outcome.i <- match(OutcomeName(formula, data), names(data))
+    data[, -outcome.i] <- AsNumeric(data[, -outcome.i], binary = FALSE)
+
+    ####################################################################
+    ##### Prepare the data                                        ######
+    ####################################################################
+
     prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
                                                 weights, weights.description, missing, seed)
 
     unweighted.training.data <- prepared.data$unweighted.training.data
     required.data <- prepared.data$required.data
-    outcome.i <- prepared.data$outcome.i
     outcome.name <- prepared.data$outcome.name
 
     ####################################################################
@@ -102,11 +116,7 @@ LDA <- function(formula,
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
     predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
     labels <- extracted$shortened.labels
-    required.data[, -outcome.i] <- AsNumeric(required.data[, -outcome.i], binary = FALSE)
-    unweighted.training.data[, -outcome.i] <- AsNumeric(unweighted.training.data[, -outcome.i], binary = FALSE)
     outcome.label <- paste0(prepared.data$variable.labels[outcome.i], if (output == "Scatterplot") "" else by.label)
-
-
 
     # Computing and checking the prior.
     filtered.outcome.variable <- Factor(unweighted.training.data[, outcome.name])
@@ -253,7 +263,7 @@ LDA <- function(formula,
 #' @importFrom flipTransformations WeightedSVD
 #' @importFrom stats cov.wt cor alias
 #' @export
-LDA.fit = function (x,
+LDA.fit <- function (x,
                    grouping,
                    prior = proportions,
                    tol = 1e-04,
