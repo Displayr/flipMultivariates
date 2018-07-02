@@ -179,20 +179,16 @@ LDA <- function(formula,
                    predictors.label = predictors.label)
 
     ####################################################################
-    ##### Saving results, parameters, and tidying up               #####
+    ##### Saving direct input and model-specific parameters        #####
     ####################################################################
-    # 1. Setting the class and call.
+
     result$original$call <- match.call()
-    class(result) <- c("LDA", "MachineLearning", class(result))
+    class(result) <- c("LDA", class(result))
+    result$output <- output
+    result$outcome.color <- outcome.color
+    result$predictors.color <- predictors.color
+    result$missing <- missing
 
-    # 2. Saving data - generally applicable.
-    if (missing == "Imputation (replace missing values with estimates)")
-        required.data <- prepared.data$imputed.data
-    result$subset <- subset <- prepared.data$row.names %in% rownames(unweighted.training.data)
-    result$weights <- prepared.data$unfiltered.weights
-    result$model <- required.data
-
-    # 3. Saving data - applicable only to LDA
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
     result$prior <- prior
@@ -201,37 +197,13 @@ LDA <- function(formula,
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
 
-    # 4. Saving descriptive information.
-    result$outcome.name <- outcome.name
-    result$sample.description <- prepared.data$sample.description
-    result$n.predictors <- ncol(unweighted.training.data) - 1
-    result$n.observations <- prepared.data$n
-    result$estimation.data <- unweighted.training.data
+    ####################################################################
+    ##### Saving processed information                             #####
+    ####################################################################
 
-    # 5. Replacing names with labels
-    if (result$show.labels <- show.labels)
-    {
-        result$outcome.label <- outcome.label
-        # Removing the outcome variable
-        #result$variable.labels <- variable.labels <- variable.labels[-match(outcome.label, variable.labels)]
-        colnames(result$original$means) <- labels
-        row.names(result$original$scaling) <- labels
-        if (!is.null(result$original$discriminant.functions))
-            rownames(result$original$discriminant.functions) <- c("Intercept", labels)
-    }
-    else
-        result$outcome.label <- outcome.name
-
-    # 6.Saving parameters
-    result$formula <- prepared.data$input.formula
-    result$output <- output
-    result$outcome.color <- outcome.color
-    result$predictors.color <- predictors.color
-    result$missing <- missing
-
-    # 7. Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
-
+    result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    if (missing == "Imputation (replace missing values with estimates)")
+        required.data <- prepared.data$imputed.data
     result
 }
 

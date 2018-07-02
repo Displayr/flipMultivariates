@@ -93,6 +93,7 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     result$outcome.name <- prepared.data$outcome.name
     result$sample.description <- prepared.data$sample.description
     result$n.observations <- prepared.data$n
+    result$n.predictors <- ncol(prepared.data$unweighted.training.data) - 1
     result$estimation.data <- prepared.data$unweighted.training.data
     result$numeric.outcome <- prepared.data$numeric.outcome
     result$outcome.levels <- levels(result$estimation.data[result$outcome.name][[1]])
