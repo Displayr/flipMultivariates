@@ -185,6 +185,8 @@ LDA <- function(formula,
     result$predictors.color <- predictors.color
     result$missing <- missing
     result$predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
+    if (missing == "Imputation (replace missing values with estimates)")
+        prepared.data$required.data <- prepared.data$imputed.data
 
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
@@ -199,8 +201,6 @@ LDA <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
-    if (missing == "Imputation (replace missing values with estimates)")
-        required.data <- prepared.data$imputed.data
     result
 }
 
