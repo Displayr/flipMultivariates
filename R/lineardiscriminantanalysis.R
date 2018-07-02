@@ -175,7 +175,7 @@ LDA <- function(formula,
                    labels = labels,
                    functions.output = output == "Discriminant Functions"),
                    variable.labels = labels,
-                   outcome.label = prepared.data$outcome.label,
+                   outcome.label = outcome.label,
                    predictors.label = predictors.label)
 
     ####################################################################
