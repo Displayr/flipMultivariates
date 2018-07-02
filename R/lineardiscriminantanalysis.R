@@ -114,9 +114,8 @@ LDA <- function(formula,
 
     extracted <- ExtractCommonPrefix(prepared.data$variable.labels[-outcome.i])
     by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
-    predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
     labels <- extracted$shortened.labels
-    outcome.label <- paste0(prepared.data$variable.labels[outcome.i], if (output == "Scatterplot") "" else by.label)
+    prepared.data$outcome.label <- paste0(prepared.data$outcome.label, if (output == "Scatterplot") "" else by.label)
 
     # Computing and checking the prior.
     filtered.outcome.variable <- Factor(unweighted.training.data[, outcome.name])
@@ -173,10 +172,7 @@ LDA <- function(formula,
                    method = variance,
                    weights = prepared.data$cleaned.weights,
                    labels = labels,
-                   functions.output = output == "Discriminant Functions"),
-                   variable.labels = labels,
-                   outcome.label = outcome.label,
-                   predictors.label = predictors.label)
+                   functions.output = output == "Discriminant Functions"))
 
     ####################################################################
     ##### Saving direct input and model-specific parameters        #####
@@ -188,6 +184,7 @@ LDA <- function(formula,
     result$outcome.color <- outcome.color
     result$predictors.color <- predictors.color
     result$missing <- missing
+    result$predictors.label <- if (by.label == "" | !show.labels) "Predictors" else extracted$common.prefix
 
     result$observed.prior <- observed.prior
     result$equal.prior <- equal.prior
@@ -206,7 +203,6 @@ LDA <- function(formula,
         required.data <- prepared.data$imputed.data
     result
 }
-
 
 #' \code{LDA.fit} Fits linear discriminant analysis models.
 #'
