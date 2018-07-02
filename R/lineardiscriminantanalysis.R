@@ -196,6 +196,14 @@ LDA <- function(formula,
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
 
+    if (show.labels)
+    {
+        colnames(result$original$means) <- labels
+        row.names(result$original$scaling) <- labels
+        if (!is.null(result$original$discriminant.functions))
+            rownames(result$original$discriminant.functions) <- c("Intercept", labels)
+    }
+
     ####################################################################
     ##### Saving processed information                             #####
     ####################################################################
