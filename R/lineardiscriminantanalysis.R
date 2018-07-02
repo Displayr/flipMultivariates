@@ -187,7 +187,7 @@ LDA <- function(formula,
 
     # 2. Saving data - generally applicable.
     if (missing == "Imputation (replace missing values with estimates)")
-        data <- prepared.data$imputed.data
+        required.data <- prepared.data$imputed.data
     result$subset <- subset <- prepared.data$row.names %in% rownames(unweighted.training.data)
     result$weights <- prepared.data$unfiltered.weights
     result$model <- required.data
