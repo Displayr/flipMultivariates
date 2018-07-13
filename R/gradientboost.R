@@ -26,8 +26,9 @@
 #'
 #' @importFrom xgboost xgboost xgb.cv
 #' @importFrom flipTransformations OneHot
+#' @aliases GradientBoosting
 #' @export
-GradientBoost <- function(formula,
+GradientBoost <- GradientBoosting <- function(formula,
                                  data = NULL,
                                  subset = NULL,
                                  weights = NULL,

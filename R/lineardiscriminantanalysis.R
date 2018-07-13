@@ -55,8 +55,9 @@
 #' @importFrom flipU OutcomeName IsCount
 #' @importFrom stats aggregate
 #' @importFrom flipRegression ConfusionMatrix
+#' @aliases LinearDiscriminantAnalysis
 #' @export
-LDA <- function(formula,
+LDA <- LinearDiscriminantAnalysis <- function(formula,
                 data = NULL,
                 subset = NULL,
                 weights = NULL,

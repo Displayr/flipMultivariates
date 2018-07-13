@@ -2,6 +2,7 @@
 % Please edit documentation in R/lineardiscriminantanalysis.R
 \name{LDA}
 \alias{LDA}
+\alias{LinearDiscriminantAnalysis}
 \title{Perform linear discriminant analysis}
 \usage{
 LDA(formula, data = NULL, subset = NULL, weights = NULL,

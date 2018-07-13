@@ -2,6 +2,7 @@
 % Please edit documentation in R/gradientboost.R
 \name{GradientBoost}
 \alias{GradientBoost}
+\alias{GradientBoosting}
 \title{Fit a gradient boosted ensemble of underlying tree or regression models}
 \usage{
 GradientBoost(formula, data = NULL, subset = NULL, weights = NULL,
