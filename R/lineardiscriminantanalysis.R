@@ -30,10 +30,10 @@
 #' @param auxiliary.data A \code{\link{data.frame}} containing additional variables
 #'  to be used in imputation (if required). While adding more variables will improve
 #'  the quality of the imputation, it will dramatically slow down the time to estimate.
-#'  Factors and Character variables with a large number of categories should not be included,
-#'  as they will both slow down the data and are unlikely to be useful
+#'  Factors and character variables with a large number of categories should not be included,
+#'  as they will both slow down the data and are unlikely to be useful.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
-#' variables label is an attribute (e.g., attr(foo, "label")).
+#'  variable's label is an attribute (e.g., attr(foo, "label")).
 #' @param ... Additional argments to be past to  \code{LDA.formula}.
 #' @details Imputation (replace missing values with estimates): All selected
 #'   outcome and predictor variables are included in the imputation, along with

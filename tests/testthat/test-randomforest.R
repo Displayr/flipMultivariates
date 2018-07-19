@@ -141,3 +141,14 @@ test_that("Random forests: dot in formula",{
     z2$original$call <- z2$formula <- NULL
     expect_equal(z, z2)
 })
+
+test_that("Random forests: missing data",{
+    hair2$x6[runif(nrow(hair2)) > 0.8] <- NA
+    hair2$x7[runif(nrow(hair2)) > 0.8] <- NA
+    expect_error(RandomForest(x6 ~ x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                       show.labels = FALSE, output = "Prediction-Accuracy Table",
+                       missing = "Imputation (replace missing values with estimates)", data = hair2), NA)
+    expect_error(RandomForest(x6 ~ x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                              show.labels = FALSE, output = "Prediction-Accuracy Table",
+                              missing = "Error if missing data", data = hair2), "The data contains missing values.")
+})

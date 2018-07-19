@@ -26,9 +26,10 @@ name of a variable in \code{data}. It may not be an expression.}
 
 \item{output}{One of \code{"Importance"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.}
 
-\item{missing}{How missing data is to be treated in the regression. Options:
+\item{missing}{How missing data is to be treated. Options:
 \code{"Error if missing data"},
-\code{"Exclude cases with missing data"},}
+\code{"Exclude cases with missing data"}, or
+\code{"Imputation (replace missing values with estimates)"}.}
 
 \item{seed}{The random number seed used in imputation.}
 

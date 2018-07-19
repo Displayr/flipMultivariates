@@ -12,9 +12,10 @@
 #' @param weights An optional vector of sampling weights, or the
 #'   name of a variable in \code{data}. It may not be an expression.
 #' @param output One of \code{"Importance"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
-#' @param missing How missing data is to be treated in the regression. Options:
+#' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"},
+#'   \code{"Exclude cases with missing data"}, or
+#'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param seed The random number seed used in imputation.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
