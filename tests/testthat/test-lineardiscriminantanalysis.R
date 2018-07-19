@@ -197,4 +197,16 @@ test_that("LDA: dot in formula", {
     expect_equal(zLDA, zLDA2)
 })
 
+test_that("LDA: missing data",{
+    hair2$x1[runif(nrow(hair2)) > 0.8] <- NA
+    hair2$x6[runif(nrow(hair2)) > 0.8] <- NA
+    expect_error(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12,
+                              show.labels = FALSE, output = "Prediction-Accuracy Table",
+                              missing = "Imputation (replace missing values with estimates)", data = hair2), NA)
+    expect_error(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12,
+                              show.labels = FALSE, output = "Prediction-Accuracy Table",
+                              missing = "Error if missing data", data = hair2), "The data contains missing values.")
+})
+
+
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
