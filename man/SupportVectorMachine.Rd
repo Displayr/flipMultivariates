@@ -29,7 +29,8 @@ name of a variable in \code{data}. It may not be an expression.}
 
 \item{missing}{How missing data is to be treated. Options:
 \code{"Error if missing data"},
-\code{"Exclude cases with missing data"},}
+\code{"Exclude cases with missing data"}, or
+\code{"Imputation (replace missing values with estimates)"}.}
 
 \item{cost}{A positive number controlling the compromoise between exactly fitting the training data
 (higher cost) and the ability to generalise to unseen data (lower cost).}

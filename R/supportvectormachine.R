@@ -14,7 +14,8 @@
 #' @param output One of \code{"Accuracy"}, \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"},
+#'   \code{"Exclude cases with missing data"}, or
+#'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param cost A positive number controlling the compromoise between exactly fitting the training data
 #' (higher cost) and the ability to generalise to unseen data (lower cost).
 #' @param seed The random number seed used in imputation.

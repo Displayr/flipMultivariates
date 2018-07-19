@@ -15,7 +15,8 @@
 #'   \code{"Prediction-Accuracy Table"} or \code{"Detail"}.
 #' @param missing How missing data is to be treated. Options:
 #'   \code{"Error if missing data"},
-#'   \code{"Exclude cases with missing data"}.
+#'   \code{"Exclude cases with missing data"}, or
+#'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param booster Whether the underlying model is a tree or linear regression. Options:
 #'   \code{"gbtree"},
 #'   \code{"gblinear"}.

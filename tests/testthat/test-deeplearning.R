@@ -68,3 +68,12 @@ test_that("Deep Learning: errors",{
                                                      hidden.nodes = "20, -5"), "Nodes of hidden layers.")
 })
 
+test_that("Deep Learning: missing data",{
+    expect_warning(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
+                              hidden.nodes = 15, max.epochs = 10, output = "Prediction-Accuracy Table",
+                              missing = "Imputation (replace missing values with estimates)"),
+                                "Cross valiidation loss is still decreasing.")
+    expect_error(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
+                                hidden.nodes = 15, max.epochs = 10, output = "Prediction-Accuracy Table",
+                                missing = "Error if missing data"), "The data contains missing values.")
+})
