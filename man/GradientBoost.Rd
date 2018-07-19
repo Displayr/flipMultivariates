@@ -40,7 +40,7 @@ name of a variable in \code{data}. It may not be an expression.}
 
 \item{grid.search}{Whether to search the parameter space in order to tune the model.}
 
-\item{seed}{The random number seed used in imputation.}
+\item{seed}{The random number seed.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}

@@ -18,7 +18,7 @@
 #'   \code{"Imputation (replace missing values with estimates)"}.
 #' @param cost A positive number controlling the compromoise between exactly fitting the training data
 #' (higher cost) and the ability to generalise to unseen data (lower cost).
-#' @param seed The random number seed used in imputation.
+#' @param seed The random number seed.
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).

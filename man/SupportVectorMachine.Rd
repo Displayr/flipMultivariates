@@ -35,7 +35,7 @@ name of a variable in \code{data}. It may not be an expression.}
 \item{cost}{A positive number controlling the compromoise between exactly fitting the training data
 (higher cost) and the ability to generalise to unseen data (lower cost).}
 
-\item{seed}{The random number seed used in imputation.}
+\item{seed}{The random number seed.}
 
 \item{statistical.assumptions}{A Statistical Assumptions object.}
 

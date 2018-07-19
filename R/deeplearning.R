@@ -19,7 +19,7 @@
 #'   \code{"Error if missing data"},
 #'   \code{"Exclude cases with missing data"}, or
 #'   \code{"Imputation (replace missing values with estimates)"}.
-#' @param seed The random number seed used in imputation.
+#' @param seed The random number seed.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param hidden.nodes A \code{\link{vector}} that specifies the number of hidden nodes in each

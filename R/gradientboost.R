@@ -21,7 +21,7 @@
 #'   \code{"gbtree"},
 #'   \code{"gblinear"}.
 #' @param grid.search Whether to search the parameter space in order to tune the model.
-#' @param seed The random number seed used in imputation.
+#' @param seed The random number seed.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #'

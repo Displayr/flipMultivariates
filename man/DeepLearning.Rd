@@ -36,7 +36,7 @@ or \code{"Network Layers"}.}
 \item{normalize}{Logical; if \code{TRUE} all predictor variables are normalized to have zero mean
 and unit variance.}
 
-\item{seed}{The random number seed used in imputation.}
+\item{seed}{The random number seed.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}
