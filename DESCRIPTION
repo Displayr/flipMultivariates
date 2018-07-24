@@ -16,6 +16,7 @@ Imports:
     flipRegression,
     flipStatistics,
     flipTransformations,
+    flipTrees,
     flipChartBasics,
     flipU,
     ggplot2,

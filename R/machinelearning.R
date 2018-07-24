@@ -7,7 +7,7 @@
 #' @return A machine learning object.
 #' @export
 
-MachineLearning <- function(algorithm, ..., warn.if.no.match = TRUE)
+MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
 {
     user.args <- list(...)
 
@@ -37,7 +37,13 @@ getFunctionAndParameters <- function(function.name)
     machine.learning.function <- gsub('"', "", function.name, fixed = TRUE) # fixing mess created when 'type' is already a character
 
     # Getting the function
-    machine.learning.function <- get0(machine.learning.function, mode = "function")
+    if (machine.learning.function == "CART")
+        machine.learning.function <- flipTrees::CART
+    else if (machine.learning.function == "Regression")
+        machine.learning.function <- flipRegression::Regression
+    else
+        machine.learning.function <- get0(machine.learning.function, mode = "function")
+
     if (!is.function(machine.learning.function))
         stop(paste0("Cannot find ", machine.learning.function, "."))
     parameters <- formalArgs(machine.learning.function)

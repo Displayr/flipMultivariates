@@ -4,7 +4,7 @@
 \alias{MachineLearning}
 \title{Train a machine learning model.}
 \usage{
-MachineLearning(algorithm, ..., warn.if.no.match = TRUE)
+MachineLearning(algorithm, ..., warn.if.no.match = FALSE)
 }
 \arguments{
 \item{algorithm}{The name of algorithm to perform the training.}
