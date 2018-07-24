@@ -44,7 +44,7 @@ test_that("Print Gradient Boost Importance",{
             }
 })
 
-
+library(flipRegression)
 test_that("Gradient Boost Weights and Filters",{
 
     # no weight, no filter

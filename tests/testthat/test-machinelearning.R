@@ -14,8 +14,9 @@ for (alg in algorithms)
 {
     test_that(paste0("Machine Learning: ", alg), {
 
-        expect_error(MachineLearning(alg,
-                              formula = sex ~ education_num + income + workclass,
-                              data = adult.2000), NA)
+        expect_error(ml <- suppressWarnings(MachineLearning(alg,
+                              formula = sex ~ education_num + marital + workclass,
+                              data = adult.2000)), NA)
+        print(ml)
     })
 }
