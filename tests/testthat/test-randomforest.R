@@ -21,8 +21,6 @@ colnames(hair1)[ncol(hair1)] <- "dollar$x18"
 # Create a smaller subset of variables for testing dot on RHS
 hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
 
-library(flipRegression)
-
 test_that("Random forests: Outputs, labels and outcome variable types",{
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")

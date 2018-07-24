@@ -39,6 +39,7 @@ Remotes:
     Displayr/flipRegression,
     Displayr/flipStatistics,
     Displayr/flipTransformations,
+    Displayr/flipTrees,
     Displayr/flipU,
     Displayr/flipChartBasics,
     Displayr/rhtmlHeatmap,

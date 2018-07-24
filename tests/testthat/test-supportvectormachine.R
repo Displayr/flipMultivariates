@@ -12,7 +12,6 @@ attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)
 # Create a smaller subset of variables for testing dot on RHS
 hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
-library(flipRegression)
 
 test_that("SVM: Costs and outputs",{
     z <- SupportVectorMachine(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,

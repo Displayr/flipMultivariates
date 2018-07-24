@@ -12,7 +12,6 @@ attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)
 # Create a smaller subset of variables for testing dot on RHS
 hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
-library(flipRegression)
 
 test_that("Print Gradient Boost: outputs and boosters",{
     for (output in c("Detail", "Accuracy", "Prediction-Accuracy Table"))
@@ -46,7 +45,6 @@ test_that("Print Gradient Boost Importance",{
 })
 
 
-library(flipRegression)
 test_that("Gradient Boost Weights and Filters",{
 
     # no weight, no filter
