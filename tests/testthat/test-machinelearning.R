@@ -17,6 +17,5 @@ for (alg in algorithms)
         expect_error(ml <- suppressWarnings(MachineLearning(alg,
                               formula = sex ~ education_num + marital + workclass,
                               data = adult.2000)), NA)
-        print(ml)
     })
 }
