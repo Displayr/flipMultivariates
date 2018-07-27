@@ -156,9 +156,36 @@ print.SupportVectorMachine <- function(x, ...)
     }
     else
     {
-        print(x$original)
+        print.original(x$original)
         invisible(x)
     }
 }
 
-
+# Copy of print.svm without the function call being printed
+print.original <- function(x)
+{
+    #cat("\nCall:", deparse(x$call, 0.8 * getOption("width")),
+    #    "\n", sep = "\n")
+    cat("Parameters:\n")
+    cat("   SVM-Type: ", c("C-classification", "nu-classification",
+                           "one-classification", "eps-regression", "nu-regression")[x$type +
+                                                                                        1], "\n")
+    cat(" SVM-Kernel: ", c("linear", "polynomial", "radial",
+                           "sigmoid")[x$kernel + 1], "\n")
+    if (x$type == 0 || x$type == 3 || x$type == 4)
+        cat("       cost: ", x$cost, "\n")
+    if (x$kernel == 1)
+        cat("     degree: ", x$degree, "\n")
+    cat("      gamma: ", x$gamma, "\n")
+    if (x$kernel == 1 || x$kernel == 3)
+        cat("     coef.0: ", x$coef0, "\n")
+    if (x$type == 1 || x$type == 2 || x$type == 4)
+        cat("         nu: ", x$nu, "\n")
+    if (x$type == 3) {
+        cat("    epsilon: ", x$epsilon, "\n\n")
+        if (x$compprob)
+            cat("Sigma: ", x$sigma, "\n\n")
+    }
+    cat("\nNumber of Support Vectors: ", x$tot.nSV)
+    cat("\n\n")
+}
