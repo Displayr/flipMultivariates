@@ -28,6 +28,7 @@ Imports:
     rhtmlHeatmap,
     rhtmlLabeledScatter,
     rhtmlMoonPlot,
+    utils,
     xgboost
 Suggests:
     testthat,

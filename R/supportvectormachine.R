@@ -156,13 +156,13 @@ print.SupportVectorMachine <- function(x, ...)
     }
     else
     {
-        print.original(x$original)
+        print.original.svm(x$original)
         invisible(x)
     }
 }
 
 # Copy of print.svm without the function call being printed
-print.original <- function(x)
+print.original.svm <- function(x)
 {
     #cat("\nCall:", deparse(x$call, 0.8 * getOption("width")),
     #    "\n", sep = "\n")
