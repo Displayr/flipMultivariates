@@ -136,7 +136,7 @@ print.SupportVectorMachine <- function(x, ...)
         else
         {
             obs <- Observed(x)[x$subset == TRUE]    # subset also accounts for NAs
-            pred <- predict(x)[x$subset == TRUE]
+            pred <- suppressWarnings(predict(x)[x$subset == TRUE])
             rmse <- sqrt(mean((pred - obs)^2))
             rsq <- (cor(pred, obs))^2
             subtitle <- "Measure of fit"

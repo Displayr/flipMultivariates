@@ -88,10 +88,10 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
 
-    # Convert predictor variables to numeric
+    # Convert predictor variables to dummy variables
     data <- GetData(formula, data, auxiliary.data = NULL)
     outcome.i <- match(OutcomeName(formula, data), names(data))
-    data[, -outcome.i] <- AsNumeric(data[, -outcome.i], binary = FALSE)
+    data <- cbind(data[outcome.i], AsNumeric(data[, -outcome.i], binary = TRUE, remove.first = TRUE))
 
     ####################################################################
     ##### Prepare the data                                        ######
@@ -503,6 +503,28 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         print(x$original$discriminant.functions)
     }
     else
-        print(x$original, ...)
+        print.original.lda(x$original, ...)
 }
 
+# Copy of print.lda without the function call being printed
+print.original.lda <- function(x, ...)
+{
+    #if (!is.null(cl <- x$call)) {
+    #    names(cl)[2L] <- ""
+    #    cat("Call:\n")
+    #    dput(cl, control = NULL)
+    #}
+    cat("\nPrior probabilities of groups:\n")
+    print(x$prior, ...)
+    cat("\nGroup means:\n")
+    print(x$means, ...)
+    cat("\nCoefficients of linear discriminants:\n")
+    print(x$scaling, ...)
+    svd <- x$svd
+    names(svd) <- dimnames(x$scaling)[[2L]]
+    if (length(svd) > 1L) {
+        cat("\nProportion of trace:\n")
+        print(round(svd^2/sum(svd^2), 4L), ...)
+    }
+    invisible(x)
+}
