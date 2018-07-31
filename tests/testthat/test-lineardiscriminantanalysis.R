@@ -58,10 +58,10 @@ test_that("LDA: plots",
 
 test_that("System is computationally singular)",
            {
-               x <- rnorm(100)
-               y <- rnorm(100)
-               z <- x
-                expect_warning(print(LDA(hair1$x1 ~ x + y + z)), "Variables are colinear.")
+               hair1$x <- rnorm(100)
+               hair1$y <- rnorm(100)
+               hair1$z <- hair1$x
+                expect_warning(print(LDA(x1 ~ x + y + z, data = hair1)), "Variables are colinear.")
            })
 
 

@@ -5,9 +5,10 @@
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom flipTransformations AdjustDataToReflectWeights
+#' @importFrom stats as.formula
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
-                                       weights, weights.description, missing, seed)
+                                       weights, weights.description, missing, seed, dummy = FALSE)
 {
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
 
@@ -31,6 +32,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
+    if (dummy)  # convert factors witn N levels to N-1 binary variables, used by LDA
+        data <- cbind(data[outcome.i], AsNumeric(data[, -outcome.i], binary = TRUE, remove.first = TRUE))
     if (setequal(data[!is.na(data[, outcome.i]), outcome.i], c(0, 1)))
         data[, outcome.i] <- as.factor(data[, outcome.i])
     outcome.variable <- data[, outcome.i]
@@ -45,7 +48,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
 
     # Treatment of missing values.
-    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
+    # rebuild formula because there are new variables for each level of factorial predictors
+    form <- as.formula(paste(outcome.name, "~ ."))
+    processed.data <- EstimationData(form, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
     n <- nrow(unweighted.training.data)
     if (n <= ncol(unweighted.training.data))
