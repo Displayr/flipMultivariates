@@ -5,7 +5,7 @@
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom flipTransformations AdjustDataToReflectWeights
-#' @importFrom stats as.formula
+#' @importFrom stats as.formula var
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed, dummy = FALSE)
@@ -91,6 +91,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
 #' Save standard data after fitting a machine learning model
 #'
+#' @importFrom flipU IsCount
 #' @noRd
 saveMachineLearningResults <- function(result, prepared.data, show.labels)
 {
@@ -123,7 +124,9 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     }
 
     # Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
+    decimals <- if (is.null(prepared.data$unfiltered.weights) || IsCount(prepared.data$unfiltered.weights))
+        0 else 2
+    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights, decimals)
 
     return(result)
 }
