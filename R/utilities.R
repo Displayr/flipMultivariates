@@ -38,7 +38,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
         # convert factors witn N levels to N-1 binary variables, used by LDA
         data <- cbind(data[outcome.i], AsNumeric(data[, -outcome.i], binary = TRUE, remove.first = TRUE))
         # remove constant variables caused by unpopulated levels
-        data[, -1] <- data[, -1][, lapply(data[, -1], var, na.rm = TRUE) != 0]
+        data <- data[, c(TRUE, sapply(data[, -1], var, na.rm = TRUE) != 0)]
     }
 
     if (setequal(data[!is.na(data[, outcome.i]), outcome.i], c(0, 1)))
