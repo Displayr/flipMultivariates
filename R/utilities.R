@@ -8,7 +8,8 @@
 #' @importFrom stats as.formula var
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
-                                       weights, weights.description, missing, seed, dummy = FALSE)
+                                       weights, weights.description, missing, seed,
+                                       bootstrap.weights = TRUE, dummy = FALSE)
 {
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
 
@@ -68,6 +69,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     # Resampling to generate a weighted sample, if necessary.
     weighted.training.data <- if (is.null(weights))
         unweighted.training.data
+    else if (!bootstrap.weights)
+        NULL
     else
         AdjustDataToReflectWeights(unweighted.training.data, cleaned.weights)
 
@@ -124,8 +127,6 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     }
 
     # Save confusion matrix
-    decimals <- if (is.null(prepared.data$unfiltered.weights) || IsCount(prepared.data$unfiltered.weights))
-        0 else 2
     result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights, decimals)
 
     return(result)

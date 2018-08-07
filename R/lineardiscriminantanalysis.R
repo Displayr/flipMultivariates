@@ -88,17 +88,13 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
 
-    # Convert predictor variables to dummy variables
-    #data <- GetData(formula, data, auxiliary.data = NULL)
-    #outcome.i <- match(OutcomeName(formula, data), names(data))
-    #data <- cbind(data[outcome.i], AsNumeric(data[, -outcome.i], binary = TRUE, remove.first = TRUE))
-
     ####################################################################
     ##### Prepare the data                                        ######
     ####################################################################
 
     prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
-                                                weights, weights.description, missing, seed, dummy = TRUE)
+                                                weights, weights.description, missing, seed,
+                                                bootstrap.weights = FALSE, dummy = TRUE)
 
     unweighted.training.data <- prepared.data$unweighted.training.data
     required.data <- prepared.data$required.data
