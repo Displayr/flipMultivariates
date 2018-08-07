@@ -127,7 +127,7 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     }
 
     # Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights, decimals)
+    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
 
     return(result)
 }
