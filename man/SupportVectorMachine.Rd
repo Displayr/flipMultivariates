@@ -4,10 +4,10 @@
 \alias{SupportVectorMachine}
 \title{Fit a support vector machine model}
 \usage{
-SupportVectorMachine(formula, data = NULL, subset = NULL, weights = NULL,
-  output = "Accuracy", missing = "Exclude cases with missing data",
-  cost = 1, seed = 12321, statistical.assumptions, show.labels = FALSE,
-  ...)
+SupportVectorMachine(formula, data = NULL, subset = NULL,
+  weights = NULL, output = "Accuracy",
+  missing = "Exclude cases with missing data", cost = 1,
+  seed = 12321, statistical.assumptions, show.labels = FALSE, ...)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}

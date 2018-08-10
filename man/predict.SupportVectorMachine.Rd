@@ -4,7 +4,8 @@
 \alias{predict.SupportVectorMachine}
 \title{\code{predict.SupportVectorMachine}}
 \usage{
-\method{predict}{SupportVectorMachine}(object, newdata = object$model, ...)
+\method{predict}{SupportVectorMachine}(object, newdata = object$model,
+  ...)
 }
 \arguments{
 \item{object}{A \code{SupportVectorMachine} object.}

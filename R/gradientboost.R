@@ -234,75 +234,8 @@ print.GradientBoost <- function(x, ...)
     }
     else
     {
-        print.original.gb(x$original)
+        x$original$call <- x$formula
+        print(x$original)
         invisible(x)
     }
 }
-
-# Copy of print.xgb function without excessive x$call output
-#' @importFrom xgboost xgb.attributes
-#' @importFrom utils object.size
-print.original.gb <- function(x, verbose = FALSE, ...)
-{
-    cat("##### xgb.Booster\n")
-    #valid_handle <- is.null.handle(x$handle)
-    #if (!valid_handle)
-    #    cat("Handle is invalid! Suggest using xgb.Booster.complete\n")
-    cat("raw: ")
-    if (!is.null(x$raw)) {
-        cat(format(object.size(x$raw), units = "auto"), "\n")
-    }
-    else {
-        cat("NULL\n")
-    }
-    #if (!is.null(x$call)) {
-    #    cat("call:\n  ")
-    #    print(x$call)
-    #}
-    if (!is.null(x$params)) {
-        cat("params (as set within xgb.train):\n")
-        cat("  ", paste(names(x$params), paste0("\"", unlist(x$params),
-                                                "\""), sep = " = ", collapse = ", "), "\n", sep = "")
-    }
-    attrs <- character(0)
-    #if (valid_handle)
-        attrs <- xgb.attributes(x)
-    if (length(attrs) > 0) {
-        cat("xgb.attributes:\n")
-        if (verbose) {
-            cat(paste(paste0("  ", names(attrs)), paste0("\"",
-                                                         unlist(attrs), "\""), sep = " = ", collapse = "\n"),
-                "\n", sep = "")
-        }
-        else {
-            cat("  ", paste(names(attrs), collapse = ", "),
-                "\n", sep = "")
-        }
-    }
-    #if (!is.null(x$callbacks) && length(x$callbacks) > 0) {
-    #    cat("callbacks:\n")
-    #    lapply(callback.calls(x$callbacks), function(x) {
-    #        cat("  ")
-    #        print(x)
-    #    })
-    #}
-    if (!is.null(x$feature_names))
-        cat("# of features:", length(x$feature_names), "\n")
-    cat("niter: ", x$niter, "\n", sep = "")
-    for (n in setdiff(names(x), c("handle", "raw", "call", "params",
-                                  "callbacks", "evaluation_log", "niter", "feature_names"))) {
-        if (is.atomic(x[[n]])) {
-            cat(n, ":", x[[n]], "\n", sep = " ")
-        }
-        else {
-            cat(n, ":\n\t", sep = " ")
-            print(x[[n]])
-        }
-    }
-    if (!is.null(x$evaluation_log)) {
-        cat("evaluation_log:\n")
-        print(x$evaluation_log, row.names = FALSE, topn = 2)
-    }
-    invisible(x)
-}
-

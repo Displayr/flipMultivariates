@@ -4,8 +4,8 @@
 \alias{predict.LDA}
 \title{\code{predict.LDA}}
 \usage{
-\method{predict}{LDA}(object, newdata = object$model, na.action = na.pass,
-  ...)
+\method{predict}{LDA}(object, newdata = object$model,
+  na.action = na.pass, ...)
 }
 \arguments{
 \item{object}{A \code{LDA} object.}

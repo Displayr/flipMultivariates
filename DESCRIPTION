@@ -46,4 +46,4 @@ Remotes:
     Displayr/rhtmlHeatmap,
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
