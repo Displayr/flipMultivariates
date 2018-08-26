@@ -123,6 +123,7 @@ DeepLearning <- function(formula,
     ##### Saving direct input parameters                           #####
     ####################################################################
 
+    result$hidden.nodes <- hidden.nodes
     result$output <- output
     result$missing <- missing
     result$normalize <- normalize
@@ -215,7 +216,7 @@ neuralNetwork <- function(X,
 
     # train until no improvement in validation loss for 3 epochs
     model <- build.model()
-    history <- model %>% fit(
+    history <- fit(model,
         X,
         Y,
         epochs = max.epochs,
@@ -225,7 +226,8 @@ neuralNetwork <- function(X,
         callbacks = c(callback_early_stopping(patience = 3)),
         verbose = 0
     )
-    history$metrics <- history$metrics[sort(names(history$metrics))] # fix random ordering
+    history$metrics <- history$metrics[sort(names(history$metrics))]    # fix unstable ordering
+    history$params <- history$params[sort(names(history$params))]
 
     if ((optimal.epochs <- length(history$metrics$val_loss)) == max.epochs)
         warning("Cross valiidation loss is still decreasing after maximum number of epochs.",
