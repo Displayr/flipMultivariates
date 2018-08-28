@@ -330,14 +330,14 @@ print.DeepLearning <- function(x, ...)
 #' including those with missing data and for the fitted \code{data} before filtering in the case
 #' that \code{newdata} is not specified.  NA is returned for cases with unfitted factor levels.
 #' @param object A \code{DeepLearning} object.
-#' @param new.data Optionally, a data frame including the variables used to fit the model.
+#' @param newdata Optionally, a data frame including the variables used to fit the model.
 #' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.DeepLearning.
 #' @importFrom flipData CheckPredictionVariables
 #' @importFrom keras predict_classes unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
-predict.DeepLearning <- function(object, new.data = NULL, ...)
+predict.DeepLearning <- function(object, newdata = NULL, ...)
 {
     if (py_is_null_xptr(object$original))
         object$original <- unserialize_model(object$original.serial)
@@ -348,7 +348,7 @@ predict.DeepLearning <- function(object, new.data = NULL, ...)
     else
         CheckPredictionVariables(object, newdata)
 
-    X <- as.matrix(AsNumeric(new.data))
+    X <- as.matrix(AsNumeric(newdata))
     constants <- object$training.stdevs == 0
     if (object$normalize)
         X[, !constants] <- scale(X[, !constants],
