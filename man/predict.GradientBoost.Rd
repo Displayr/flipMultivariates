@@ -4,7 +4,7 @@
 \alias{predict.GradientBoost}
 \title{\code{predict.GradientBoost}}
 \usage{
-\method{predict}{GradientBoost}(object, newdata = object$model, ...)
+\method{predict}{GradientBoost}(object, newdata = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{GradientBoost} object.}

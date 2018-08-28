@@ -4,7 +4,7 @@
 \alias{predict.RandomForest}
 \title{\code{predict.RandomForest}}
 \usage{
-\method{predict}{RandomForest}(object, newdata = object$model,
+\method{predict}{RandomForest}(object, newdata = NULL,
   na.action = na.pass, ...)
 }
 \arguments{

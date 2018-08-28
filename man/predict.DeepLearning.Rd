@@ -4,7 +4,7 @@
 \alias{predict.DeepLearning}
 \title{\code{predict.DeepLearning}}
 \usage{
-\method{predict}{DeepLearning}(object, new.data = object$model, ...)
+\method{predict}{DeepLearning}(object, new.data = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{DeepLearning} object.}

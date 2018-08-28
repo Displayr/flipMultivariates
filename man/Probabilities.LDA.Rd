@@ -4,7 +4,7 @@
 \alias{Probabilities.LDA}
 \title{\code{Probabilities.LDA}}
 \usage{
-Probabilities.LDA(x)
+\method{Probabilities}{LDA}(x)
 }
 \arguments{
 \item{x}{A \code{LDA} object.}

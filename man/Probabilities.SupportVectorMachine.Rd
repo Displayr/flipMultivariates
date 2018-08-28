@@ -4,7 +4,7 @@
 \alias{Probabilities.SupportVectorMachine}
 \title{\code{Probabilities.SupportVectorMachine}}
 \usage{
-Probabilities.SupportVectorMachine(x)
+\method{Probabilities}{SupportVectorMachine}(x)
 }
 \arguments{
 \item{x}{A \code{SupportVectorMachine} object.}

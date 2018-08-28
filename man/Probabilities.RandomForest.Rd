@@ -4,7 +4,7 @@
 \alias{Probabilities.RandomForest}
 \title{\code{Probabilities.RandomForest}}
 \usage{
-Probabilities.RandomForest(x)
+\method{Probabilities}{RandomForest}(x)
 }
 \arguments{
 \item{x}{A \code{RandomForest} object.}

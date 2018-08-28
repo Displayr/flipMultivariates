@@ -13,9 +13,14 @@
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.LDA <- function(object, newdata = object$model, na.action = na.pass, ...)
+predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    newdata <- CheckPredictionVariables(object, newdata)
+    newdata <- if (is.null(newdata))
+        # no warnings from CheckPredictionVariables if predicting training data
+        suppressWarnings(CheckPredictionVariables(object, object$model))
+    else
+        CheckPredictionVariables(object, newdata)
+
     ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
 }
 
@@ -63,9 +68,14 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' @importFrom stats na.pass
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.RandomForest <- function(object, newdata = object$model, na.action = na.pass, ...)
+predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    newdata <- CheckPredictionVariables(object, newdata)
+    newdata <- if (is.null(newdata))
+        # no warnings from CheckPredictionVariables if predicting training data
+        suppressWarnings(CheckPredictionVariables(object, object$model))
+    else
+        CheckPredictionVariables(object, newdata)
+
     randomForestExtractVariables(object, "response", newdata = newdata, na.action = na.action)
 }
 
@@ -102,11 +112,16 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 #' @importFrom stats complete.cases
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.SupportVectorMachine <- function(object, newdata = object$model, ...)
+predict.SupportVectorMachine <- function(object, newdata = NULL, ...)
 {
     # CheckPredictionVariables is still required without newdata because predictions in object$fitted may be
     # a subset of object$model.
-    newdata <- CheckPredictionVariables(object, newdata)
+    newdata <- if (is.null(newdata))
+        # no warnings from CheckPredictionVariables if predicting training data
+        suppressWarnings(CheckPredictionVariables(object, object$model))
+    else
+        CheckPredictionVariables(object, newdata)
+
     # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases
     # (without NA or new levels). Default to NA for other instances.
     newdata[complete.cases(newdata), "prediction"] <-
@@ -130,7 +145,7 @@ Probabilities.SupportVectorMachine <- function(x)
     all.probs <- data.frame(matrix(NA, ncol = ncol(prob.excluding.na), nrow = nrow(x$model)))
     all.probs[row.names(prob.excluding.na), ] <- prob.excluding.na
     colnames(all.probs) <- colnames(prob.excluding.na)
-    return(all.probs)
+    return(as.matrix(all.probs[, order(names(all.probs))]))
 }
 
 #' \code{predict.GradientBoost}
@@ -146,9 +161,13 @@ Probabilities.SupportVectorMachine <- function(x)
 #' @importFrom stats complete.cases
 #' @importFrom flipData CheckPredictionVariables
 #' @export
-predict.GradientBoost <- function(object, newdata = object$model, ...)
+predict.GradientBoost <- function(object, newdata = NULL, ...)
 {
-    newdata <- CheckPredictionVariables(object, newdata)
+    newdata <- if (is.null(newdata))
+        # no warnings from CheckPredictionVariables if predicting training data
+        suppressWarnings(CheckPredictionVariables(object, object$model))
+    else
+        CheckPredictionVariables(object, newdata)
     newdata <- OneHot(newdata, object$outcome.name)$X
 
     prediction <- predict(object$original, newdata = newdata, reshape = TRUE, ...)
@@ -185,8 +204,9 @@ Probabilities.GradientBoost <- function(object)
     probabilities <- data.frame(predict(object$original, newdata = data, reshape = TRUE))
 
     # add NA probability for instances with missing prediction variables
+    colnames(probabilities) <- object$outcome.levels
     probabilities[!complete.cases(data), ] <- NA
-    return(probabilities)
+    return(as.matrix(probabilities))
 }
 
 

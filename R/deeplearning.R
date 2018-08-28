@@ -337,12 +337,17 @@ print.DeepLearning <- function(x, ...)
 #' @importFrom keras predict_classes unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
-predict.DeepLearning <- function(object, new.data = object$model, ...)
+predict.DeepLearning <- function(object, new.data = NULL, ...)
 {
     if (py_is_null_xptr(object$original))
         object$original <- unserialize_model(object$original.serial)
 
-    new.data <- CheckPredictionVariables(object, new.data)
+    newdata <- if (is.null(newdata))
+        # no warnings from CheckPredictionVariables if predicting training data
+        suppressWarnings(CheckPredictionVariables(object, object$model))
+    else
+        CheckPredictionVariables(object, newdata)
+
     X <- as.matrix(AsNumeric(new.data))
     constants <- object$training.stdevs == 0
     if (object$normalize)

@@ -4,7 +4,7 @@
 \alias{Probabilities.DeepLearning}
 \title{\code{Probabilities.DeepLearning}}
 \usage{
-Probabilities.DeepLearning(object)
+\method{Probabilities}{DeepLearning}(object)
 }
 \arguments{
 \item{object}{A \code{DeepLearning} object.}

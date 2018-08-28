@@ -4,7 +4,7 @@
 \alias{Probabilities.GradientBoost}
 \title{\code{Probabilities.GradientBoost}}
 \usage{
-Probabilities.GradientBoost(object)
+\method{Probabilities}{GradientBoost}(object)
 }
 \arguments{
 \item{object}{A \code{GradientBoost} object.}
