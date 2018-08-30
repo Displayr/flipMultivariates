@@ -211,7 +211,8 @@ print.GradientBoost <- function(x, ...)
             rmse <- sqrt(mean((pred - obs)^2))
             rsq <- 1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
             subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
+            tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse,
+                                       "R-squared" = if (rsq < 0) NA else rsq),
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,
