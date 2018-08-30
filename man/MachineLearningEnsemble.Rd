@@ -5,7 +5,7 @@
 \title{Create an ensemble of MachineLearning and/or Regression models}
 \usage{
 MachineLearningEnsemble(models, compare.only = FALSE,
-  output = "Comparison")
+  evaluation.filter = NULL, output = "Comparison")
 }
 \arguments{
 \item{models}{A \code{list} of models, all of which are of class
@@ -13,6 +13,9 @@ MachineLearningEnsemble(models, compare.only = FALSE,
 
 \item{compare.only}{Logical; whether to just produce a table comparing the models or
 additionally combine them to make a new ensemble model.}
+
+\item{evaluation.filter}{An optional vector specifying a subset of observations to be
+used for evaluating the models.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a

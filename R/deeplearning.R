@@ -295,7 +295,7 @@ print.DeepLearning <- function(x, ...)
             obs <- Observed(x)[x$subset == TRUE]    # subset also accounts for NAs
             pred <- predict(x)[x$subset == TRUE]
             rmse <- sqrt(mean((pred - obs)^2))
-            rsq <- (cor(pred, obs))^2
+            rsq <- 1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
             subtitle <- "Measure of fit"
             tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse, "R-squared" = rsq),
                                      column.labels = " ",

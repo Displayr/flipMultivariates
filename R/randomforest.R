@@ -30,7 +30,7 @@ RandomForest <- function(formula,
                          subset = NULL,
                          weights = NULL,
                          output = "Importance",
-                         missing  = "Exclude cases with missing data",
+                         missing = "Exclude cases with missing data",
                          seed = 12321,
                          show.labels = FALSE,
                          sort.by.importance = TRUE,
@@ -81,6 +81,7 @@ RandomForest <- function(formula,
     ####################################################################
 
     result$original$call <- match.call()
+    #result$original.subset <- CleanSubset(subset, nrow(data))
     result$output <- output
     result$missing <- missing
     result$sort.by.importance <- sort.by.importance

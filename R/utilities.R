@@ -89,7 +89,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
                 outcome.label = outcome.label,
                 variable.labels = variable.labels,
                 outcome.i = outcome.i,
-                input.formula = input.formula))
+                input.formula = input.formula,
+                subset.missing.removed = processed.data$post.missing.data.estimation.sample))
 }
 
 #' Save standard data after fitting a machine learning model
@@ -100,7 +101,7 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
 {
     # Save data, subset and weights
     result$model <- prepared.data$required.data
-    result$subset <- subset <- prepared.data$row.names %in% rownames(prepared.data$unweighted.training.data)
+    result$subset <- prepared.data$subset.missing.removed # original subset with missing data removed
     result$weights <- prepared.data$unfiltered.weights
     result$formula <- prepared.data$input.formula
 
@@ -127,7 +128,7 @@ saveMachineLearningResults <- function(result, prepared.data, show.labels)
     }
 
     # Save confusion matrix
-    result$confusion <- ConfusionMatrix(result, subset, prepared.data$unfiltered.weights)
+    result$confusion <- ConfusionMatrix(result, result$subset, prepared.data$unfiltered.weights)
 
     return(result)
 }
