@@ -138,8 +138,8 @@ has.numeric.outcome <- function(x) {
 rmse <- function(obs, pred) sqrt(mean((obs - pred)^2, na.rm = TRUE))
 r.squared <- function(obs, pred) {
     obs.and.pred <- complete.cases(obs, pred)
-    obs <- obs[complete.cases]
-    pred <- pred[complete.cases]
+    obs <- obs[obs.and.pred]
+    pred <- pred[obs.and.pred]
     1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
 }
 #r.squared <- function(obs, pred) cor(obs, pred, use = "complete.obs")^2
