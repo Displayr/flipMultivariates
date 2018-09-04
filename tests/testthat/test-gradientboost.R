@@ -10,6 +10,7 @@ hair1$num <- suppressWarnings(flipTransformations::AsNumeric(hair1$x1, binary = 
 hair1$numeric <- hair1$num + runif(length(hair1$num)) / 10
 attr(hair1$x7, "question") <- "Variable number 7"
 hair1$cat <- factor(hair1$num)
+hair1$bin <- hair1$num > 1
 # Create a smaller subset of variables for testing dot on RHS
 hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
 
@@ -26,8 +27,17 @@ test_that("Print Gradient Boost: outputs and boosters",{
                                    show.labels = FALSE, output = output, data = hair1, subset = split60 == "Estimation Sample",
                                    booster = booster, grid.search = grid.search)
                 expect_error(capture.output(print(z)), NA)
-
             }
+})
+
+test_that("Print Gradient Boost: binary outcome",{
+    for (booster in c("gbtree", "gblinear"))
+    {
+        z <- GradientBoost(bin ~ x6 + x7 + x8 + x9,
+                           show.labels = FALSE, output = "Accuracy", data = hair1, subset = split60 == "Estimation Sample",
+                           booster = booster, grid.search = FALSE)
+        expect_error(capture.output(print(z)), NA)
+    }
 })
 
 test_that("Print Gradient Boost Importance",{
