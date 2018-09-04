@@ -59,8 +59,6 @@ MachineLearningEnsemble <- function(models,
     if (!compare.only)
     {
         comparison <- rbind(comparison, rep(NA, ncol(comparison)), stringsAsFactors = FALSE)
-        #comparison$training.accuracy[n.models + 1] <- result$training.accuracy
-        #comparison$evaluation.accuracy[n.models + 1] <- result$evaluation.accuracy
         comparison[["Underlying model"]][n.models + 1] <- "Ensemble"
         rownames(comparison)[n.models + 1] <- "Ensemble"
 
@@ -80,9 +78,13 @@ MachineLearningEnsemble <- function(models,
         }
 
         result$outcome <- outcome
+        result$outcome.label <- models[[1]]$outcome.label
+        result$sample.description <- models[[1]]$sample.description
         result$subset <- subset
         result$weights <- weights
-        result$confusion <- ConfusionMatrix(result, subset, weights)
+        result$confusion <- ConfusionMatrix(result,
+                                            if (is.null(evaluation.filter)) subset else evaluation.filter,
+                                            weights)
 
         if (numeric.outcome) {
             comparison[["Training RMSE"]][n.models + 1] <- result$training.rmse <- rmse(outcome[subset], result$prediction[subset])
