@@ -90,6 +90,8 @@ MachineLearningEnsemble <- function(models,
                                             if (is.null(evaluation.filter)) subset else evaluation.filter,
                                             weights)
 
+        # TODO - all training and testing stats for underlying models are weighted
+        # so the stats below for the ensemble should be weighted on the same basis
         if (numeric.outcome) {
             comparison[["Training RMSE"]][n.models + 1] <- result$training.rmse <- rmse(outcome[subset], result$prediction[subset])
             if (!is.null(evaluation.filter))
@@ -101,7 +103,7 @@ MachineLearningEnsemble <- function(models,
         }
         else
         {
-            comparison[["Training accuracy"]][n.models + 1] <- result$training.accuracy <- attr(result$confusion, "accuracy")
+            comparison[["Training accuracy"]][n.models + 1] <- result$training.accuracy <- attr(ConfusionMatrix(result, subset = subset), "accuracy")
             if (!is.null(evaluation.filter))
                 comparison[["Evaluation accuracy"]][n.models + 1] <- result$evaluation.accuracy <- attr(ConfusionMatrix(result, subset = evaluation.filter), "accuracy")
             comparison[["Model type"]][n.models + 1] <- "Average probabilities"
