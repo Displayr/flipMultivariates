@@ -146,8 +146,12 @@ r.squared <- function(obs, pred) {
     obs.and.pred <- complete.cases(obs, pred)
     obs <- obs[obs.and.pred]
     pred <- pred[obs.and.pred]
-    1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
+    r.sq <- 1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
+    if (r.sq < 0)
+        return(NA)
+    r.sq
 }
+# below defintion only valid when optimizing sum of squared errors
 #r.squared <- function(obs, pred) cor(obs, pred, use = "complete.obs")^2
 
 numericPerformance <- function(x, evaluation.filter) {
