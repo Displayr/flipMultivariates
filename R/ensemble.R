@@ -21,6 +21,10 @@ MachineLearningEnsemble <- function(models,
     if (n.models <= 1)
         stop("At least 2 models are required to create an ensemble.")
 
+    # Treat TRUE filter as NULL, i.e., no evaluation sample statistics are calculated.
+    if (!is.null(evaluation.filter) && length(evaluation.filter) == 1 && evaluation.filter == TRUE)
+        evaluation.filter <- NULL
+
     # Test that models are of the same class and outcome. Not necessary to use same data
     # unless evaluation.filter is specified.
     checkModelsComparable(models, evaluation.filter)
@@ -218,7 +222,7 @@ print.MachineLearningEnsemble <- function(x, ...) {
 
     if (x$output == "Ensemble")
     {
-        x$confusion
+        print(x$confusion)
     }
     else
     {
