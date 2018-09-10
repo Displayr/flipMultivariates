@@ -6,6 +6,7 @@
 #'     additionally combine them to make a new ensemble model.
 #' @param evaluation.filter An optional vector specifying a subset of observations to be
 #'     used for evaluating the models.
+#' @param evaluation.weights An optional vector of weights to be used for evaluating the models.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
@@ -15,46 +16,21 @@
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
                            evaluation.filter = NULL,
+                           evaluation.weights = NULL,
                            output = "Comparison") {
 
     n.models <- length(models)
     if (n.models <= 1)
         stop("At least 2 models are required to create an ensemble.")
 
-    # Treat TRUE filter as NULL, i.e., no evaluation sample statistics are calculated.
+    # Treat TRUE filter as NULL, i.e., no evaluation.filter statistics are calculated.
     if (!is.null(evaluation.filter) && length(evaluation.filter) == 1 && evaluation.filter == TRUE)
         evaluation.filter <- NULL
 
     # Test that models are of the same class and outcome. Not necessary to use same data
-    # unless evaluation.filter is specified.
-    checkModelsComparable(models, evaluation.filter)
+    # unless evaluation.filter and/or weights are specified.
+    numeric.outcome <- checkModelsComparable(models, evaluation.filter, evaluation.weights)
     comparison <- data.frame(t(sapply(models, class.and.type)), stringsAsFactors = FALSE)
-
-    statistic.names <- c("Underlying model", "Model type")
-
-    numeric.outcomes <- sapply(models, has.numeric.outcome)
-    if (length(unique(numeric.outcomes)) != 1)
-        stop("Outcomes must be all either numeric or categorical to comapre models.")
-    numeric.outcome <- numeric.outcomes[[1]]
-
-    if (numeric.outcome)
-    {
-        perfomances <- sapply(models, numericPerformance, evaluation.filter)
-        comparison <- cbind(comparison, t(perfomances))
-        colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
-                                                     "Training R^2", "Evaluation R^2"))
-        if (all(is.na(comparison$`Evaluation R^2`)))
-            comparison$`Evaluation R^2` <- comparison$`Evaluation RMSE` <- NULL
-    }
-    else
-    {
-        perfomances <- sapply(models, categoricalPerformance, evaluation.filter)
-        comparison <- cbind(comparison, t(perfomances))
-        colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
-        if (all(is.na(comparison$`Evaluation accuracy`)))
-            comparison$`Evaluation accuracy` <- NULL
-    }
-
     rownames(comparison) <- paste("Model", seq(n.models))
 
     result <- list()
@@ -62,14 +38,13 @@ MachineLearningEnsemble <- function(models,
 
     if (!compare.only)
     {
-        comparison <- rbind(comparison, rep(NA, ncol(comparison)), stringsAsFactors = FALSE)
-        comparison[["Underlying model"]][n.models + 1] <- "Ensemble"
+        ensemble.type <- if (numeric.outcome) "Average" else "Average probabilities"
+        comparison <- rbind(comparison, c("Ensemble", ensemble.type), stringsAsFactors = FALSE)
         rownames(comparison)[n.models + 1] <- "Ensemble"
 
         common <-  extractCommonData(models)
         outcome <- common$outcome
         subset <- common$subset
-        weights <- common$weights
 
         if (numeric.outcome) {
             result$prediction <- rowMeans(sapply(models, predict))
@@ -84,30 +59,29 @@ MachineLearningEnsemble <- function(models,
         result$outcome <- outcome
         result$outcome.label <- models[[1]]$outcome.label
         result$sample.description <- models[[1]]$sample.description
-        result$subset <- subset
-        result$weights <- weights
-        result$confusion <- ConfusionMatrix(result,
-                                            if (is.null(evaluation.filter)) subset else evaluation.filter,
-                                            weights)
+        result$subset <- subset          # subsets used to fit the models
+        result$weights <- common$weights # weights used to fit the models
+        result$confusion <- ConfusionMatrix(result) # for the fitted data
+        models$ensemble <- result
+    }
 
-        # TODO - all training and testing stats for underlying models are weighted
-        # so the stats below for the ensemble should be weighted on the same basis
-        if (numeric.outcome) {
-            comparison[["Training RMSE"]][n.models + 1] <- result$training.rmse <- rmse(outcome[subset], result$prediction[subset])
-            if (!is.null(evaluation.filter))
-                comparison[["Evaluation RMSE"]][n.models + 1] <- result$evaluation.rmse <- rmse(outcome[evaluation.filter], result$prediction[evaluation.filter])
-            comparison[["Training R^2"]][n.models + 1] <- result$training.r.squared <- r.squared(outcome[subset], result$prediction[subset])
-            if (!is.null(evaluation.filter))
-                comparison[["Evaluation R^2"]][n.models + 1] <- result$evaluation.r.squared <- r.squared(outcome[evaluation.filter], result$prediction[evaluation.filter])
-            comparison[["Model type"]][n.models + 1] <- "Average"
-        }
-        else
-        {
-            comparison[["Training accuracy"]][n.models + 1] <- result$training.accuracy <- attr(ConfusionMatrix(result, subset = subset), "accuracy")
-            if (!is.null(evaluation.filter))
-                comparison[["Evaluation accuracy"]][n.models + 1] <- result$evaluation.accuracy <- attr(ConfusionMatrix(result, subset = evaluation.filter), "accuracy")
-            comparison[["Model type"]][n.models + 1] <- "Average probabilities"
-        }
+    statistic.names <- c("Underlying model", "Model type")
+    if (numeric.outcome)
+    {
+        perfomances <- sapply(models, numericPerformance, evaluation.filter, evaluation.weights)
+        comparison <- cbind(comparison, t(perfomances))
+        colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
+                                                     "Training R^2", "Evaluation R^2"))
+        if (all(is.na(comparison$`Evaluation R^2`)))
+            comparison$`Evaluation R^2` <- comparison$`Evaluation RMSE` <- NULL
+    }
+    else
+    {
+        perfomances <- sapply(models, categoricalPerformance, evaluation.filter, evaluation.weights)
+        comparison <- cbind(comparison, t(perfomances))
+        colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
+        if (all(is.na(comparison$`Evaluation accuracy`)))
+            comparison$`Evaluation accuracy` <- NULL
     }
 
     result$numeric.outcome <- numeric.outcome
@@ -156,16 +130,19 @@ r.squared <- function(obs, pred) {
 # below defintion only valid when optimizing sum of squared errors
 #r.squared <- function(obs, pred) cor(obs, pred, use = "complete.obs")^2
 
-numericPerformance <- function(x, evaluation.filter) {
+numericPerformance <- function(x, evaluation.filter, evaluation.weights) {
 
-    # Use the same weights as fitting the model
-    weights <- if (is.null(x$weights)) rep(1, nrow(x$model)) else x$weights
-    pred <- predict(x) * weights
-    obs <- Observed(x) * weights
-    training.pred <- pred[x$subset]
-    training.obs <- obs[x$subset]
-    evaluation.pred <- pred[evaluation.filter]
-    evaluation.obs <- obs[evaluation.filter]
+    weights <- if (is.null(x$weights)) 1 else x$weights
+    if (is.null(evaluation.weights))
+        evaluation.weights <- 1
+
+    pred <- predict(x)
+    obs <- Observed(x)
+
+    training.pred <- (pred * weights)[x$subset]
+    training.obs <- (obs * weights)[x$subset]
+    evaluation.pred <- (pred * evaluation.weights)[evaluation.filter]
+    evaluation.obs <- (obs * evaluation.weights)[evaluation.filter]
 
     result <- c(rmse(training.obs, training.pred),
                 if (is.null(evaluation.filter)) NA else rmse(evaluation.obs, evaluation.pred),
@@ -176,17 +153,25 @@ numericPerformance <- function(x, evaluation.filter) {
     return(result)
 }
 
-categoricalPerformance <- function(x, evaluation.filter) {
+#' @importFrom flipRegression Accuracy
+categoricalPerformance <- function(x, evaluation.filter, evaluation.weights) {
 
-    training.accuracy <- attr(ConfusionMatrix(x), "accuracy")
-    evaluation.accuracy <- attr(ConfusionMatrix(x, subset = evaluation.filter), "accuracy")
+    training.accuracy <- if (!is.null(x$confusion))
+        attr(x$confusion, "accuracy")
+    else
+        Accuracy(x, subset = x$subset)
+    evaluation.accuracy <- Accuracy(x, evaluation.filter, evaluation.weights)
     result <- c(training.accuracy,
                 if (is.null(evaluation.filter)) NA else evaluation.accuracy)
     names(result) <- c("training.accuracy", "evaluation.accuracy")
     return(result)
 }
 
-checkModelsComparable <- function(models, evaluation.filter) {
+checkModelsComparable <- function(models, evaluation.filter, evaluation.weights) {
+
+    numeric.outcomes <- sapply(models, has.numeric.outcome)
+    if (length(unique(numeric.outcomes)) != 1)
+        stop("Outcomes must be all either numeric or categorical to comapre models.")
 
     valid.classes <- sapply(models, function(model) (any(c("Regression", "MachineLearning") %in% class(model))))
     if (!all(valid.classes))
@@ -196,13 +181,13 @@ checkModelsComparable <- function(models, evaluation.filter) {
     if (length(unique(outcome.names)) != 1)
         stop("All models must predict the same outcome but they do not.")
 
-    if (!is.null(evaluation.filter))
-    {
-        data.lengths <- c(sapply(models, function(model) length(model$subset)),
-                          length(evaluation.filter))
-        if (length(unique(data.lengths)) != 1)
+    data.lengths <- sapply(models, function(m) nrow(m$model))
+    if (!is.null(evaluation.filter) && length(unique(c(length(evaluation.filter), data.lengths))) != 1)
             stop("Lengths of evaluation filter and input data for each model must be the same.")
-    }
+    if (!is.null(evaluation.weights) && length(unique(c(length(evaluation.weights), data.lengths))) != 1)
+        stop("Lengths of evaluation weights and input data for each model must be the same.")
+
+    return(numeric.outcomes[[1]])
 }
 
 extractCommonData <- function(models) {

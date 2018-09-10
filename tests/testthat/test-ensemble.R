@@ -3,14 +3,15 @@ context("Machine Learning Ensembles")
 library(flipMultivariates)
 data(adult.2000, package = "flipExampleData")
 
-set.seed(123)
+set.seed(1234)
 missing.marital <- runif(2000) > 0.9
 missing.occupation <- runif(2000) > 0.9
 adult.2000$marital[missing.marital] <- NA
 adult.2000$occupation[missing.occupation] <- NA
 train.subset <- c(rep(TRUE, 1000), rep(FALSE, 1000))
-attr(train.subset, "name") <- "training data"
+#attr(train.subset, "name") <- "training data"
 eval.subset <- !train.subset
+weights <- runif(2000)
 
 # Binary outcome
 formula <- income ~ education_num + sex + race
@@ -22,21 +23,25 @@ models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algor
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
-                                                                           subset = train.subset)))
+                                                                           subset = train.subset,
+                                                                           weights = weights)))
 
 test_that("MachineLearningEnsemble: binary outcome", {
 
     en <- MachineLearningEnsemble(models,
                                   compare.only = TRUE,
-                                  evaluation.filter = eval.subset)
-
-    en <- MachineLearningEnsemble(models,
-                                  compare.only = FALSE,
-                                  evaluation.filter = eval.subset)
+                                  evaluation.filter = eval.subset,
+                                  evaluation.weights = weights)
 
     en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
                                   evaluation.filter = eval.subset,
+                                  evaluation.weights = weights)
+
+    en <- MachineLearningEnsemble(models,
+                                  compare.only = FALSE,
+                                  evaluation.filter = eval.subset,
+                                  evaluation.weights = weights,
                                   output = "Ensemble")
 })
 
@@ -50,21 +55,25 @@ models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algor
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
-                                                                           subset = train.subset)))
+                                                                           subset = train.subset,
+                                                                           weights = weights)))
 
 test_that("MachineLearningEnsemble: categorical outcome", {
 
     en <- MachineLearningEnsemble(models,
                                 compare.only = TRUE,
-                                evaluation.filter = eval.subset)
-
-    en <- MachineLearningEnsemble(models,
-                                compare.only = FALSE,
-                                evaluation.filter = eval.subset)
+                                evaluation.filter = eval.subset,
+                                evaluation.weights = weights)
 
     en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
                                 evaluation.filter = eval.subset,
+                                evaluation.weights = weights)
+
+    en <- MachineLearningEnsemble(models,
+                                compare.only = FALSE,
+                                evaluation.filter = eval.subset,
+                                evaluation.weights = weights,
                                 output = "Ensemble")
 })
 
@@ -78,22 +87,26 @@ models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algor
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
-                                                                           subset = train.subset)))
+                                                                           subset = train.subset,
+                                                                           weights = weights)))
 
 
 test_that("MachineLearningEnsemble: numeric outcome", {
 
     en <- MachineLearningEnsemble(models,
                                 compare.only = TRUE,
-                                evaluation.filter = eval.subset)
-
-    en <- MachineLearningEnsemble(models,
-                                compare.only = FALSE,
-                                evaluation.filter = eval.subset)
+                                evaluation.filter = eval.subset,
+                                evaluation.weights = weights)
 
     en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
                                 evaluation.filter = eval.subset,
+                                evaluation.weights = weights)
+
+    en <- MachineLearningEnsemble(models,
+                                compare.only = FALSE,
+                                evaluation.filter = eval.subset,
+                                evaluation.weights = weights,
                                 output = "Ensemble")
 })
 
