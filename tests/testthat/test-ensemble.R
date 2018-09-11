@@ -44,6 +44,9 @@ test_that("MachineLearningEnsemble: binary outcome", {
                                   evaluation.weights = weights,
                                   output = "Ensemble"), NA)
 
+    expect_error(predict(en), NA)
+    expect_error(Probabilities.MachineLearningEnsemble(en), NA)
+
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
@@ -95,6 +98,9 @@ test_that("MachineLearningEnsemble: categorical outcome", {
                                 evaluation.filter = eval.subset,
                                 evaluation.weights = weights,
                                 output = "Ensemble"), NA)
+
+    expect_error(predict(en), NA)
+    expect_error(Probabilities.MachineLearningEnsemble(en), NA)
 
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
@@ -148,6 +154,10 @@ test_that("MachineLearningEnsemble: numeric outcome", {
                                 evaluation.filter = eval.subset,
                                 evaluation.weights = weights,
                                 output = "Ensemble"), NA)
+
+    expect_error(predict(en), NA)
+    expect_error(Probabilities.MachineLearningEnsemble(en),
+                 "Probabilities are only applicable to models with categorical outcome variables.")
 
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
