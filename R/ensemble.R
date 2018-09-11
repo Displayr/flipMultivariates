@@ -70,13 +70,8 @@ MachineLearningEnsemble <- function(models,
 
     if (!is.null(evaluation.filter))
     {
-        eval.wts <- !is.null(evaluation.weights)
-        trn.wts <- !is.null(models[[1]]$weights)
-        msg <- "Weights used for training the models differ from evaluation weights."
-        if (eval.wts != trn.wts)
-            warning(msg)
-        if (eval.wts && trn.wts && !all(evaluation.weights == models[[1]]$weights))
-            warning(msg)
+        if (!identical(evaluation.weights, models[[1]]$weights))
+            warning("Weights used for training the models differ from evaluation weights.")
     }
     else if (!is.null(evaluation.weights))
         warning("Weights will hve no effect because a filter to evaluate the models was not specified.")
