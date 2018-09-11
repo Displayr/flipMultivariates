@@ -5,8 +5,11 @@
 #' @param compare.only Logical; whether to just produce a table comparing the models or
 #'     additionally combine them to make a new ensemble model.
 #' @param evaluation.filter An optional vector specifying a subset of observations to be
-#'     used for evaluating the models.
+#'     used for evaluating the models. If not specified, models will only be compared on the
+#'     training data. To evaluate on the whole sample, a subset must still be specified.
 #' @param evaluation.weights An optional vector of weights to be used for evaluating the models.
+#'     Ignored if no evaluation.filter is supplied. A warning is given if these differ from the
+#'     training weights.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
@@ -65,10 +68,23 @@ MachineLearningEnsemble <- function(models,
         models$ensemble <- result
     }
 
+    if (!is.null(evaluation.filter))
+    {
+        eval.wts <- !is.null(evaluation.weights)
+        trn.wts <- !is.null(models[[1]]$weights)
+        msg <- "Weights used for training the models differ from evaluation weights."
+        if (eval.wts != trn.wts)
+            warning(msg)
+        if (eval.wts && trn.wts && !all(evaluation.weights == models[[1]]$weights))
+            warning(msg)
+    }
+    else if (!is.null(evaluation.weights))
+        warning("Weights will hve no effect because a filter to evaluate the models was not specified.")
+
     statistic.names <- c("Underlying model", "Model type")
     if (numeric.outcome)
     {
-        perfomances <- sapply(models, numericPerformance, evaluation.filter, evaluation.weights)
+        perfomances <- sapply(models, numeric.performance, evaluation.filter, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
@@ -77,7 +93,7 @@ MachineLearningEnsemble <- function(models,
     }
     else
     {
-        perfomances <- sapply(models, categoricalPerformance, evaluation.filter, evaluation.weights)
+        perfomances <- sapply(models, categorical.performance, evaluation.filter, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
         if (all(is.na(comparison$`Evaluation accuracy`)))
@@ -116,53 +132,43 @@ has.numeric.outcome <- function(x) {
         x$numeric.outcome
 }
 
-# stats below are calculated when both pred and obs are not NA
-rmse <- function(obs, pred) sqrt(mean((obs - pred)^2, na.rm = TRUE))
-r.squared <- function(obs, pred) {
-    obs.and.pred <- complete.cases(obs, pred)
-    obs <- obs[obs.and.pred]
-    pred <- pred[obs.and.pred]
-    r.sq <- 1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
-    if (r.sq < 0)
-        return(NA)
-    r.sq
-}
-# below defintion only valid when optimizing sum of squared errors
-#r.squared <- function(obs, pred) cor(obs, pred, use = "complete.obs")^2
 
-numericPerformance <- function(x, evaluation.filter, evaluation.weights) {
-
-    weights <- if (is.null(x$weights)) 1 else x$weights
-    if (is.null(evaluation.weights))
-        evaluation.weights <- 1
+numeric.performance <- function(x, evaluation.filter, evaluation.weights) {
 
     pred <- predict(x)
     obs <- Observed(x)
 
-    training.pred <- (pred * weights)[x$subset]
-    training.obs <- (obs * weights)[x$subset]
-    evaluation.pred <- (pred * evaluation.weights)[evaluation.filter]
-    evaluation.obs <- (obs * evaluation.weights)[evaluation.filter]
+    training.pred <- pred[x$subset]
+    training.obs <- obs[x$subset]
+    evaluation.pred <- pred[evaluation.filter]
+    evaluation.obs <- obs[evaluation.filter]
 
-    result <- c(rmse(training.obs, training.pred),
-                if (is.null(evaluation.filter)) NA else rmse(evaluation.obs, evaluation.pred),
-                r.squared(training.obs, training.pred),
-                if (is.null(evaluation.filter)) NA else r.squared(evaluation.obs, evaluation.pred))
+    training.metrics <- numeric.outcome.metrics(training.obs, training.pred,
+                                                evaluation.weights[x$subset])
+    evaluation.metrics <- numeric.outcome.metrics(evaluation.obs, evaluation.pred,
+                                                  evaluation.weights[evaluation.filter])
+
+    result <- c(training.metrics$rmse, evaluation.metrics$rmse,
+                training.metrics$r.squared, evaluation.metrics$r.squared)
     names(result) <- c("training.rmse", "evaluation.rmse",
                        "training.r.squared", "evaluation.r.squared")
     return(result)
 }
 
 #' @importFrom flipRegression Accuracy
-categoricalPerformance <- function(x, evaluation.filter, evaluation.weights) {
+categorical.performance <- function(x, evaluation.filter, evaluation.weights) {
 
     training.accuracy <- if (!is.null(x$confusion))
         attr(x$confusion, "accuracy")
     else
         Accuracy(x, subset = x$subset)
-    evaluation.accuracy <- Accuracy(x, evaluation.filter, evaluation.weights)
-    result <- c(training.accuracy,
-                if (is.null(evaluation.filter)) NA else evaluation.accuracy)
+
+    evaluation.accuracy <- if (is.null(evaluation.filter))
+        NA
+    else
+        suppressWarnings(Accuracy(x, evaluation.filter, evaluation.weights))
+
+    result <- c(training.accuracy, evaluation.accuracy)
     names(result) <- c("training.accuracy", "evaluation.accuracy")
     return(result)
 }
@@ -183,9 +189,9 @@ checkModelsComparable <- function(models, evaluation.filter, evaluation.weights)
 
     data.lengths <- sapply(models, function(m) nrow(m$model))
     if (!is.null(evaluation.filter) && length(unique(c(length(evaluation.filter), data.lengths))) != 1)
-            stop("Lengths of evaluation filter and input data for each model must be the same.")
+            stop("Filter must be the same length as the input data for each model, but is not.")
     if (!is.null(evaluation.weights) && length(unique(c(length(evaluation.weights), data.lengths))) != 1)
-        stop("Lengths of evaluation weights and input data for each model must be the same.")
+        stop("Weights must be the same length as the input data for each model, but is not.")
 
     return(numeric.outcomes[[1]])
 }

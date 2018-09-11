@@ -135,13 +135,12 @@ print.SupportVectorMachine <- function(x, ...)
         }
         else
         {
-            obs <- Observed(x)[x$subset]    # subset also accounts for NAs
-            pred <- suppressWarnings(predict(x)[x$subset])
-            rmse <- sqrt(mean((pred - obs)^2))
-            rsq <- 1 - (sum((obs - pred)^2) / sum((obs - mean(obs))^2))
+            metrics <- numeric.outcome.metrics(Observed(x)[x$subset],
+                                               predict(x)[x$subset],
+                                               x$weights[x$subset])
             subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(c("Root Mean Squared Error" = rmse,
-                                       "R-squared" = if (rsq < 0) NA else rsq),
+            tbl <- DeepLearningTable(c("Root Mean Squared Error" = metrics$rmse,
+                                       "R-squared" = metrics$r.squared),
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,

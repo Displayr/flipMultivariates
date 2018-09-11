@@ -16,9 +16,12 @@ MachineLearningEnsemble(models, compare.only = FALSE,
 additionally combine them to make a new ensemble model.}
 
 \item{evaluation.filter}{An optional vector specifying a subset of observations to be
-used for evaluating the models.}
+used for evaluating the models. If not specified, models will only be compared on the
+training data. To evaluate on the whole sample, a subset must still be specified.}
 
-\item{evaluation.weights}{An optional vector of weights to be used for evaluating the models.}
+\item{evaluation.weights}{An optional vector of weights to be used for evaluating the models.
+Ignored if no evaluation.filter is supplied. A warning is given if these differ from the
+training weights.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a
