@@ -160,7 +160,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
 
-    x <- unweighted.training.data[, -outcome.i]
+    x <- unweighted.training.data[, -outcome.i, drop = FALSE]
     group <- unweighted.training.data[, outcome.name]
     labels <- labels[match(names(x), names(labels))]
     result <- list(call = match.call(),
@@ -253,7 +253,7 @@ LDA.fit <- function (x,
         stop("'x' is not a matrix")
     x <- as.matrix(x)
     if (any(!is.finite(x)))
-    stop("infinite, NA or NaN values in 'x'")
+    stop("Input data contains infinite, NA or NaN values.")
     if (is.null(weights))
         weights <- rep(1, nrow(x))
     n <- sum(weights)
@@ -268,10 +268,13 @@ LDA.fit <- function (x,
     counts <- WeightedCounts(g, weights)
     if (!missing(prior))
     {
-        if (any(prior < 0) || round(sum(prior), 5) != 1)
-            stop("invalid 'prior'")
+        if (any(prior < 0))
+            stop("Prior probabilities of class membership must not be negative.")
+        if (round(sum(prior), 5) != 1)
+            stop("Prior probabilities of class membership must sum to 1.")
         if (length(prior) != nlevels(g))
-            stop("'prior' is of incorrect length")
+            stop("There shoul be ", nlevels(g), " prior probabilities but ",
+                 length(prior), " have been supplied.")
         prior <- prior[counts > 0L]
     }
     if (any(counts == 0L))
@@ -316,7 +319,7 @@ LDA.fit <- function (x,
     X.s$d[is.nan(X.s$d)] <- 0
     rank <- sum(X.s$d > tol)
     if (rank == 0L)
-        stop("rank = 0: variables are numerically constant")
+        stop("Variable(s) are constant but must contain different values.")
 
     scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank],, rank)
     # if (CV)

@@ -4,11 +4,11 @@
 #'     \code{MachineLearning} or \code{Regression}.
 #' @param compare.only Logical; whether to just produce a table comparing the models or
 #'     additionally combine them to make a new ensemble model.
-#' @param evaluation.filter An optional vector specifying a subset of observations to be
+#' @param evaluation.subset An optional vector specifying a subset of observations to be
 #'     used for evaluating the models. If not specified, models will only be compared on the
 #'     training data. To evaluate on the whole sample, a subset must still be specified.
 #' @param evaluation.weights An optional vector of weights to be used for evaluating the models.
-#'     Ignored if no evaluation.filter is supplied. A warning is given if these differ from the
+#'     Ignored if no evaluation.subset is supplied. A warning is given if these differ from the
 #'     training weights.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
@@ -18,7 +18,7 @@
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
-                           evaluation.filter = NULL,
+                           evaluation.subset = NULL,
                            evaluation.weights = NULL,
                            output = "Comparison") {
 
@@ -26,13 +26,13 @@ MachineLearningEnsemble <- function(models,
     if (n.models <= 1)
         stop("At least 2 models are required to create an ensemble.")
 
-    # Treat TRUE filter as NULL, i.e., no evaluation.filter statistics are calculated.
-    if (!is.null(evaluation.filter) && length(evaluation.filter) == 1 && evaluation.filter == TRUE)
-        evaluation.filter <- NULL
+    # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
+    if (!is.null(evaluation.subset) && length(evaluation.subset) == 1 && evaluation.subset == TRUE)
+        evaluation.subset <- NULL
 
     # Test that models are of the same class and outcome. Not necessary to use same data
-    # unless evaluation.filter and/or weights are specified.
-    numeric.outcome <- checkModelsComparable(models, evaluation.filter, evaluation.weights)
+    # unless evaluation.subset and/or weights are specified.
+    numeric.outcome <- checkModelsComparable(models, evaluation.subset, evaluation.weights)
     comparison <- data.frame(t(sapply(models, class.and.type)), stringsAsFactors = FALSE)
     rownames(comparison) <- paste("Model", seq(n.models))
 
@@ -68,7 +68,7 @@ MachineLearningEnsemble <- function(models,
         models$ensemble <- result
     }
 
-    if (!is.null(evaluation.filter))
+    if (!is.null(evaluation.subset))
     {
         if (!identical(evaluation.weights, models[[1]]$weights))
             warning("Weights used for training the models differ from evaluation weights.")
@@ -79,7 +79,7 @@ MachineLearningEnsemble <- function(models,
     statistic.names <- c("Underlying model", "Model type")
     if (numeric.outcome)
     {
-        perfomances <- sapply(models, numeric.performance, evaluation.filter, evaluation.weights)
+        perfomances <- sapply(models, numeric.performance, evaluation.subset, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
@@ -88,7 +88,7 @@ MachineLearningEnsemble <- function(models,
     }
     else
     {
-        perfomances <- sapply(models, categorical.performance, evaluation.filter, evaluation.weights)
+        perfomances <- sapply(models, categorical.performance, evaluation.subset, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
         if (all(is.na(comparison$`Evaluation accuracy`)))
@@ -128,20 +128,20 @@ has.numeric.outcome <- function(x) {
 }
 
 
-numeric.performance <- function(x, evaluation.filter, evaluation.weights) {
+numeric.performance <- function(x, evaluation.subset, evaluation.weights) {
 
     pred <- predict(x)
     obs <- Observed(x)
 
     training.pred <- pred[x$subset]
     training.obs <- obs[x$subset]
-    evaluation.pred <- pred[evaluation.filter]
-    evaluation.obs <- obs[evaluation.filter]
+    evaluation.pred <- pred[evaluation.subset]
+    evaluation.obs <- obs[evaluation.subset]
 
     training.metrics <- numeric.outcome.metrics(training.obs, training.pred,
                                                 evaluation.weights[x$subset])
     evaluation.metrics <- numeric.outcome.metrics(evaluation.obs, evaluation.pred,
-                                                  evaluation.weights[evaluation.filter])
+                                                  evaluation.weights[evaluation.subset])
 
     result <- c(training.metrics$rmse, evaluation.metrics$rmse,
                 training.metrics$r.squared, evaluation.metrics$r.squared)
@@ -151,24 +151,24 @@ numeric.performance <- function(x, evaluation.filter, evaluation.weights) {
 }
 
 #' @importFrom flipRegression Accuracy
-categorical.performance <- function(x, evaluation.filter, evaluation.weights) {
+categorical.performance <- function(x, evaluation.subset, evaluation.weights) {
 
     training.accuracy <- if (!is.null(x$confusion))
         attr(x$confusion, "accuracy")
     else
         Accuracy(x, subset = x$subset)
 
-    evaluation.accuracy <- if (is.null(evaluation.filter))
+    evaluation.accuracy <- if (is.null(evaluation.subset))
         NA
     else
-        suppressWarnings(Accuracy(x, evaluation.filter, evaluation.weights))
+        suppressWarnings(Accuracy(x, evaluation.subset, evaluation.weights))
 
     result <- c(training.accuracy, evaluation.accuracy)
     names(result) <- c("training.accuracy", "evaluation.accuracy")
     return(result)
 }
 
-checkModelsComparable <- function(models, evaluation.filter, evaluation.weights) {
+checkModelsComparable <- function(models, evaluation.subset, evaluation.weights) {
 
     numeric.outcomes <- sapply(models, has.numeric.outcome)
     if (length(unique(numeric.outcomes)) != 1)
@@ -183,7 +183,7 @@ checkModelsComparable <- function(models, evaluation.filter, evaluation.weights)
         stop("All models must predict the same outcome but they do not.")
 
     data.lengths <- sapply(models, function(m) nrow(m$model))
-    if (!is.null(evaluation.filter) && length(unique(c(length(evaluation.filter), data.lengths))) != 1)
+    if (!is.null(evaluation.subset) && length(unique(c(length(evaluation.subset), data.lengths))) != 1)
             stop("Filter must be the same length as the input data for each model, but is not.")
     if (!is.null(evaluation.weights) && length(unique(c(length(evaluation.weights), data.lengths))) != 1)
         stop("Weights must be the same length as the input data for each model, but is not.")

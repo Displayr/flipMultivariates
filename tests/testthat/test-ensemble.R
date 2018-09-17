@@ -30,17 +30,17 @@ test_that("MachineLearningEnsemble: binary outcome", {
 
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = TRUE,
-                                  evaluation.filter = eval.subset,
+                                  evaluation.subset = eval.subset,
                                   evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
-                                  evaluation.filter = eval.subset,
+                                  evaluation.subset = eval.subset,
                                   evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
-                                  evaluation.filter = eval.subset,
+                                  evaluation.subset = eval.subset,
                                   evaluation.weights = weights,
                                   output = "Ensemble"), NA)
 
@@ -50,20 +50,20 @@ test_that("MachineLearningEnsemble: binary outcome", {
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
-                                  evaluation.filter = NULL,
+                                  evaluation.subset = NULL,
                                   evaluation.weights = NULL), NA)
 
     # same filter as training - different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
-                                  evaluation.filter = train.subset,
+                                  evaluation.subset = train.subset,
                                   evaluation.weights = NULL),
                    "Weights used for training the models differ from evaluation weights.")
 
     # different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                                compare.only = FALSE,
-                                               evaluation.filter = eval.subset,
+                                               evaluation.subset = eval.subset,
                                                evaluation.weights = weights + 1),
                     "Weights used for training the models differ from evaluation weights.")
 })
@@ -85,17 +85,17 @@ test_that("MachineLearningEnsemble: categorical outcome", {
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = TRUE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights,
                                 output = "Ensemble"), NA)
 
@@ -105,20 +105,20 @@ test_that("MachineLearningEnsemble: categorical outcome", {
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
                                                compare.only = FALSE,
-                                               evaluation.filter = NULL,
+                                               evaluation.subset = NULL,
                                                evaluation.weights = NULL), NA)
 
     # same filter as training - different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                                  compare.only = FALSE,
-                                                 evaluation.filter = train.subset,
+                                                 evaluation.subset = train.subset,
                                                  evaluation.weights = NULL),
                    "Weights used for training the models differ from evaluation weights.")
 
     # different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                                  compare.only = FALSE,
-                                                 evaluation.filter = eval.subset,
+                                                 evaluation.subset = eval.subset,
                                                  evaluation.weights = weights + 1),
                    "Weights used for training the models differ from evaluation weights.")
 })
@@ -141,17 +141,17 @@ test_that("MachineLearningEnsemble: numeric outcome", {
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = TRUE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
-                                evaluation.filter = eval.subset,
+                                evaluation.subset = eval.subset,
                                 evaluation.weights = weights,
                                 output = "Ensemble"), NA)
 
@@ -162,20 +162,20 @@ test_that("MachineLearningEnsemble: numeric outcome", {
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
                                                compare.only = FALSE,
-                                               evaluation.filter = NULL,
+                                               evaluation.subset = NULL,
                                                evaluation.weights = NULL), NA)
 
     # same filter as training - different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                                  compare.only = FALSE,
-                                                 evaluation.filter = train.subset,
+                                                 evaluation.subset = train.subset,
                                                  evaluation.weights = NULL),
                    "Weights used for training the models differ from evaluation weights.")
 
     # different weights warning
     expect_warning(en <- MachineLearningEnsemble(models,
                                                  compare.only = FALSE,
-                                                 evaluation.filter = eval.subset,
+                                                 evaluation.subset = eval.subset,
                                                  evaluation.weights = weights + 1),
                    "Weights used for training the models differ from evaluation weights.")
 })

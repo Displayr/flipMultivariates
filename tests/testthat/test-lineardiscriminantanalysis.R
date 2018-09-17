@@ -174,6 +174,12 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
               expect_equal(0.2883744, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
 })
 
+test_that("LDA wrong prior", {
+    data(colas, package = "flipExampleData")
+    zLDA <- expect_error(suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = rep(0.1, 8)),
+                                        "The 'prior' must be one of."))
+})
+
 
 hair2$x6[5:10] <- NA
 

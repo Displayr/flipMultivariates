@@ -5,7 +5,7 @@
 \title{Create an ensemble of MachineLearning and/or Regression models}
 \usage{
 MachineLearningEnsemble(models, compare.only = FALSE,
-  evaluation.filter = NULL, evaluation.weights = NULL,
+  evaluation.subset = NULL, evaluation.weights = NULL,
   output = "Comparison")
 }
 \arguments{
@@ -15,12 +15,12 @@ MachineLearningEnsemble(models, compare.only = FALSE,
 \item{compare.only}{Logical; whether to just produce a table comparing the models or
 additionally combine them to make a new ensemble model.}
 
-\item{evaluation.filter}{An optional vector specifying a subset of observations to be
+\item{evaluation.subset}{An optional vector specifying a subset of observations to be
 used for evaluating the models. If not specified, models will only be compared on the
 training data. To evaluate on the whole sample, a subset must still be specified.}
 
 \item{evaluation.weights}{An optional vector of weights to be used for evaluating the models.
-Ignored if no evaluation.filter is supplied. A warning is given if these differ from the
+Ignored if no evaluation.subset is supplied. A warning is given if these differ from the
 training weights.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
