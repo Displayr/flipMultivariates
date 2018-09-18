@@ -1,7 +1,7 @@
 
 #' Perform standard data checking and tidying actions before fitting a machine learning model
 #'
-#' @importFrom flipData GetData EstimationData DataFormula
+#' @importFrom flipData GetData EstimationData DataFormula ErrorIfInfinity
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName
 #' @importFrom flipTransformations AdjustDataToReflectWeights
@@ -41,6 +41,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
         # convert factors with N levels to N-1 binary variables, used by LDA
         data <- cbind(data[outcome.i], AsNumeric(data[, -outcome.i], binary = TRUE, remove.first = TRUE))
         # remove constant variables caused by unpopulated levels
+        ErrorIfInfinity(data)
         data <- data[, c(TRUE, sapply(data[, -1], var, na.rm = TRUE) != 0)]
     }
 
@@ -62,6 +63,8 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     form <- as.formula(paste(outcome.name, "~ ."))
     processed.data <- EstimationData(form, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
+    ErrorIfInfinity(unweighted.training.data)
+
     n <- nrow(unweighted.training.data)
     if (n <= ncol(unweighted.training.data))
         stop("The sample size is too small. There should be more samples than predictor variables, but there are ",

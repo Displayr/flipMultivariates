@@ -11,7 +11,7 @@ Imports:
     Ckmeans.1d.dp,
     e1071,
     flipAnalysisOfVariance,
-    flipData,
+    flipData (>= 1.1.3),
     flipFormat,
     flipRegression,
     flipStatistics,

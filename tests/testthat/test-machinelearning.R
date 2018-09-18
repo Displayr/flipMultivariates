@@ -20,3 +20,21 @@ for (alg in algorithms)
         suppressWarnings(print(ml))
     })
 }
+
+adult.2000$race[runif(2000) > 0.9] <- NA
+adult.2000$age[runif(2000) > 0.9] <- -Inf
+adult.2000$hrs_per_week[runif(2000) > 0.9] <- Inf
+algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
+                "Gradient Boosting", "Linear Discriminant Analysis")
+
+for (alg in algorithms)
+{
+    test_that(paste0("Machine Learning infinity: ", alg), {
+
+        expect_error(ml <- suppressWarnings(MachineLearning(alg,
+                                                            formula = sex ~ education_num + marital + age + hrs_per_week,
+                                                            data = adult.2000)),
+                     "Variable(s) age, hrs_per_week contain infinite values. Either recode the infinities to finite values or set them as missing data.",
+                     fixed = TRUE)
+    })
+}
