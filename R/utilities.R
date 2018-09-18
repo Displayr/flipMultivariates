@@ -150,12 +150,12 @@ correctPredictionsText <- function(overall.accuracy, group.labels, group.accurac
 }
 
 
-# Compute performance metrics for a model with nmeric outcome.
+# Compute performance metrics for a model with numeric outcome.
 # Calculation uses cases when both pred and obs are not NA.
 # The alternative definition of r^2 as cor(obs, pred)^2 is
 #   only valid when optimizing sum of squared errors.
 # https://stats.stackexchange.com/questions/83826/is-a-weighted-r2-in-robust-linear-model-meaningful-for-goodness-of-fit-analys
-numeric.outcome.metrics <- function(obs, pred, weights) {
+numericOutcomeMetrics <- function(obs, pred, weights) {
 
     obs.and.pred <- complete.cases(obs, pred)
     if (sum(obs.and.pred) == 0)

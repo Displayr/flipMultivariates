@@ -33,7 +33,7 @@ MachineLearningEnsemble <- function(models,
     # Test that models are of the same class and outcome. Not necessary to use same data
     # unless evaluation.subset and/or weights are specified.
     numeric.outcome <- checkModelsComparable(models, evaluation.subset, evaluation.weights)
-    comparison <- data.frame(t(sapply(models, class.and.type)), stringsAsFactors = FALSE)
+    comparison <- data.frame(t(sapply(models, classAndType)), stringsAsFactors = FALSE)
     rownames(comparison) <- paste("Model", seq(n.models))
 
     result <- list()
@@ -79,7 +79,7 @@ MachineLearningEnsemble <- function(models,
     statistic.names <- c("Underlying model", "Model type")
     if (numeric.outcome)
     {
-        perfomances <- sapply(models, numeric.performance, evaluation.subset, evaluation.weights)
+        perfomances <- sapply(models, numericPerformance, evaluation.subset, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
@@ -88,7 +88,7 @@ MachineLearningEnsemble <- function(models,
     }
     else
     {
-        perfomances <- sapply(models, categorical.performance, evaluation.subset, evaluation.weights)
+        perfomances <- sapply(models, categoricalPerformance, evaluation.subset, evaluation.weights)
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
         if (all(is.na(comparison$`Evaluation accuracy`)))
@@ -105,7 +105,7 @@ MachineLearningEnsemble <- function(models,
 
 ######### Helper functions #########
 
-class.and.type <- function(model)
+classAndType <- function(model)
 {
     model.class <- setdiff(class(model), c("list", "MachineLearning"))[1]
     model.type <- switch(model.class,
@@ -120,7 +120,7 @@ class.and.type <- function(model)
     return(result)
 }
 
-has.numeric.outcome <- function(x) {
+hasNumericOutcome <- function(x) {
     if ("Regression" %in% class(x))
         x$type == "Linear"
     else
@@ -128,7 +128,7 @@ has.numeric.outcome <- function(x) {
 }
 
 
-numeric.performance <- function(x, evaluation.subset, evaluation.weights) {
+numericPerformance <- function(x, evaluation.subset, evaluation.weights) {
 
     pred <- predict(x)
     obs <- Observed(x)
@@ -138,9 +138,9 @@ numeric.performance <- function(x, evaluation.subset, evaluation.weights) {
     evaluation.pred <- pred[evaluation.subset]
     evaluation.obs <- obs[evaluation.subset]
 
-    training.metrics <- numeric.outcome.metrics(training.obs, training.pred,
+    training.metrics <- numericOutcomeMetrics(training.obs, training.pred,
                                                 evaluation.weights[x$subset])
-    evaluation.metrics <- numeric.outcome.metrics(evaluation.obs, evaluation.pred,
+    evaluation.metrics <- numericOutcomeMetrics(evaluation.obs, evaluation.pred,
                                                   evaluation.weights[evaluation.subset])
 
     result <- c(training.metrics$rmse, evaluation.metrics$rmse,
@@ -151,7 +151,7 @@ numeric.performance <- function(x, evaluation.subset, evaluation.weights) {
 }
 
 #' @importFrom flipRegression Accuracy
-categorical.performance <- function(x, evaluation.subset, evaluation.weights) {
+categoricalPerformance <- function(x, evaluation.subset, evaluation.weights) {
 
     training.accuracy <- if (!is.null(x$confusion))
         attr(x$confusion, "accuracy")
@@ -170,7 +170,7 @@ categorical.performance <- function(x, evaluation.subset, evaluation.weights) {
 
 checkModelsComparable <- function(models, evaluation.subset, evaluation.weights) {
 
-    numeric.outcomes <- sapply(models, has.numeric.outcome)
+    numeric.outcomes <- sapply(models, hasNumericOutcome)
     if (length(unique(numeric.outcomes)) != 1)
         stop("Outcomes must be all either numeric or categorical to comapre models.")
 

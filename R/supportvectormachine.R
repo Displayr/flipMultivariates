@@ -135,7 +135,7 @@ print.SupportVectorMachine <- function(x, ...)
         }
         else
         {
-            metrics <- numeric.outcome.metrics(Observed(x)[x$subset],
+            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
                                                predict(x)[x$subset],
                                                x$weights[x$subset])
             subtitle <- "Measure of fit"
