@@ -2,7 +2,8 @@
 % Please edit documentation in R/ensemble.R
 \name{MachineLearningEnsemble}
 \alias{MachineLearningEnsemble}
-\title{Create an ensemble of MachineLearning and/or Regression models}
+\title{Create an ensemble or comparison table of existing MachineLearning
+and/or Regression models}
 \usage{
 MachineLearningEnsemble(models, compare.only = FALSE,
   evaluation.subset = NULL, evaluation.weights = NULL,
@@ -17,7 +18,8 @@ additionally combine them to make a new ensemble model.}
 
 \item{evaluation.subset}{An optional vector specifying a subset of observations to be
 used for evaluating the models. If not specified, models will only be compared on the
-training data. To evaluate on the whole sample, a subset must still be specified.}
+training data. If models are not trained on the whole sample To evaluate on the whole sample,
+a subset must still be specified.}
 
 \item{evaluation.weights}{An optional vector of weights to be used for evaluating the models.
 Ignored if no evaluation.subset is supplied. A warning is given if these differ from the
@@ -28,5 +30,6 @@ produces a table comparing the models, or \code{"Ensemble"} which produces a
 \code{\link{ConfusionMatrix}}.}
 }
 \description{
-Create an ensemble of MachineLearning and/or Regression models
+Create an ensemble or comparison table of existing MachineLearning
+and/or Regression models
 }

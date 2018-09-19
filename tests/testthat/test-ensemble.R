@@ -18,13 +18,17 @@ formula <- income ~ education_num + sex + race
 model.types <- c("Random Forest", "Support Vector Machine", "Regression",
                  "Gradient Boost", "CART", "Deep Learning", "LDA")
 
+models.args <- lapply(model.types, function(x) list(algorithm = x, type = "Binary Logit"))
+
 models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algorithm = x,
                                                                            type = "Binary Logit",
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
                                                                            subset = train.subset,
-                                                                           weights = weights)))
+                                                                           weights = weights,
+                                                                           seed = 12321,
+                                                                           show.labels = FALSE)))
 
 test_that("MachineLearningEnsemble: binary outcome", {
 
@@ -37,6 +41,7 @@ test_that("MachineLearningEnsemble: binary outcome", {
                                   compare.only = FALSE,
                                   evaluation.subset = eval.subset,
                                   evaluation.weights = weights), NA)
+    comparison.table <- en$comparison
 
     expect_error(en <- MachineLearningEnsemble(models,
                                   compare.only = FALSE,
@@ -66,6 +71,18 @@ test_that("MachineLearningEnsemble: binary outcome", {
                                                evaluation.subset = eval.subset,
                                                evaluation.weights = weights + 1),
                     "Weights used for training the models differ from evaluation weights.")
+
+    # Check that building the models before the ensemble is the same as building for the ensemble.
+    new.models.en <- suppressWarnings(MachineLearningMulti(formula = formula,
+                                                           data = adult.2000,
+                                                           subset = train.subset,
+                                                           weights = weights,
+                                                           evaluation.subset = eval.subset,
+                                                           missing = "Exclude cases with missing data",
+                                                           models.args = models.args))
+    # DeepLearning is random despite seeds set and same inputs.
+    new.models.en$comparison[6, 4] <- comparison.table[6, 4] <- 0
+    expect_true(isTRUE(all.equal(new.models.en$comparison, comparison.table)))
 })
 
 # Categorical outcome
@@ -73,13 +90,17 @@ formula <- occupation ~ education_num + sex + race
 model.types <- c("Random Forest", "Support Vector Machine", "Regression",
                  "Gradient Boost", "CART", "Deep Learning", "LDA")
 
+models.args <- lapply(model.types, function(x) list(algorithm = x, type = "Multinomial Logit"))
+
 models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algorithm = x,
                                                                            type = "Multinomial Logit",
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
                                                                            subset = train.subset,
-                                                                           weights = weights)))
+                                                                           weights = weights,
+                                                                           seed = 12321,
+                                                                           show.labels = FALSE)))
 
 test_that("MachineLearningEnsemble: categorical outcome", {
 
@@ -92,6 +113,7 @@ test_that("MachineLearningEnsemble: categorical outcome", {
                                 compare.only = FALSE,
                                 evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
+    comparison.table <- en$comparison
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
@@ -121,6 +143,18 @@ test_that("MachineLearningEnsemble: categorical outcome", {
                                                  evaluation.subset = eval.subset,
                                                  evaluation.weights = weights + 1),
                    "Weights used for training the models differ from evaluation weights.")
+
+    # Check that building the models before the ensemble is the same as building for the ensemble.
+    new.models.en <- suppressWarnings(MachineLearningMulti(formula = formula,
+                                                           data = adult.2000,
+                                                           subset = train.subset,
+                                                           weights = weights,
+                                                           evaluation.subset = eval.subset,
+                                                           missing = "Exclude cases with missing data",
+                                                           models.args = models.args))
+    # DeepLearning is random despite seeds set and same inputs.
+    new.models.en$comparison[6, 3:4] <- comparison.table[6, 3:4] <- 0
+    expect_true(isTRUE(all.equal(new.models.en$comparison, comparison.table)))
 })
 
 # Numeric outcome
@@ -128,14 +162,17 @@ formula <- education_num ~ occupation + sex + race + income
 model.types <- c("Random Forest", "Support Vector Machine", "Regression",
                  "Gradient Boost", "CART", "Deep Learning")
 
+models.args <- lapply(model.types, function(x) list(algorithm = x, type = "Linear"))
+
 models <- suppressWarnings(lapply(model.types, function(x) MachineLearning(algorithm = x,
                                                                            type = "Linear",
                                                                            formula = formula,
                                                                            data = adult.2000,
                                                                            missing = "Exclude cases with missing data",
                                                                            subset = train.subset,
-                                                                           weights = weights)))
-
+                                                                           weights = weights,
+                                                                           seed = 12321,
+                                                                           show.labels = FALSE)))
 
 test_that("MachineLearningEnsemble: numeric outcome", {
 
@@ -148,6 +185,7 @@ test_that("MachineLearningEnsemble: numeric outcome", {
                                 compare.only = FALSE,
                                 evaluation.subset = eval.subset,
                                 evaluation.weights = weights), NA)
+    comparison.table <- en$comparison
 
     expect_error(en <- MachineLearningEnsemble(models,
                                 compare.only = FALSE,
@@ -178,6 +216,18 @@ test_that("MachineLearningEnsemble: numeric outcome", {
                                                  evaluation.subset = eval.subset,
                                                  evaluation.weights = weights + 1),
                    "Weights used for training the models differ from evaluation weights.")
+
+    # Check that building the models before the ensemble is the same as building for the ensemble.
+    new.models.en <- suppressWarnings(MachineLearningMulti(formula = formula,
+                                                           data = adult.2000,
+                                                           subset = train.subset,
+                                                           weights = weights,
+                                                           evaluation.subset = eval.subset,
+                                                           missing = "Exclude cases with missing data",
+                                                           models.args = models.args))
+    # DeepLearning is random despite seeds set and same inputs.
+    new.models.en$comparison[6, 3:6] <- comparison.table[6, 3:6] <- 0
+    expect_true(isTRUE(all.equal(new.models.en$comparison, comparison.table)))
 })
 
 

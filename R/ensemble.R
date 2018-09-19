@@ -1,4 +1,5 @@
-#' Create an ensemble of MachineLearning and/or Regression models
+#' Create an ensemble or comparison table of existing MachineLearning
+#' and/or Regression models
 #'
 #' @param models A \code{list} of models, all of which are of class
 #'     \code{MachineLearning} or \code{Regression}.
@@ -6,7 +7,8 @@
 #'     additionally combine them to make a new ensemble model.
 #' @param evaluation.subset An optional vector specifying a subset of observations to be
 #'     used for evaluating the models. If not specified, models will only be compared on the
-#'     training data. To evaluate on the whole sample, a subset must still be specified.
+#'     training data. If models are not trained on the whole sample To evaluate on the whole sample,
+#'     a subset must still be specified.
 #' @param evaluation.weights An optional vector of weights to be used for evaluating the models.
 #'     Ignored if no evaluation.subset is supplied. A warning is given if these differ from the
 #'     training weights.
@@ -254,3 +256,65 @@ Probabilities.MachineLearningEnsemble <- function(object)
     return(object$probabilities)
 }
 
+
+#' Create an ensemble or comparison table of new MachineLearning and/or Regression models
+#'
+#' @param formula A formula of the form \code{groups ~ x1 + x2 + ...}
+#'   That is, the response is the grouping factor and the right hand side
+#'   specifies the (non-factor) discriminators, and any transformations, interactions,
+#'   or other non-additive operators apart from \code{.} will be ignored.
+#' @param data A \code{\link{data.frame}} from which variables specified
+#'   in formula are preferentially to be taken.
+#' @param subset An optional vector specifying a subset of observations to be
+#'   used in the fitting process, or, the name of a variable in \code{data}. It
+#'   may not be an expression.
+#' @param weights An optional vector of sampling weights, or the
+#'   name of a variable in \code{data}. It may not be an expression.
+#' @param evaluation.subset An optional vector specifying a subset of observations to be
+#'   used for evaluating the models. If not specified, models will only be compared on the
+#'   training data. If models are not trained on the whole sample To evaluate on the whole sample,
+#'   a subset must still be specified.
+#' @param missing How missing data is to be treated. Options:
+#'   \code{"Error if missing data"},
+#'   \code{"Exclude cases with missing data"}, or
+#'   \code{"Imputation (replace missing values with estimates)"}.
+#' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
+#'   variables label is an attribute (e.g., attr(foo, "label")).
+#' @param seed The random number seed.
+#' @param models.args A \code{\link{list}} of lists of arguments to be passed to \code{\link{MachineLearning}}
+#'   to create each model.
+#' @param compare.only Logical; whether to just produce a table comparing the models or
+#'     additionally combine them to make a new ensemble model.
+#' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
+#'     produces a table comparing the models, or \code{"Ensemble"} which produces a
+#'     \code{\link{ConfusionMatrix}}.
+#' @export
+MachineLearningMulti <- function(formula,
+                                 data = NULL,
+                                 subset = NULL,
+                                 weights = NULL,
+                                 evaluation.subset = NULL,
+                                 missing = "Exclude cases with missing data",
+                                 show.labels = FALSE,
+                                 seed = 12321,
+                                 models.args = NULL,
+                                 compare.only = FALSE,
+                                 output = "Comparison") {
+
+    n.models <- length(models.args)
+    common.args <- list(formula = formula, data = data, weights = weights, subset = subset,
+                        missing = missing, show.labels = show.labels, seed = seed)
+    fitted.models <- list()
+
+    for (i in seq(n.models))
+    {
+        model.args <- c(common.args, models.args[[i]])
+        fitted.models[[i]] <- do.call(MachineLearning, model.args)
+    }
+
+    MachineLearningEnsemble(fitted.models,
+                            compare.only = compare.only,
+                            evaluation.subset = evaluation.subset,
+                            evaluation.weights = weights,
+                            output = output)
+}
