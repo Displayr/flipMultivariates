@@ -76,7 +76,7 @@ MachineLearningEnsemble <- function(models,
             warning("Weights used for training the models differ from evaluation weights.")
     }
     else if (!is.null(evaluation.weights))
-        warning("Weights will hve no effect because a filter to evaluate the models was not specified.")
+        warning("Weights will have no effect because a filter to evaluate the models was not specified.")
 
     statistic.names <- c("Underlying model", "Model type")
     if (numeric.outcome)
@@ -315,6 +315,6 @@ MachineLearningMulti <- function(formula,
     MachineLearningEnsemble(fitted.models,
                             compare.only = compare.only,
                             evaluation.subset = evaluation.subset,
-                            evaluation.weights = weights,
+                            evaluation.weights = if (is.null(evaluation.subset)) NULL else weights,
                             output = output)
 }
