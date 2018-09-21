@@ -29,8 +29,13 @@ MachineLearningEnsemble <- function(models,
         stop("At least 2 models are required to create an ensemble.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
-    if (!is.null(evaluation.subset) && length(evaluation.subset) == 1 && evaluation.subset == TRUE)
-        evaluation.subset <- NULL
+    if (!is.null(evaluation.subset))
+    {
+        if (length(evaluation.subset) == 1 && evaluation.subset == TRUE)
+            evaluation.subset <- NULL
+        else
+            evaluation.subset <- as.logical(evaluation.subset)
+    }
 
     # Test that models are of the same class and outcome. Not necessary to use same data
     # unless evaluation.subset and/or weights are specified.
