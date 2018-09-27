@@ -60,7 +60,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     # Treatment of missing values.
     # rebuild formula because there are new variables for each level of factorial predictors
-    form <- as.formula(paste(outcome.name, "~ ."))
+    predictor.names <- colnames(data)[colnames(data) != outcome.name]
+    form <- as.formula(paste(outcome.name, "~",
+                             paste(predictor.names[predictor.names != outcome.name], collapse = "+")))
     processed.data <- EstimationData(form, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
     ErrorIfInfinity(unweighted.training.data)
