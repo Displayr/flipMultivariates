@@ -25,7 +25,7 @@ MachineLearningEnsemble <- function(models,
                            output = "Comparison") {
 
     n.models <- length(models)
-    if (n.models <= 1)
+    if (n.models <= 1 && !compare.only)
         stop("At least 2 models are required to create an ensemble.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
