@@ -1,3 +1,4 @@
+
 #' \code{predict.LDA}
 #'
 #' Predicts a model outcome based on \code{newdata} and a fitted LDA \code{object}.  A value (which
@@ -15,6 +16,7 @@
 #' @export
 predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
+    # CheckPredictionVariables is still required without newdata because empty training levels are removed
     newdata <- if (is.null(newdata))
         # no warnings from CheckPredictionVariables if predicting training data
         suppressWarnings(CheckPredictionVariables(object, object$model))
@@ -70,6 +72,7 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' @export
 predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
+    # CheckPredictionVariables is still required without newdata because empty training levels are removed
     newdata <- if (is.null(newdata))
         # no warnings from CheckPredictionVariables if predicting training data
         suppressWarnings(CheckPredictionVariables(object, object$model))
@@ -114,8 +117,7 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 #' @export
 predict.SupportVectorMachine <- function(object, newdata = NULL, ...)
 {
-    # CheckPredictionVariables is still required without newdata because predictions in object$fitted may be
-    # a subset of object$model.
+    # CheckPredictionVariables is still required without newdata because empty training levels are removed
     newdata <- if (is.null(newdata))
         # no warnings from CheckPredictionVariables if predicting training data
         suppressWarnings(CheckPredictionVariables(object, object$model))
@@ -163,6 +165,7 @@ Probabilities.SupportVectorMachine <- function(x)
 #' @export
 predict.GradientBoost <- function(object, newdata = NULL, ...)
 {
+    # CheckPredictionVariables is still required without newdata because empty training levels are removed
     newdata <- if (is.null(newdata))
         # no warnings from CheckPredictionVariables if predicting training data
         suppressWarnings(CheckPredictionVariables(object, object$model))
