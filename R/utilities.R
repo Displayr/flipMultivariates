@@ -3,13 +3,14 @@
 #'
 #' @importFrom flipData GetData EstimationData DataFormula ErrorIfInfinity
 #' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName
+#' @importFrom flipU OutcomeName AllVariablesNames
 #' @importFrom flipTransformations AdjustDataToReflectWeights
 #' @importFrom stats as.formula var
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed,
-                                       bootstrap.weights = TRUE, dummy = FALSE)
+                                       bootstrap.weights = TRUE, dummy = FALSE,
+                                       strict.var.names = FALSE)
 {
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
 
@@ -32,6 +33,18 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     }
 
     data <- GetData(input.formula, data, auxiliary.data = NULL)
+
+    # randomForest fails with data when variable names contain "$" even if surrounded by backticks
+    if (strict.var.names)
+    {
+        vars <- AllVariablesNames(input.formula, data = data)
+        vars <- gsub("\\`", "", vars)   # remove backticks
+        vars <- gsub("[$ ]", ".", vars) # replace dollar and space with dot
+        input.formula <- formula(paste0(vars[1], "~", paste0(vars[-1], collapse = "+")))
+        colnames(data) <- gsub("\\`", "", colnames(data))
+        colnames(data) <- gsub("[$ ]", ".", colnames(data))
+    }
+
     row.names <- rownames(data)
     outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
