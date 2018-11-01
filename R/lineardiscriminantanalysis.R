@@ -305,9 +305,10 @@ LDA.fit <- function (x,
     if (any(f1 < tol))
     {
         const <- format((1L:k)[f1 < tol])
-        stop(sprintf(ngettext(length(const), "variable %s appears to be constant within groups",
-                "variables %s appear to be constant within groups"),
-                 paste(const, collapse = " ")), domain = NA)
+        stop(sprintf(ngettext(length(const),
+                              "Variable %s is constant within groups and an LDA model cannot be fitted. Please remove the variable.",
+                              "Variables %s are constant within groups and an LDA model cannot be fitted. Please remove the variables."),
+                     paste(const, collapse = " ")), domain = NA)
     }
     weights.sum = sum(weights)
     scaling <- diag(1/f1, , k)
