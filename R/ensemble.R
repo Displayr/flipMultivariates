@@ -90,8 +90,8 @@ MachineLearningEnsemble <- function(models,
         comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
-        if (all(is.na(comparison$`Evaluation R^2`)))
-            comparison$`Evaluation R^2` <- comparison$`Evaluation RMSE` <- NULL
+        if (all(is.na(comparison$`Evaluation RMSE`)))
+            comparison$`Evaluation RMSE` <- comparison$`Evaluation RMSE` <- NULL
     }
     else
     {
