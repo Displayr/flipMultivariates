@@ -41,7 +41,12 @@ MachineLearningEnsemble <- function(models,
     # unless evaluation.subset and/or weights are specified.
     numeric.outcome <- checkModelsComparable(models, evaluation.subset, evaluation.weights)
     comparison <- data.frame(t(sapply(models, classAndType)), stringsAsFactors = FALSE)
-    rownames(comparison) <- paste("Model", seq(n.models))
+
+    rownames(comparison) <- if (is.null(names(models)))
+        paste("Model", seq(n.models))
+    else
+        names(models)
+
 
     result <- list()
     class(result) <- c("MachineLearningEnsemble", class(result))
