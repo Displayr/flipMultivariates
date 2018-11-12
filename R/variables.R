@@ -52,6 +52,7 @@ DiscriminantVariables <- function(x)
 ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.action = na.pass, ...)
 {
     newdata[, object$outcome.name] <- NULL
+    set.seed(12321) # avoid random tie-breaking from max.col within predict()
     suppressWarnings(predict(object$original, prior = prior , newdata = newdata, na.action = na.action)[[type]])
 }
 
