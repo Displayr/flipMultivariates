@@ -98,7 +98,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     level.counts <- sapply(weighted.training.data, function(x) length(levels(x)))
     if (!allow.single.categories && any(level.counts == 1))
     {
-        warning("Categorical predictors must have more than one category, after applying any ",
+        stop("Categorical predictors must have more than one category, after applying any ",
                 "filter, weights and missing data treatment. This is not the case for: ",
                 paste(names(level.counts)[level.counts == 1], collapse = ", "),
                 ". Please remove those variables to proceed.")
