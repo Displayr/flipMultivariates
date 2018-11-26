@@ -10,7 +10,8 @@
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed,
                                        bootstrap.weights = TRUE, dummy = FALSE,
-                                       strict.var.names = FALSE)
+                                       strict.var.names = FALSE,
+                                       allow.single.categories = TRUE)
 {
     input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
 
@@ -93,6 +94,16 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
         NULL
     else
         AdjustDataToReflectWeights(unweighted.training.data, cleaned.weights)
+
+    level.counts <- sapply(weighted.training.data, function(x) length(levels(x)))
+    if (!allow.single.categories && any(level.counts == 1))
+    {
+        warning("Categorical predictors must have more than one category, after applying any ",
+                "filter, weights and missing data treatment. This is not the case for: ",
+                paste(names(level.counts)[level.counts == 1], collapse = ", "),
+                ". Please remove those variables to proceed.")
+        weighted.training.data <- weighted.training.data[, level.counts != 1]
+    }
 
     return(list(unweighted.training.data = unweighted.training.data,
                 weighted.training.data = weighted.training.data,

@@ -56,7 +56,8 @@ SupportVectorMachine <- function(formula,
     weights <- eval(substitute(weights), data, parent.frame())
 
     prepared.data <- prepareMachineLearningData(formula, data, subset, subset.description,
-                                                weights, weights.description, missing, seed)
+                                                weights, weights.description, missing, seed,
+                                                allow.single.categories = FALSE)
 
     unweighted.training.data <- prepared.data$unweighted.training.data
     weighted.training.data <- prepared.data$weighted.training.data
