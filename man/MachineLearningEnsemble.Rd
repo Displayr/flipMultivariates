@@ -6,14 +6,19 @@
 and/or Regression models}
 \usage{
 MachineLearningEnsemble(models, compare.only = FALSE,
-  evaluation.subset = NULL, evaluation.weights = NULL,
-  output = "Comparison")
+  optimal.ensemble = FALSE, evaluation.subset = NULL,
+  evaluation.weights = NULL, output = "Comparison")
 }
 \arguments{
 \item{models}{A \code{list} of models, all of which are of class
 \code{MachineLearning} or \code{Regression}.}
 
 \item{compare.only}{Logical; whether to just produce a table comparing the models or
+additionally combine them to make a new ensemble model.}
+
+\item{optimal.ensemble}{Logical; whether to find the ensemble with the best accuracy or
+r-squared, calculated on the \code{evaluation.subset} if given, else on the training
+data. Ignored if \code{compare.only} is TRUE.
 additionally combine them to make a new ensemble model.}
 
 \item{evaluation.subset}{An optional vector specifying a subset of observations to be
