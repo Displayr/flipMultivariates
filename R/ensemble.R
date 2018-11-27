@@ -32,6 +32,8 @@ MachineLearningEnsemble <- function(models,
     n.models <- length(models)
     if (n.models <= 1 && !compare.only)
         stop("At least 2 models are required to create an ensemble.")
+    if (optimal.ensemble && compare.only)
+        stop("Cannot create an optimal ensemble if only performing comaprson.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
     if (!is.null(evaluation.subset))
@@ -59,8 +61,7 @@ MachineLearningEnsemble <- function(models,
 
     if (!compare.only)
     {
-        ensemble.type <- if (numeric.outcome) "Average" else "Average probabilities"
-        comparison <- rbind(comparison, c("Ensemble", ensemble.type), stringsAsFactors = FALSE)
+        comparison <- rbind(comparison, c("Ensemble", "All models"), stringsAsFactors = FALSE)
         rownames(comparison)[n.models + 1] <- "Ensemble"
 
         common <-  extractCommonData(models)
@@ -76,8 +77,7 @@ MachineLearningEnsemble <- function(models,
         result$sample.description <- models[[1]]$sample.description
         result$subset <- subset          # subsets used to fit the models
         result$weights <- common$weights # weights used to fit the models
-        result$confusion <- ConfusionMatrix(result) # for the fitted data
-        models$ensemble <- result
+        models$ensemble <- result        # add to list of models for evaluation
 
         if (optimal.ensemble)
         {
@@ -91,37 +91,33 @@ MachineLearningEnsemble <- function(models,
             combinations <- 2^n.models - 1
             for (combo in seq(combinations))
             {
-                print(combo)
                 which.models <- c(as.logical(intToBits(combo))[1:n.models], FALSE)
                 combo.models <- models[which.models]
 
                 preds.and.probs <- ensemblePredictionsAndProbabilities(combo.models, numeric.outcome)
                 result$prediction <- preds.and.probs$prediction
-                result$probabilities <- preds.and.probs$probabilities
+                #result$probabilities <- preds.and.probs$probabilities
 
                 perf <- performance.function(result, evaluation.subset, evaluation.weights)
-                if (perf[length(perf)] > optimal.performance)
+                combo.performance <- if(is.null(evaluation.subset)) perf[length(perf) - 1] else perf[length(perf)]
+                #print(c(combo.performance, optimal.performance, combo))
+                if (combo.performance > optimal.performance)
                 {
-                    optimal.performance <- perf[length(perf)]
+                    optimal.performance <- combo.performance
                     optimal.models <- which.models
                 }
             }
 
-            print(perf)
-            print(optimal.models)
+            result$optimal.models <- c(optimal.models, FALSE)
 
             # Update prediction and probabilities of result with optimal model
             preds.and.probs <- ensemblePredictionsAndProbabilities(models[optimal.models],
                                                                    numeric.outcome)
             result$prediction <- preds.and.probs$prediction
             result$probabilities <- preds.and.probs$probabilities
-
-
-            # TODO check if no evaluation subset
-
-            models$optimal.ensemble <- result
-            result$confusion <- ConfusionMatrix(result)
+            models$optimal.ensemble <- result  # add optimal to list of models for evaluation
         }
+        result$confusion <- ConfusionMatrix(result) # for the fitted data
     }
 
     if (!is.null(evaluation.subset))
@@ -153,6 +149,7 @@ MachineLearningEnsemble <- function(models,
     result$numeric.outcome <- numeric.outcome
     result$comparison <- comparison
     result$ensemble <- !compare.only
+    result$optimal.ensemble <- optimal.ensemble
     result$n.models <- n.models
     result$output <- output
     return(result)
@@ -289,8 +286,19 @@ print.MachineLearningEnsemble <- function(x, ...) {
         title <- paste("Comparison of", x$n.models, " models")
         if (x$ensemble)
             title <- paste0(title, " and Ensemble")
+
+        footer <- NULL
+        if (x$optimal.ensemble)
+        {
+            footer <- x$comparison[x$optimal.models, 1, drop = FALSE]
+            footer <- cbind(rownames(footer), footer)
+            footer <- apply(footer, 1, function(x) paste0(x[1], " (", x[2], ")", collapse = ""))
+            footer <- paste0("Optimal ensemble models: ", paste(footer, collapse = ", "))
+        }
+
         tbl <- ComparisonTable(x$comparison,
-                               title = title)
+                               title = title,
+                               footer = footer)
         tbl
     }
 }
