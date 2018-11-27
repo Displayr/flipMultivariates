@@ -207,7 +207,7 @@ Probabilities.GradientBoost <- function(object)
     data <- OneHot(data, object$outcome.name)$X
     probabilities <- data.frame(predict(object$original, newdata = data, reshape = TRUE))
     if (object$original$params$objective == "binary:logistic")
-        probabilities <- cbind(probabilities, 1 - probabilities)
+        probabilities <- cbind(1 - probabilities, probabilities)
 
     # add NA probability for instances with missing prediction variables
     colnames(probabilities) <- object$outcome.levels
