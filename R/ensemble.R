@@ -5,6 +5,10 @@
 #'     \code{MachineLearning} or \code{Regression}.
 #' @param compare.only Logical; whether to just produce a table comparing the models or
 #'     additionally combine them to make a new ensemble model.
+#' @param optimal.ensemble Logical; whether to find the ensemble with the best accuracy or
+#'     r-squared, calculated on the \code{evaluation.subset} if given, else on the training
+#'     data. Ignored if \code{compare.only} is TRUE.
+#'     additionally combine them to make a new ensemble model.
 #' @param evaluation.subset An optional vector specifying a subset of observations to be
 #'     used for evaluating the models. If not specified, models will only be compared on the
 #'     training data. If models are not trained on the whole sample To evaluate on the whole sample,
@@ -20,6 +24,7 @@
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
+                           optimal.ensemble = FALSE,
                            evaluation.subset = NULL,
                            evaluation.weights = NULL,
                            output = "Comparison") {
@@ -40,6 +45,7 @@ MachineLearningEnsemble <- function(models,
     # Test that models are of the same class and outcome. Not necessary to use same data
     # unless evaluation.subset and/or weights are specified.
     numeric.outcome <- checkModelsComparable(models, evaluation.subset, evaluation.weights)
+    performance.function <- if (numeric.outcome) numericPerformance else categoricalPerformance
     comparison <- data.frame(t(sapply(models, classAndType)), stringsAsFactors = FALSE)
 
     rownames(comparison) <- if (is.null(names(models)))
@@ -61,15 +67,9 @@ MachineLearningEnsemble <- function(models,
         outcome <- common$outcome
         subset <- common$subset
 
-        if (numeric.outcome) {
-            result$prediction <- rowMeans(sapply(models, predict))
-        }
-        else
-        {
-            probabilities <- Reduce("+", lapply(models, Probabilities)) / n.models
-            result$prediction <- as.factor(colnames(probabilities)[max.col(probabilities, ties.method = "first")])
-            result$probabilities <- probabilities
-        }
+        preds.and.probs <- ensemblePredictionsAndProbabilities(models, numeric.outcome)
+        result$prediction <- preds.and.probs$prediction
+        result$probabilities <- preds.and.probs$probabilities
 
         result$outcome <- outcome
         result$outcome.label <- models[[1]]$outcome.label
@@ -78,6 +78,50 @@ MachineLearningEnsemble <- function(models,
         result$weights <- common$weights # weights used to fit the models
         result$confusion <- ConfusionMatrix(result) # for the fitted data
         models$ensemble <- result
+
+        if (optimal.ensemble)
+        {
+            comparison <- rbind(comparison, c("Ensemble", "Optimal"), stringsAsFactors = FALSE)
+            rownames(comparison)[n.models + 2] <- "Optimal Ensemble"
+
+            optimal.performance <- 0
+            optimal.models <- NULL
+
+            # Test all combinations of models
+            combinations <- 2^n.models - 1
+            for (combo in seq(combinations))
+            {
+                print(combo)
+                which.models <- c(as.logical(intToBits(combo))[1:n.models], FALSE)
+                combo.models <- models[which.models]
+
+                preds.and.probs <- ensemblePredictionsAndProbabilities(combo.models, numeric.outcome)
+                result$prediction <- preds.and.probs$prediction
+                result$probabilities <- preds.and.probs$probabilities
+
+                perf <- performance.function(result, evaluation.subset, evaluation.weights)
+                if (perf[length(perf)] > optimal.performance)
+                {
+                    optimal.performance <- perf[length(perf)]
+                    optimal.models <- which.models
+                }
+            }
+
+            print(perf)
+            print(optimal.models)
+
+            # Update prediction and probabilities of result with optimal model
+            preds.and.probs <- ensemblePredictionsAndProbabilities(models[optimal.models],
+                                                                   numeric.outcome)
+            result$prediction <- preds.and.probs$prediction
+            result$probabilities <- preds.and.probs$probabilities
+
+
+            # TODO check if no evaluation subset
+
+            models$optimal.ensemble <- result
+            result$confusion <- ConfusionMatrix(result)
+        }
     }
 
     if (!is.null(evaluation.subset))
@@ -89,10 +133,11 @@ MachineLearningEnsemble <- function(models,
         warning("Weights will have no effect because a filter to evaluate the models was not specified.")
 
     statistic.names <- c("Underlying model", "Model type")
+    perfomances <- sapply(models, performance.function, evaluation.subset, evaluation.weights)
+    comparison <- cbind(comparison, t(perfomances))
+
     if (numeric.outcome)
     {
-        perfomances <- sapply(models, numericPerformance, evaluation.subset, evaluation.weights)
-        comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
         if (all(is.na(comparison$`Evaluation RMSE`)))
@@ -100,8 +145,6 @@ MachineLearningEnsemble <- function(models,
     }
     else
     {
-        perfomances <- sapply(models, categoricalPerformance, evaluation.subset, evaluation.weights)
-        comparison <- cbind(comparison, t(perfomances))
         colnames(comparison) <- c(statistic.names, c("Training accuracy", "Evaluation accuracy"))
         if (all(is.na(comparison$`Evaluation accuracy`)))
             comparison$`Evaluation accuracy` <- NULL
@@ -139,6 +182,19 @@ hasNumericOutcome <- function(x) {
         x$numeric.outcome
 }
 
+ensemblePredictionsAndProbabilities <- function(models, numeric.outcome) {
+
+    if (numeric.outcome) {
+        probabilities <- NULL
+        prediction <- rowMeans(sapply(models, predict))
+    }
+    else
+    {
+        probabilities <- Reduce("+", lapply(models, Probabilities)) / length(models)
+        prediction <- as.factor(colnames(probabilities)[max.col(probabilities, ties.method = "first")])
+    }
+    return(list(prediction = prediction, probabilities = probabilities))
+}
 
 numericPerformance <- function(x, evaluation.subset, evaluation.weights) {
 
