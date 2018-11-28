@@ -8,7 +8,7 @@ MachineLearningMulti(formula, data = NULL, subset = NULL,
   weights = NULL, evaluation.subset = NULL,
   missing = "Exclude cases with missing data", show.labels = FALSE,
   seed = 12321, models.args = NULL, compare.only = FALSE,
-  output = "Comparison")
+  optimal.ensemble = FALSE, output = "Comparison")
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -46,6 +46,10 @@ to create each model.}
 
 \item{compare.only}{Logical; whether to just produce a table comparing the models or
 additionally combine them to make a new ensemble model.}
+
+\item{optimal.ensemble}{Logical; whether to find the ensemble with the best accuracy or
+r-squared, calculated on the \code{evaluation.subset} if given, else on the training
+data. Ignored if \code{compare.only} is TRUE.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a

@@ -8,7 +8,6 @@
 #' @param optimal.ensemble Logical; whether to find the ensemble with the best accuracy or
 #'     r-squared, calculated on the \code{evaluation.subset} if given, else on the training
 #'     data. Ignored if \code{compare.only} is TRUE.
-#'     additionally combine them to make a new ensemble model.
 #' @param evaluation.subset An optional vector specifying a subset of observations to be
 #'     used for evaluating the models. If not specified, models will only be compared on the
 #'     training data. If models are not trained on the whole sample To evaluate on the whole sample,
@@ -33,7 +32,7 @@ MachineLearningEnsemble <- function(models,
     if (n.models <= 1 && !compare.only)
         stop("At least 2 models are required to create an ensemble.")
     if (optimal.ensemble && compare.only)
-        stop("Cannot create an optimal ensemble if only performing comaprson.")
+        stop("Cannot create an optimal ensemble if only performing comparirson.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
     if (!is.null(evaluation.subset))
@@ -359,6 +358,9 @@ Probabilities.MachineLearningEnsemble <- function(object)
 #'   to create each model.
 #' @param compare.only Logical; whether to just produce a table comparing the models or
 #'     additionally combine them to make a new ensemble model.
+#' @param optimal.ensemble Logical; whether to find the ensemble with the best accuracy or
+#'     r-squared, calculated on the \code{evaluation.subset} if given, else on the training
+#'     data. Ignored if \code{compare.only} is TRUE.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
@@ -373,6 +375,7 @@ MachineLearningMulti <- function(formula,
                                  seed = 12321,
                                  models.args = NULL,
                                  compare.only = FALSE,
+                                 optimal.ensemble = FALSE,
                                  output = "Comparison") {
 
     n.models <- length(models.args)
@@ -388,6 +391,7 @@ MachineLearningMulti <- function(formula,
 
     MachineLearningEnsemble(fitted.models,
                             compare.only = compare.only,
+                            optimal.ensemble = optimal.ensemble,
                             evaluation.subset = evaluation.subset,
                             evaluation.weights = if (is.null(evaluation.subset)) NULL else weights,
                             output = output)
