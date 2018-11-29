@@ -6,8 +6,8 @@
 and/or Regression models}
 \usage{
 MachineLearningEnsemble(models, compare.only = FALSE,
-  optimal.ensemble = FALSE, evaluation.subset = NULL,
-  evaluation.weights = NULL, output = "Comparison")
+  evaluation.subset = NULL, evaluation.weights = NULL,
+  output = "Comparison", optimal.ensemble = FALSE)
 }
 \arguments{
 \item{models}{A \code{list} of models, all of which are of class
@@ -15,10 +15,6 @@ MachineLearningEnsemble(models, compare.only = FALSE,
 
 \item{compare.only}{Logical; whether to just produce a table comparing the models or
 additionally combine them to make a new ensemble model.}
-
-\item{optimal.ensemble}{Logical; whether to find the ensemble with the best accuracy or
-r-squared, calculated on the \code{evaluation.subset} if given, else on the training
-data. Ignored if \code{compare.only} is TRUE.}
 
 \item{evaluation.subset}{An optional vector specifying a subset of observations to be
 used for evaluating the models. If not specified, models will only be compared on the
@@ -32,6 +28,10 @@ training weights.}
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a
 \code{\link{ConfusionMatrix}}.}
+
+\item{optimal.ensemble}{Logical; whether to find the ensemble with the best accuracy or
+r-squared, calculated on the \code{evaluation.subset} if given, else on the training
+data. Ignored if \code{compare.only} is TRUE.}
 }
 \description{
 Create an ensemble or comparison table of existing MachineLearning
