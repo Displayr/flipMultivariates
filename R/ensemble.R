@@ -23,16 +23,16 @@
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
-                           optimal.ensemble = FALSE,
                            evaluation.subset = NULL,
                            evaluation.weights = NULL,
-                           output = "Comparison") {
+                           output = "Comparison",
+                           optimal.ensemble = FALSE) {
 
     n.models <- length(models)
     if (n.models <= 1 && !compare.only)
         stop("At least 2 models are required to create an ensemble.")
     if (optimal.ensemble && compare.only)
-        stop("Cannot create an optimal ensemble if only performing comparirson.")
+        stop("Cannot create an optimal ensemble if only performing comparison.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
     if (!is.null(evaluation.subset))
@@ -95,11 +95,9 @@ MachineLearningEnsemble <- function(models,
 
                 preds.and.probs <- ensemblePredictionsAndProbabilities(combo.models, numeric.outcome)
                 result$prediction <- preds.and.probs$prediction
-                #result$probabilities <- preds.and.probs$probabilities
 
                 perf <- performance.function(result, evaluation.subset, evaluation.weights)
                 combo.performance <- if(is.null(evaluation.subset)) perf[length(perf) - 1] else perf[length(perf)]
-                #print(c(combo.performance, optimal.performance, combo))
                 if (combo.performance > optimal.performance)
                 {
                     optimal.performance <- combo.performance
