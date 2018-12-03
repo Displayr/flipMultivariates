@@ -98,7 +98,7 @@ MachineLearningEnsemble <- function(models,
 
                 perf <- performance.function(result, evaluation.subset, evaluation.weights)
                 combo.performance <- if(is.null(evaluation.subset)) perf[length(perf) - 1] else perf[length(perf)]
-                if (combo.performance > optimal.performance)
+                if (!is.na(combo.performance) && combo.performance > optimal.performance)
                 {
                     optimal.performance <- combo.performance
                     optimal.models <- which.models
@@ -134,7 +134,7 @@ MachineLearningEnsemble <- function(models,
         colnames(comparison) <- c(statistic.names, c("Training RMSE", "Evaluation RMSE",
                                                      "Training R^2", "Evaluation R^2"))
         if (all(is.na(comparison$`Evaluation RMSE`)))
-            comparison$`Evaluation RMSE` <- comparison$`Evaluation RMSE` <- NULL
+            comparison$`Evaluation RMSE` <- comparison$`Evaluation R^2` <- NULL
     }
     else
     {
