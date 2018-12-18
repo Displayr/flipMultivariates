@@ -173,6 +173,7 @@ predict.GradientBoost <- function(object, newdata = NULL, ...)
     else
         CheckPredictionVariables(object, newdata)
     newdata <- OneHot(newdata, object$outcome.name)$X
+    object$original$feature_names <- colnames(newdata) # avoids error if newdata uses names and model uses labels
 
     prediction <- predict(object$original, newdata = newdata, reshape = TRUE, ...)
 
