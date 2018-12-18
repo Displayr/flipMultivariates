@@ -99,7 +99,9 @@ Probabilities.RandomForest <- function(x)
 #' @import randomForest
 randomForestExtractVariables <- function(object, type, newdata = object$model, na.action = na.pass)
 {
-    predict(object$original, type, newdata = newdata, na.action = na.action)
+    pred <- predict(object$original, type, newdata = newdata, na.action = na.action)
+    names(pred) <- NULL
+    pred
 }
 
 
