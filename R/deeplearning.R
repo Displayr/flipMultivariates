@@ -351,7 +351,7 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
     X <- as.matrix(AsNumeric(newdata))
     constants <- object$training.stdevs == 0
     if (object$normalize)
-        X[, !constants] <- scale(X[, !constants],
+        X[, !constants] <- scale(X[, !constants, drop = FALSE],
                                  center = object$training.means[!constants],
                                  scale = object$training.stdevs[!constants])
 
