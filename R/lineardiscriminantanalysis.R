@@ -73,7 +73,6 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
                 ...)
 {
 
-
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
     ####################################################################
@@ -107,6 +106,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
 
     if (!is.factor(required.data[, outcome.name]) & !IsCount(required.data[, outcome.name]))
         stop("LDA requires the outcome variable to be categorical or a count.")
+    factor.levels <- attr(required.data, "factor.levels")
     required.data <- CreatingFactorDependentVariableIfNecessary(formula, required.data)
     unweighted.training.data <- CreatingFactorDependentVariableIfNecessary(formula, unweighted.training.data)
 
@@ -191,6 +191,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     result$prior <- prior
     dv <- predict(result$original,prior = observed.prior, newdata = x, na.action = na.pass)[["x"]]
     result$centroids <- MeanByGroup(dv, group, prepared.data$cleaned.weights)
+    result$factor.levels <- factor.levels
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
 
