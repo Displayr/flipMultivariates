@@ -18,6 +18,11 @@ for (alg in algorithms)
                               formula = sex ~ education_num + marital + workclass,
                               data = adult.2000)), NA)
         suppressWarnings(print(ml))
+        first.pred <- predict(ml)[1]
+        pred.from.chars <- predict(ml, data.frame(education_num = 9,
+                                                  marital = " Married-civ-spouse",
+                                                  workclass = " Private"))
+        expect_equal(first.pred, pred.from.chars)
     })
 }
 

@@ -21,7 +21,23 @@ predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
         # no warnings from CheckPredictionVariables if predicting training data
         suppressWarnings(CheckPredictionVariables(object, object$model))
     else
+    {
+        predictor.cols <- sapply(colnames(newdata), match, names(object$factor.levels))
+
+        for (newdata.col in seq(length(predictor.cols)))
+        {
+            predictor.col <- predictor.cols[newdata.col]
+            if (!is.na(newdata.col) && !is.null(object$factor.levels[[predictor.col]]))
+            {
+                newdata[, newdata.col] <- factor(as.character(newdata[, newdata.col]),
+                                                 levels = object$factor.levels[[predictor.col]])
+            }
+        }
+        newdata[, is.na(predictor.cols)] <- NULL
+        newdata <- AsNumeric(newdata, binary = TRUE, remove.first = TRUE)
+        ErrorIfInfinity(newdata)
         CheckPredictionVariables(object, newdata)
+    }
 
     ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
 }
@@ -181,8 +197,9 @@ predict.GradientBoost <- function(object, newdata = NULL, ...)
 
     if (object$original$params$objective == "binary:logistic")
     {
-        prediction <- as.factor(prediction > 0.5)
-        levels(prediction) <- object$outcome.levels
+        prediction <- ceiling(2 * prediction)
+        prediction <- object$outcome.levels[prediction]
+        prediction <- factor(prediction, levels = object$outcome.levels)
     }
     if (object$original$params$objective == "multi:softprob")
     {
