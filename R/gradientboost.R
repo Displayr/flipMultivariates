@@ -125,7 +125,7 @@ GradientBoost <- GradientBoosting <- function(formula,
         }
 
         n.rounds <- 1000
-        cv.nfold <- 5
+        cv.nfold <- 5   # use fewer folds than without grid.search for speed
 
         if (booster == "gbtree")
             search.grid <- expand.grid(subsample = c(0.7, 1),
