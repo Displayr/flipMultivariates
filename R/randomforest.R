@@ -107,7 +107,6 @@ prepareRFChartData <- function(x)
         output.data <- x$original$importance
         if (x$show.labels)
             rownames(output.data) <- x$variable.labels
-        colnames(output.data) <- c("%IncMSE", "Importance (IncNodePurity)")
         return(output.data)
 
     } else if (x$output == "Prediction-Accuracy Table")
