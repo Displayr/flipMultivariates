@@ -218,9 +218,7 @@ calcAccuracy <- function(x)
     {
         confM <- x$confusion
         class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-        class.cor <- matrix(class.cor, ncol = 1, dimnames = list(colnames(confM), "Accuracy by class (%)"))
-        names(class.cor) <- colnames(confM)
-        output.data <- class.cor * 100        
+        class.cor <- matrix(class.cor * 100, ncol = 1, dimnames = list(colnames(confM), "Accuracy by class (%)"))
         return(class.cor)
     }
     else
