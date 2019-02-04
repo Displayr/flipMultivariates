@@ -166,6 +166,7 @@ GradientBoost <- GradientBoosting <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    attr(result, "ChartData") <- prepareGBChartData(result)
     result
 }
 
@@ -179,6 +180,7 @@ GradientBoost <- GradientBoosting <- function(formula,
 #' @method print GradientBoost
 print.GradientBoost <- function(x, ...)
 {
+    output.data <- attr(x, "ChartData")
     if (x$output == "Accuracy")
     {
         title <- paste0("Gradient Boosting: ", x$outcome.label)
@@ -192,12 +194,9 @@ print.GradientBoost <- function(x, ...)
 
         if (!x$numeric.outcome)
         {
-            confM <- x$confusion
-            tot.cor <- sum(diag(confM))/sum(confM)
-            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-            names(class.cor) <- colnames(confM)
+            tot.cor <- sum(diag(x$confusion))/sum(x$confusion)
             subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
-            tbl <- DeepLearningTable(class.cor*100,
+            tbl <- DeepLearningTable(output.data,
                                      column.labels = "Accuracy by class (%)",
                                      order.values = FALSE,
                                      title = title,
@@ -210,8 +209,7 @@ print.GradientBoost <- function(x, ...)
                                                predict(x)[x$subset],
                                                x$weights[x$subset])
             subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(c("Root Mean Squared Error" = metrics$rmse,
-                                       "R-squared" = metrics$r.squared),
+            tbl <- DeepLearningTable(output.data,
                                      column.labels = " ",
                                      order.values = FALSE,
                                      title = title,
@@ -237,5 +235,47 @@ print.GradientBoost <- function(x, ...)
         x$original$call <- x$formula
         print(x$original)
         invisible(x)
+    }
+}
+
+#' @importFrom utils capture.output
+prepareGBChartData <- function(x, ...)
+{
+    output.data <- NULL
+    if (x$output == "Accuracy")
+    {
+        if (!x$numeric.outcome)
+        {
+            confM <- x$confusion
+            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
+            names(class.cor) <- colnames(confM)
+            output.data <- class.cor * 100        
+            return(class.cor)
+        }
+        else
+        {
+            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
+                                               predict(x)[x$subset],
+                                               x$weights[x$subset])
+            output.data <- c("Root Mean Squared Error" = metrics$rmse,
+                             "R-squared" = metrics$r.squared)
+        }
+        return(output.data)
+    }
+    else if (x$output == "Prediction-Accuracy Table")
+    {
+        return(ExtractChartData(x$confusion))
+    }
+    else if (x$output == "Importance")
+    {
+        tmp <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
+        importance <- unlist(tmp[,2])
+        names(importance) <- unlist(tmp[,1])
+        importance <- importance/importance[1]
+        return(importance)
+    }
+    else
+    {
+        return(capture.output(print(x$original)))
     }
 }
