@@ -182,47 +182,9 @@ print.GradientBoost <- function(x, ...)
 {
     output.data <- attr(x, "ChartData")
     if (x$output == "Accuracy")
-    {
-        title <- paste0("Gradient Boosting: ", x$outcome.label)
-        predictors <- x$variable.labels
-        extracted <- ExtractCommonPrefix(predictors)
-        if (!is.na(extracted$common.prefix))
-        {
-            predictors <- extracted$shortened.labels
-        }
-        predictors <- paste(predictors, collapse = ", ")
-
-        if (!x$numeric.outcome)
-        {
-            tot.cor <- sum(diag(x$confusion))/sum(x$confusion)
-            subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
-            tbl <- DeepLearningTable(output.data,
-                                     column.labels = "Accuracy by class (%)",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        else
-        {
-            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
-                                               predict(x)[x$subset],
-                                               x$weights[x$subset])
-            subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(output.data,
-                                     column.labels = " ",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        print(tbl)
-
-    }
+        print(formatAccuracy(x, "Gradient Boosting"))
     else if (x$output == "Prediction-Accuracy Table")
-    {
         print(x$confusion)
-    }
     else if (x$output == "Importance")
     {
         importance <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
@@ -244,23 +206,7 @@ prepareGBChartData <- function(x, ...)
     output.data <- NULL
     if (x$output == "Accuracy")
     {
-        if (!x$numeric.outcome)
-        {
-            confM <- x$confusion
-            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-            names(class.cor) <- colnames(confM)
-            output.data <- class.cor * 100        
-            return(class.cor)
-        }
-        else
-        {
-            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
-                                               predict(x)[x$subset],
-                                               x$weights[x$subset])
-            output.data <- c("Root Mean Squared Error" = metrics$rmse,
-                             "R-squared" = metrics$r.squared)
-        }
-        return(output.data)
+        return(calcAccuracy(x))
     }
     else if (x$output == "Prediction-Accuracy Table")
     {

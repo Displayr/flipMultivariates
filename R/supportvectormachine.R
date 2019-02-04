@@ -87,6 +87,7 @@ SupportVectorMachine <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    attr(result, "ChartData") <- prepareSVMChartData(result)
     result
 }
 
@@ -102,59 +103,9 @@ SupportVectorMachine <- function(formula,
 print.SupportVectorMachine <- function(x, ...)
 {
     if (x$output == "Accuracy")
-    {
-        title <- paste0("Support Vector Machine: ", x$outcome.label)
-        if (x$show.labels)
-        {
-            predictors <- x$variable.labels
-        }
-        else
-        {
-            predictors <- attr(x$original$terms, "term.labels")
-        }
-
-        extracted <- ExtractCommonPrefix(predictors)
-        if (!is.na(extracted$common.prefix))
-        {
-            predictors <- extracted$shortened.labels
-        }
-        predictors <- paste(predictors, collapse = ", ")
-
-        if (!x$numeric.outcome)
-        {
-            confM <- x$confusion
-            tot.cor <- sum(diag(confM))/sum(confM)
-            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-            names(class.cor) <- colnames(confM)
-            subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
-            tbl <- DeepLearningTable(class.cor*100,
-                                     column.labels = "Accuracy by class (%)",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        else
-        {
-            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
-                                               predict(x)[x$subset],
-                                               x$weights[x$subset])
-            subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(c("Root Mean Squared Error" = metrics$rmse,
-                                       "R-squared" = metrics$r.squared),
-                                     column.labels = " ",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        print(tbl)
-
-    }
+        print(formatAccuracy(x, "Support Vector Machine"))
     else if (x$output == "Prediction-Accuracy Table")
-    {
         print(x$confusion)
-    }
     else
     {
         x$original$call <- x$formula
@@ -163,3 +114,12 @@ print.SupportVectorMachine <- function(x, ...)
     }
 }
 
+prepareSVMChartData <- function(x)
+{
+    if (x$output == "Accuracy")
+        return(calcAccuracy(x))
+    else if (x$output == "Prediction-Accuracy Table")
+        return(ExtractChartData(x$confusion))
+    else
+        return(capture.output(print(x$original)))
+}

@@ -136,9 +136,34 @@ DeepLearning <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    attr(result, "ChartData") <- prepareDLChartData(result)
     result
 }
 
+prepareDLChartData <- function(x, ...)
+{
+    if (py_is_null_xptr(x$original))
+        x$original <- unserialize_model(x$original.serial)
+    
+    if (x$output == "Accuracy")
+    {
+        return(calcAccuracy(x))
+    }
+    else if (x$output == "Prediction-Accuracy Table")
+    {
+        return(ExtractChartData(x$confusion))
+    }
+    else if (x$output == "Cross Validation")
+    {
+        output.data <- data.frame(x$cross.validation$metrics)
+        colnames(output.data) <- c("Training accuracy", "Training loss", "Validation accuracy", "Validation loss")
+        return(output.data)
+    }
+    else
+    {
+        return(capture.output(print(x$original)))
+    }
+}
 
 #' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical
 #' @importFrom keras compile fit serialize_model callback_early_stopping use_session_with_seed
@@ -266,55 +291,11 @@ print.DeepLearning <- function(x, ...)
         x$original <- unserialize_model(x$original.serial)
 
     if (x$output == "Accuracy")
-    {
-        title <- paste0("Deep Learning: ", x$outcome.label)
-        predictors <- x$variable.labels
-        extracted <- ExtractCommonPrefix(predictors)
-        if (!is.na(extracted$common.prefix))
-        {
-            predictors <- extracted$shortened.labels
-        }
-        predictors <- paste(predictors, collapse = ", ")
-
-        if (!x$numeric.outcome)
-        {
-            confM <- x$confusion
-            tot.cor <- sum(diag(confM))/sum(confM)
-            class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
-            names(class.cor) <- colnames(confM)
-            subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
-            tbl <- DeepLearningTable(class.cor*100,
-                                     column.labels = "Accuracy by class (%)",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        else
-        {
-            metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
-                                               predict(x)[x$subset],
-                                               x$weights[x$subset])
-            subtitle <- "Measure of fit"
-            tbl <- DeepLearningTable(c("Root Mean Squared Error" = metrics$rmse,
-                                       "R-squared" = metrics$r.squared),
-                                     column.labels = " ",
-                                     order.values = FALSE,
-                                     title = title,
-                                     subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
-                                     footer = x$sample.description)
-        }
-        print(tbl)
-
-    }
+        print(formatAccuracy(x, "Deep Learning"))
     else if (x$output == "Prediction-Accuracy Table")
-    {
         print(x$confusion)
-    }
     else if (x$output == "Cross Validation")
-    {
         print(plot(x$cross.validation))
-    }
     else
     {
         print(x$original)

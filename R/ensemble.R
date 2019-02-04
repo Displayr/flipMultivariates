@@ -149,6 +149,7 @@ MachineLearningEnsemble <- function(models,
     result$optimal.ensemble <- optimal.ensemble
     result$n.models <- n.models
     result$output <- output
+    attr(result, "ChartData") <- prepareEnsembleChartData(result)
     return(result)
 }
 
@@ -298,6 +299,14 @@ print.MachineLearningEnsemble <- function(x, ...) {
                                footer = footer)
         tbl
     }
+}
+
+prepareEnsembleChartData <- function(x)
+{
+    if (x$output == "Ensemble")
+        return(ExtractChartData(x$confusion))
+    else
+        return(x$comparison)
 }
 
 #' \code{predict.MachineLearningEnsemble}

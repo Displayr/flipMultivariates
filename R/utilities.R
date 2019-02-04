@@ -211,3 +211,63 @@ numericOutcomeMetrics <- function(obs, pred, weights) {
     return(list(rmse = rmse, r.squared = r.sq))
 }
 
+# Returns table for printing accuracy summary
+calcAccuracy <- function(x)
+{
+    if (!x$numeric.outcome)
+    {
+        confM <- x$confusion
+        class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
+        class.cor <- matrix(class.cor, ncol = 1, dimnames = list(colnames(confM), "Accuracy by class (%)"))
+        names(class.cor) <- colnames(confM)
+        output.data <- class.cor * 100        
+        return(class.cor)
+    }
+    else
+    {
+        metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
+                                           predict(x)[x$subset],
+                                           x$weights[x$subset])
+        output.data <- c("Root Mean Squared Error" = metrics$rmse,
+                         "R-squared" = metrics$r.squared)
+    }
+    return(output.data)
+}
+
+formatAccuracy <- function(x, algorithm)
+{
+    output.data <- calcAccuracy(x)
+    title <- paste0(algorithm, ": ", x$outcome.label)
+    predictors <- x$variable.labels
+    extracted <- ExtractCommonPrefix(predictors)
+    if (!is.na(extracted$common.prefix))
+    {
+        predictors <- extracted$shortened.labels
+    }
+    predictors <- paste(predictors, collapse = ", ")
+
+    if (!x$numeric.outcome)
+    {
+        tot.cor <- sum(diag(x$confusion))/sum(x$confusion)
+        subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
+        tbl <- DeepLearningTable(output.data,
+                                 column.labels = "Accuracy by class (%)",
+                                 order.values = FALSE,
+                                 title = title,
+                                 subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
+                                 footer = x$sample.description)
+    }
+    else
+    {
+        subtitle <- "Measure of fit"
+        tbl <- DeepLearningTable(output.data,
+                                 column.labels = " ",
+                                 order.values = FALSE,
+                                 title = title,
+                                 subtitle = paste(subtitle, " (Predictors: ", predictors, ")", sep = ""),
+                                 footer = x$sample.description)
+    }
+    return(tbl)
+}
+
+

@@ -96,8 +96,27 @@ RandomForest <- function(formula,
         else
             rownames(result$original$importanceSD) <- result$variable.labels
     }
+    attr(result, "ChartData") <- prepareRFChartData(result)
     result
 }
+
+prepareRFChartData <- function(x)
+{   
+    if (x$output == "Importance")
+    {
+        output.data <- x$original$importance
+        if (x$show.labels)
+            rownames(output.data) <- x$variable.labels
+        colnames(output.data) <- c("%IncMSE", "Importance (IncNodePurity)")
+        return(output.data)
+
+    } else if (x$output == "Prediction-Accuracy Table")
+        return(ExtractChartData(x$confusion))
+    else
+        return(capture.output(print(x$original)))
+}
+    
+        
 
 #' @import randomForest
 #' @importFrom flipFormat RandomForestTable FormatAsReal RandomForestTable ExtractCommonPrefix
