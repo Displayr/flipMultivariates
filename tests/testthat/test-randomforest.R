@@ -25,12 +25,14 @@ test_that("Random forests: Outputs, labels and outcome variable types",{
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
+    expect_equal(attr(z, "ChartData"), z$original$importance, check.attributes = FALSE)
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = FALSE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = TRUE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
+    expect_equal(attr(z, "ChartData")[2], "Call:")
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = FALSE, output = "Detail", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
@@ -40,6 +42,7 @@ test_that("Random forests: Outputs, labels and outcome variable types",{
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
+    expect_equal(attr(z, "ChartData"), ExtractChartData(z))
     z <- RandomForest(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                       show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)

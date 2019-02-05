@@ -30,14 +30,32 @@ test_that("LDA: plots",
                                            method = "moment", data = hair1, subset = split60 == "Estimation Sample",
                                            show.labels = TRUE, output = "Scatterplot"))
               expect_error(print(zLDA), NA)
+
+              chart.dat <- structure(c(-2.40270212048022, -0.38347784494597, 2.3137863453945,
+                                       3.23130876867615, -0.443477820196444, 0.530232594522982, 3.59454746040973,
+                                       -0.0493608999949436, 3.65010223613683, 0.229409884683453, -2.42165670744295,
+                                       0.995933738442906, 0.433713532891357, 2.98425747335485, -0.133295738357835,
+                                       3.40255715844592, 0.518272387014377, -1.53367270819624, 0.341430107689394,
+                                       1.18022258606677, -0.630008440453795, -0.43066522130126, -0.931270319099291,
+                                       -0.678378921931945, 0.230057553267276, -0.80591921707889, -0.434283879369377,
+                                       -0.730858735891654, 0.0223151985836516, -1.16703971960613, -1.90751457543177,
+                                       -1.22275817781825), .Dim = c(16L, 2L), .Dimnames = list(c("Less than 1 year",
+                                       "1 to 5 years", "Over 5 years", "x6", "x7", "x8", "x9", "x10",
+                                       "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18"), c("LD1", "LD2")))
+              expect_equal(attr(zLDA, "ChartData"), chart.dat)
+
               zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                                            method = "moment", data = hair1, subset = split60 == "Estimation Sample",
                                            show.labels = TRUE, output = "Moonplot"))
               expect_error(print(zLDA), NA)
+              expect_equal(attr(zLDA, "ChartData"), chart.dat)
+
               zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                                            method = "moment", data = hair1, subset = split60 == "Estimation Sample",
                                            show.labels = TRUE, output = "Prediction-Accuracy Table"))
               expect_error(print(zLDA), NA)
+              expect_equal(attr(zLDA, "ChartData"), ExtractChartData(zLDA$confusion))
+
               hair1$X1 <- hair1$x1
               flipFormat::Labels(hair1$X1) <- "Duration"
               hair1$X6 <- hair1$x6
@@ -133,8 +151,31 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
 test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
           {
               zLDA <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
-                                           method = "moment", data = hair1, prior = "Observed",
+                                           method = "moment", data = hair1, prior = "Observed", output = "Means",
                                            weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE))
+
+              expect_equal(attr(zLDA, "ChartData"), structure(c(7.24437148217636, 3.46397748592871, 4.47664165103189,
+                                3.9202626641651, 3.58227016885553, 4.90891181988743, 4.52626641651032,
+                                7.11022514071295, 5.55037523452158, 4.7077861163227, 3.15881801125704,
+                                3.85384615384615, 2.97110694183865, 6.65514705882353, 3.58897058823529,
+                                6.12922794117647, 6.01764705882353, 4.45919117647059, 5.64209558823529,
+                                5.19944852941176, 7.2375, 6.44779411764706, 5.41783088235294,
+                                4.68051470588235, 5.50569852941177, 4.27481617647059, 9.09566395663957,
+                                3.43757904245709, 5.57967479674797, 6.30957542908762, 3.94182475158085,
+                                6.9289972899729, 4.97208672086721, 5.64733514001807, 6.08563685636856,
+                                5.3349593495935, 4.61996386630533, 4.05871725383921, 4.20578139114725,
+                                0.531333942621244, 0.0410825933510373, 0.0267111883273091, 0.585708825864053,
+                                0.0386762017579645, 0.533420779027016, 0.05653914609799, 0.248650932783968,
+                                0.0841609994183441, 0.0075103300872595, 0.467772114218906, 0.305738726431116,
+                                0.585007716402078, 1.82787618374647e-10, 0.361443659250526, 0.601056506239137,
+                                5.94653493113384e-12, 0.331205336516674, 3.9773209725702e-10,
+                                0.199630239638239, 0.000155258576763351, 0.0814002174179213,
+                                1, 5.75728985319213e-09, 1.39183742617899e-05, 4.36342628695741e-12
+              ), .Dim = c(13L, 5L), .Dimnames = list(c(x6 = "x6", x7 = "x7",
+                               x8 = "x8", x9 = "x9", x10 = "x10", x11 = "x11", x12 = "x12",
+                               x13 = "x13", x14 = "x14", x15 = "x15", x16 = "x16", x17 = "x17",
+                               x18 = "x18"), c("Less than 1 year", "1 to 5 years", "Over 5 years",
+                               "r.squared", "p.values"))))
               variance.explained <- round(zLDA$original$svd^2/sum(zLDA$original$svd^2), 4L)
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)

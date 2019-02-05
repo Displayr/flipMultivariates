@@ -23,10 +23,19 @@ test_that("Print Gradient Boost: outputs and boosters",{
                                    show.labels = TRUE, output = output, data = hair1, subset = split60 == "Estimation Sample",
                                    booster = booster, grid.search = grid.search)
                 expect_error(capture.output(print(z)), NA)
+                if (output == "Prediction-Accuracy Table")
+                    expect_equal(attr(z, "ChartData"), ExtractChartData(z$confusion))
+                else if (output == "Detail")
+                    expect_equal(attr(z, "ChartData")[1], "##### xgb.Booster")
+                else
+                    expect_equal(names(attr(z, "ChartData")), c("Root Mean Squared Error", "R-squared"))
+
                 z <- GradientBoost(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                                    show.labels = FALSE, output = output, data = hair1, subset = split60 == "Estimation Sample",
                                    booster = booster, grid.search = grid.search)
                 expect_error(capture.output(print(z)), NA)
+
+
             }
 })
 

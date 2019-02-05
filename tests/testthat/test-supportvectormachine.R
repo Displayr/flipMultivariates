@@ -18,6 +18,8 @@ test_that("SVM: Costs and outputs",{
                               show.labels = TRUE, output = "Accuracy", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 0.001)
     expect_error(capture.output(print(z)), NA)
+    expect_equal(names(attr(z, "ChartData")), c("Root Mean Squared Error", "R-squared"))
+
     z <- SupportVectorMachine(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                               show.labels = FALSE, output = "Accuracy", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 1000000)
@@ -30,6 +32,8 @@ test_that("SVM: Costs and outputs",{
                               show.labels = FALSE, output = "Prediction-Accuracy Table", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 100)
     expect_error(capture.output(print(z)), NA)
+    expect_equal(attr(z, "ChartData"), ExtractChartData(z$confusion))
+
     z <- SupportVectorMachine(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                               show.labels = TRUE, output = "Detail", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 0.00001)
@@ -58,6 +62,8 @@ test_that("SVM: Costs and outputs",{
                               show.labels = TRUE, output = "Detail", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 0.00001)
     expect_error(capture.output(print(z)), NA)
+    expect_equal(attr(z, "ChartData")[2], "Call:")
+
     z <- SupportVectorMachine(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                               show.labels = FALSE, output = "Detail", data = hair1,
                               subset = split60 == "Estimation Sample", cost = 1000000000)

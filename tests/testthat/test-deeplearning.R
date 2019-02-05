@@ -13,26 +13,31 @@ test_that("Print Deep Learning: outcome types", {
     dl <- suppressWarnings(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
                        hidden.nodes = 15, max.epochs = 10, output = "Prediction-Accuracy Table"))
     expect_error(capture.output(print(dl)), NA)
+    expect_equal(attr(dl, "ChartData"), ExtractChartData(dl$confusion))
 
     # multiclass outcoume, xval output, 2 layer
     dl <- suppressWarnings(DeepLearning(workclass ~ occupation + relationship + race + sex + hrs_per_week, data = adult.2000,
                         hidden.nodes = c(20, 10), max.epochs = 10, output = "Cross Validation"))
     expect_error(capture.output(print(dl)), NA)
+    expect_equal(attr(dl, "ChartData"), dl$cross.validation$metrics, check.attributes = FALSE)
 
     # numeric outcome, accuracy output, no normalization
     dl <- suppressWarnings(DeepLearning(hrs_per_week ~ occupation + relationship + race + workclass + sex, data = adult.2000,
                        hidden.nodes = 8, max.epochs = 10, output = "Accuracy", normalize = FALSE))
     expect_error(capture.output(print(dl)), NA)
+    expect_equal(names(attr(dl, "ChartData")), c('Root Mean Squared Error', 'R-squared'))
 
     # imbalanced multiclass (90% of country is USA), layers output, 3 layer
     dl <- suppressWarnings(DeepLearning(country ~ ., data = adult.2000,
                         hidden.nodes = c(50, 35, 20), max.epochs = 10, output = "Network Layers"))
     expect_error(capture.output(print(dl)), NA)
+    expect_equal(attr(dl, "ChartData")[1] , "Model")
 
     # single predictor
     dl <- suppressWarnings(DeepLearning(occupation ~ age, data = adult.2000,
-                                        hidden.nodes = 5, max.epochs = 10, output = "Accuracy"))
+                                        hidden.nodes = 5, max.epochs = 10, output = "Detail"))
     expect_error(capture.output(print(dl)), NA)
+    expect_equal(attr(dl, "ChartData")[1], "Model")
 
 })
 
