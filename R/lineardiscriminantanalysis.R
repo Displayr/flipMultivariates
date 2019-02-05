@@ -462,7 +462,7 @@ prepareLDAChartData <- function(x)
     } else
     {
         x$original$call <- x$formula
-        return(capture.output(print(x$original)))
+        return(as.matrix(capture.output(print(x$original))))
     }
 }
         

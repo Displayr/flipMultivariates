@@ -222,6 +222,6 @@ prepareGBChartData <- function(x, ...)
     }
     else
     {
-        return(capture.output(print(x$original)))
+        return(as.matrix(capture.output(print(x$original))))
     }
 }

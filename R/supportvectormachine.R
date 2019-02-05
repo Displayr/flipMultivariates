@@ -121,5 +121,5 @@ prepareSVMChartData <- function(x)
     else if (x$output == "Prediction-Accuracy Table")
         return(ExtractChartData(x$confusion))
     else
-        return(capture.output(print(x$original)))
+        return(as.matrix(capture.output(print(x$original))))
 }
