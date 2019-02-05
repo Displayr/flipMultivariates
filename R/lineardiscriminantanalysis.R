@@ -208,6 +208,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    attr(result, "ChartData") <- prepareLDAChartData(result)
     result
 }
 
@@ -425,6 +426,47 @@ lda.functions <- function(x, groups, grp.means, prior, weights, functions.output
     class.funs[1,] <- class.funs[1,] + log(prior)
     return(class.funs)
 }
+
+#' @importFrom flipAnalysisOfVariance MultipleANOVAs
+prepareLDAChartData <- function(x)
+{
+    if (x$output == "Means")
+    {
+        dependent.name <- x$outcome.name
+        data <- x$estimation.data
+        dependent <- data[, dependent.name]
+        show.labels <- x$show.labels
+        column.names <- levels(dependent)
+        independents <- data[, -match(dependent.name, names(data))]
+        cmp.models <- MultipleANOVAs(independents, dependent)
+
+        means <- t(x$original$means)
+        r.squared <- sapply(cmp.models, function(m) m$r.squared)       
+        p.values <- sapply(cmp.models, function(m) m$p)
+        return(cbind(means, r.squared, p.values))       
+
+    } else if (x$output == "Prediction-Accuracy Table")
+    {
+        return (ExtractChartData(x$confusion))
+
+    } else if (x$output == "Scatterplot" || x$output == "Moonplot")
+    {
+        scale <-  apply(abs(x$centroids), 2, mean) / apply(abs(x$correlations), 2, mean)
+        correlations <- sweep(x$correlations, 2, scale, "*")
+        return(rbind(x$centroids, correlations))
+
+    } else if (x$output == "Discriminant Functions")
+    {
+        return(x$original$discriminant.functions)
+
+    } else
+    {
+        x$original$call <- x$formula
+        return(capture.output(print(x$original)))
+    }
+}
+        
+    
 
 
 #' print.LDA
