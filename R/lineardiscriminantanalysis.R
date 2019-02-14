@@ -54,7 +54,6 @@
 #' @importFrom flipStatistics Correlation MeanByGroup
 #' @importFrom flipU OutcomeName IsCount
 #' @importFrom stats aggregate
-#' @importFrom flipRegression ConfusionMatrix
 #' @aliases LinearDiscriminantAnalysis
 #' @export
 LDA <- LinearDiscriminantAnalysis <- function(formula,
@@ -436,14 +435,13 @@ prepareLDAChartData <- function(x)
         data <- x$estimation.data
         dependent <- data[, dependent.name]
         show.labels <- x$show.labels
-        column.names <- levels(dependent)
         independents <- data[, -match(dependent.name, names(data))]
         cmp.models <- MultipleANOVAs(independents, dependent)
 
         means <- t(x$original$means)
-        r.squared <- sapply(cmp.models, function(m) m$r.squared)       
+        r.squared <- sapply(cmp.models, function(m) m$r.squared)
         p.values <- sapply(cmp.models, function(m) m$p)
-        return(cbind(means, r.squared, p.values))       
+        return(cbind(means, r.squared, p.values))
 
     } else if (x$output == "Prediction-Accuracy Table")
     {
@@ -465,9 +463,6 @@ prepareLDAChartData <- function(x)
         return(as.matrix(capture.output(print(x$original))))
     }
 }
-        
-    
-
 
 #' print.LDA
 #'
@@ -487,7 +482,6 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
     data <- x$estimation.data
     dependent <- data[, dependent.name]
     show.labels <- x$show.labels
-    column.names <- levels(dependent)
 
     output <- x$output
     if (output == "Prediction-Accuracy Table")
@@ -501,8 +495,9 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         weights <- x$weights[subset]
         confusion <- x$confusion
         confusion <- confusion / sum(confusion)
-        subtitle = correctPredictionsText(sum(diag(confusion)), column.names,
-                                          diag(confusion) / apply(confusion, 1, sum))
+        subtitle = correctPredictionsText(sum(diag(confusion)),
+                                          colnames(x$confusion),
+                                    diag(confusion) / apply(confusion, 1, sum))
 
         title <- paste0("Linear Discriminant Analysis: ", x$outcome.label)
         if (show.labels)
