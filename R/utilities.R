@@ -129,6 +129,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 #' Save standard data after fitting a machine learning model
 #'
 #' @importFrom flipU IsCount
+#' @importFrom flipRegression ConfusionMatrix
 #' @noRd
 saveMachineLearningResults <- function(result, prepared.data, show.labels)
 {
