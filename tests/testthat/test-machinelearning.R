@@ -74,7 +74,7 @@ test_that("DS-2304: effects plot with colinear variable",
         robust.se = get0("formRobustSE", ifnotfound = FALSE),
         importance.absolute = get0("formAbsoluteImportance"),
         interaction = get0("formInteraction"),
-        relative.importance = formOutput == "Relative Importance Analysis")
+        relative.importance = formOutput == "Relative Importance Analysis"))
 
     expect_error(suppressWarnings(print(model)), NA)
 })
