@@ -255,7 +255,7 @@ neuralNetwork <- function(X,
     history$params <- history$params[sort(names(history$params))]
 
     if ((optimal.epochs <- length(history$metrics$val_loss)) == max.epochs)
-        warning("Cross valiidation loss is still decreasing after maximum number of epochs.",
+        warning("Cross validation loss is still decreasing after maximum number of epochs.",
                 " Model may not have converged, consider increasing the maximum number of epochs.")
     else
         optimal.epochs <- optimal.epochs - 3
