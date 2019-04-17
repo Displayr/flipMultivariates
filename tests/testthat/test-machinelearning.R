@@ -47,8 +47,10 @@ for (alg in algorithms)
 test_that("DS-2304: effects plot with colinear variable",
 {
     load("DS2304data.rda")
+    dat <- data.frame(Overall, Fees, Interest, Phone, Branch, Online, ATM, Fees2)
     model <- suppressWarnings(MachineLearning(
         formula = Overall ~ Fees + Interest + Phone + Branch + Online + ATM + Fees2,
+        data = dat,
         algorithm = formAlgorithm,
         weights = QPopulationWeight, subset = QFilter,
         missing = formMissing, output = formOutput, show.labels = !formNames,
