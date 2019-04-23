@@ -48,6 +48,8 @@ test_that("DS-2304: effects plot with colinear variable",
 {
     load("DS2304data.rda")
     dat <- data.frame(Overall, Fees, Interest, Phone, Branch, Online, ATM, Fees2)
+
+    ## with data arg.
     model <- suppressWarnings(MachineLearning(
         formula = Overall ~ Fees + Interest + Phone + Branch + Online + ATM + Fees2,
         data = dat,
@@ -79,4 +81,37 @@ test_that("DS-2304: effects plot with colinear variable",
         relative.importance = formOutput == "Relative Importance Analysis"))
 
     expect_error(suppressWarnings(print(model)), NA)
+
+    ## without data arg
+    model <- suppressWarnings(MachineLearning(
+        formula = Overall ~ Fees + Interest + Phone + Branch + Online + ATM + Fees2,
+        algorithm = formAlgorithm,
+        weights = QPopulationWeight, subset = QFilter,
+        missing = formMissing, output = formOutput, show.labels = !formNames,
+        seed = get0("formSeed"),
+        cost = get0("formCost"),
+        booster = get0("formBooster"),
+        grid.search = get0("formSearch"),
+        sort.by.importance = get0("formImportance"),
+        hidden.nodes = get0("formHiddenLayers"),
+        max.epochs = get0("formEpochs"),
+        normalize = get0("formNormalize"),
+        outcome.color = get0("formOutColor"),
+        predictors.color = get0("formPredColor"),
+        prior = get0("formPrior"),
+        prune = get0("formPruning"),
+        early.stopping = get0("formStopping"),
+        predictor.level.treatment = get0("formPredictorCategoryLabels"),
+        outcome.level.treatment = get0("formOutcomeCategoryLabels"),
+        long.running.calculations = get0("formLongRunningCalculations"),
+        type = get0("formRegressionType"),
+        auxiliary.data = get0("formAuxiliaryVariables"),
+        correction = get0("formCorrection"),
+        robust.se = get0("formRobustSE", ifnotfound = FALSE),
+        importance.absolute = get0("formAbsoluteImportance"),
+        interaction = get0("formInteraction"),
+        relative.importance = formOutput == "Relative Importance Analysis"))
+
+    expect_error(suppressWarnings(print(model)), NA)
+
 })
