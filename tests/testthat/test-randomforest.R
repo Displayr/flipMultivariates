@@ -79,8 +79,8 @@ test_that("Random forests: weights and filters",{
     ConfusionMatrix(z)
 
     # Weighted and filtered
-    expect_error(z <- RandomForest(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
-                                   data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE), NA)
+    expect_error(suppressWarnings(z <- RandomForest(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
+                                   data = hair1, weights = hair1$id, subset = split60 == "Estimation Sample", show.labels = TRUE)), NA)
     Accuracy(z)
     ConfusionMatrix(z)
 
@@ -153,3 +153,28 @@ test_that("Random forests: missing data",{
                               show.labels = FALSE, output = "Prediction-Accuracy Table",
                               missing = "Error if missing data", data = hair2), "The data contains missing values.")
 })
+
+
+
+test_that("Weighted versus unweighted results",
+          {
+                set.seed(1223)
+                n <- 100
+                df <- data.frame(dep = runif(n), #factor(round(runif(n)*5)),
+                              A = factor(round(runif(n)*5)),
+                              B = factor(round(runif(n)*5)),
+                              C = factor(round(runif(n)*5)),
+                              D = factor(round(runif(n)*5)),
+                              wgt = runif(n)/100 + .995)
+                out = RandomForest(dep ~ A + B + C + D, data = df)
+                expect_equal(tail(out$original$rsq, 1), -0.1332517, tol = 0.00001)
+                expect_warning(RandomForest(dep ~ A + B + C + D, data = df), NA)
+                # The weighted sample causes the measures of accuracy to be
+                # very optimistic: https://stats.stackexchange.com/a/166492
+                expect_warning(RandomForest(dep ~ A + B + C + D, data = df, weights = df$wgt),
+                               "are overly optimistic when a weight")
+                expect_warning(RandomForest(dep ~ A + B + C + D, data = df, weights = df$wgt),
+                                 "Weights have been applied")
+                suppressWarnings(out <- RandomForest(dep ~ A + B + C + D, data = df, weights = df$wgt))
+                expect_equal(tail(out$original$rsq, 1), 0.392224, tol = 0.00001)
+          })

@@ -40,7 +40,8 @@ RandomForest <- function(formula,
     ##### Error checking specific to this function                ######
     ####################################################################
 
-    # prepareMachineLearningData called with strict.var.names
+    if (!is.null(weights))
+        warning("The measures of fit (R-squared and out-of-bag sample) are overly optimistic when a weight is applied. It is recommended that you evaluate the quality of the model using unweighted data.")
 
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
@@ -101,7 +102,7 @@ RandomForest <- function(formula,
 }
 
 prepareRFChartData <- function(x)
-{   
+{
     if (x$output == "Importance")
     {
         output.data <- x$original$importance
@@ -114,8 +115,8 @@ prepareRFChartData <- function(x)
     else
         return(as.matrix(capture.output(print(x$original))))
 }
-    
-        
+
+
 
 #' @import randomForest
 #' @importFrom flipFormat RandomForestTable FormatAsReal RandomForestTable ExtractCommonPrefix
