@@ -41,7 +41,9 @@ RandomForest <- function(formula,
     ####################################################################
 
     if (!is.null(weights))
-        warning("The measures of fit (R-squared and out-of-bag sample) are overly optimistic when a weight is applied. It is recommended that you evaluate the quality of the model using unweighted data.")
+        warning("The measures of fit (R-squared and out-of-bag sample accuracy) are ",
+                "overly optimistic when a weight is applied. It is recommended that ",
+                "you evaluate the quality of the model using unweighted data.")
 
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
