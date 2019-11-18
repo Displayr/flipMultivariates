@@ -1,4 +1,4 @@
-# library(testthat)
-# library(flipMultivariates)
-#
-# test_check("flipMultivariates")
+library(testthat)
+library(flipMultivariates)
+
+test_check("flipMultivariates")
