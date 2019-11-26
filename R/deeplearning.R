@@ -144,7 +144,7 @@ prepareDLChartData <- function(x, ...)
 {
     if (py_is_null_xptr(x$original))
         x$original <- unserialize_model(x$original.serial)
-    
+
     if (x$output == "Accuracy")
     {
         return(calcAccuracy(x))
@@ -183,7 +183,11 @@ neuralNetwork <- function(X,
     # Note - below disables GPU computations and CPU parallelization by default, so slows performance
     # This should be removed when we require more speed
     # https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development
-    use_session_with_seed(seed)
+    #use_session_with_seed(seed)
+
+    # This line is used instead of use_session_with_seed to avoid bug with tf v2.0.0
+    # https://github.com/rstudio/keras/issues/890
+    tensorflow::tf$random$set_seed(seed)
 
     # create a function that builds the model one layer at a time.
     # called for cross-validation then again for the final model
