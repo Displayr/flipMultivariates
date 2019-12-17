@@ -1,12 +1,18 @@
 #' Train a machine learning model.
 #'
-#' @param algorithm The name of algorithm to perform the training.
-#' @param ... Arguments to the function \code{algorithm}
+#' @param algorithm The name of algorithm to perform the training. One of
+#' \code{"CART"}, \code{"Regression"}, \code{"Random Forest"}, \code{"Deep Learning"},
+#' \code{"Support Vector Machine"}, \code{"Linear Discriminant Analysis"}, or
+#' \code{"Gradient Boosting"}.
+#' @param ... Arguments to the function \code{algorithm}; see See Also
 #' @param warn.if.no.match Logical; If TRUE, a warning is shown if any arguments are not matched.
 #' @importFrom methods formalArgs
 #' @return A machine learning object.
 #' @export
-
+#' @seealso \code{\link{SupportVectorMachine}}, \code{\link[flipTrees]{CART}},
+#' \code{\link{DeepLearning}}, \code{\link{GradientBoosting}},
+#' \code{\link{LinearDiscrinminantAnalysis}}, \code{\link{RandomForest}},
+#' \code{\link[flipRegression]{Regression}}
 MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
 {
     user.args <- list(...)
@@ -55,7 +61,7 @@ getFunctionAndParameters <- function(function.name)
 #'
 #' @param parameter.names The names of parameters.
 #' @param arguments The arguments to match to the parameters.
-#' @param warn.if.no.match If TRUE, a warning is shown if any arugments are not matched.
+#' @param warn.if.no.match If TRUE, a warning is shown if any arguments are not matched.
 #' @noRd
 substituteArgumentNames <- function(parameter.names, arguments, warn.if.no.match = TRUE)
 {

@@ -7,9 +7,12 @@
 MachineLearning(algorithm, ..., warn.if.no.match = FALSE)
 }
 \arguments{
-\item{algorithm}{The name of algorithm to perform the training.}
+\item{algorithm}{The name of algorithm to perform the training. One of
+\code{"CART"}, \code{"Regression"}, \code{"Random Forest"}, \code{"Deep Learning"},
+\code{"Support Vector Machine"}, \code{"Linear Discriminant Analysis"}, or
+\code{"Gradient Boosting"}.}
 
-\item{...}{Arguments to the function \code{algorithm}}
+\item{...}{Arguments to the function \code{algorithm}; see See Also}
 
 \item{warn.if.no.match}{Logical; If TRUE, a warning is shown if any arguments are not matched.}
 }
@@ -18,4 +21,10 @@ A machine learning object.
 }
 \description{
 Train a machine learning model.
+}
+\seealso{
+\code{\link{SupportVectorMachine}}, \code{\link[flipTrees]{CART}},
+\code{\link{DeepLearning}}, \code{\link{GradientBoosting}},
+\code{\link{LinearDiscrinminantAnalysis}}, \code{\link{RandomForest}},
+\code{\link[flipRegression]{Regression}}
 }
