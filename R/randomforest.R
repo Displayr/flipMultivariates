@@ -100,6 +100,11 @@ RandomForest <- function(formula,
             rownames(result$original$importanceSD) <- result$variable.labels
     }
     attr(result, "ChartData") <- prepareRFChartData(result)
+  
+    # Reduce output size
+    attr(result$formula, ".Environment") <- NULL
+    attr(result$original$terms, ".Environment") <- NULL
+  
     result
 }
 
