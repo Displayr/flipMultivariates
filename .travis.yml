@@ -31,6 +31,7 @@ r_github_packages:
   - Displayr/flipExampleData
 
 script:
+  - Rscript -e 'devtools::install_github(paste0("Displayr/", c("flipFormat", "flipTransformations", "flipRegression"), "@DS-2703"))'
   - R CMD build --no-manual --no-build-vignettes --no-resave-data .
   - R CMD check --as-cran --no-manual --no-build-vignettes --no-tests *.tar.gz
   - if [ -d tests/testthat ]; then
