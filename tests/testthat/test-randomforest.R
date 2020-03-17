@@ -188,5 +188,5 @@ test_that("DS-2766: check that output doesn't get too big",
 
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = TRUE, output = "Importance", data = hair100,)
-    expect_true(object.size(z) < 6000000)
+    expect_true(object.size(z) < 9000000)
 })
