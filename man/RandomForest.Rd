@@ -14,7 +14,6 @@ RandomForest(
   seed = 12321,
   show.labels = FALSE,
   sort.by.importance = TRUE,
-  return.forest = FALSE,
   ...
 )
 }
@@ -48,9 +47,6 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 
 \item{sort.by.importance}{Sort the last column of the importance table
 in descending order.}
-
-\item{return.forest}{Whether to return the original$forest property
-(defaults to FALSE to minimise output size).}
 
 \item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
 }

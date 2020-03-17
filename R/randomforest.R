@@ -21,8 +21,6 @@
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param sort.by.importance Sort the last column of the importance table
 #' in descending order.
-#' @param return.forest Whether to return the original$forest property
-#'   (defaults to FALSE to minimise output size).
 #' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
 #' @importFrom stats pnorm
 #' @importFrom randomForest randomForest
@@ -36,7 +34,6 @@ RandomForest <- function(formula,
                          seed = 12321,
                          show.labels = FALSE,
                          sort.by.importance = TRUE,
-                         return.forest = FALSE,
                          ...)
 {
     ####################################################################
@@ -107,7 +104,6 @@ RandomForest <- function(formula,
     # Reduce output size
     attr(result$formula, ".Environment") <- NULL
     attr(result$original$terms, ".Environment") <- NULL
-    result$original$forest <- NULL
 
     result
 }
