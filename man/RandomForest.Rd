@@ -4,9 +4,19 @@
 \alias{RandomForest}
 \title{Fit a random forest model}
 \usage{
-RandomForest(formula, data = NULL, subset = NULL, weights = NULL,
-  output = "Importance", missing = "Exclude cases with missing data",
-  seed = 12321, show.labels = FALSE, sort.by.importance = TRUE, ...)
+RandomForest(
+  formula,
+  data = NULL,
+  subset = NULL,
+  weights = NULL,
+  output = "Importance",
+  missing = "Exclude cases with missing data",
+  seed = 12321,
+  show.labels = FALSE,
+  sort.by.importance = TRUE,
+  return.forest = FALSE,
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
@@ -38,6 +48,9 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 
 \item{sort.by.importance}{Sort the last column of the importance table
 in descending order.}
+
+\item{return.forest}{Whether to return the original$forest property
+(defaults to FALSE to minimise output size).}
 
 \item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
 }

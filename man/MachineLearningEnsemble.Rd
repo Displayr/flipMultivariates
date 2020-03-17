@@ -5,9 +5,14 @@
 \title{Create an ensemble or comparison table of existing MachineLearning
 and/or Regression models}
 \usage{
-MachineLearningEnsemble(models, compare.only = FALSE,
-  evaluation.subset = NULL, evaluation.weights = NULL,
-  output = "Comparison", optimal.ensemble = FALSE)
+MachineLearningEnsemble(
+  models,
+  compare.only = FALSE,
+  evaluation.subset = NULL,
+  evaluation.weights = NULL,
+  output = "Comparison",
+  optimal.ensemble = FALSE
+)
 }
 \arguments{
 \item{models}{A \code{list} of models, all of which are of class

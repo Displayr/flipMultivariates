@@ -4,9 +4,19 @@
 \alias{LDA.fit}
 \title{\code{LDA.fit} Fits linear discriminant analysis models.}
 \usage{
-LDA.fit(x, grouping, prior = proportions, tol = 1e-04,
-  method = c("moment", "mle"), weights = NULL, CV = FALSE, nu = 5,
-  labels = NULL, functions.output = FALSE, ...)
+LDA.fit(
+  x,
+  grouping,
+  prior = proportions,
+  tol = 1e-04,
+  method = c("moment", "mle"),
+  weights = NULL,
+  CV = FALSE,
+  nu = 5,
+  labels = NULL,
+  functions.output = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{A matrix or data frame of explanatory variables.}

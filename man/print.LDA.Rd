@@ -4,8 +4,7 @@
 \alias{print.LDA}
 \title{print.LDA}
 \usage{
-\method{print}{LDA}(x, p.cutoff = 0.05, digits = max(3L,
-  getOption("digits") - 3L), ...)
+\method{print}{LDA}(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 }
 \arguments{
 \item{x}{The \link{LDA} object.}

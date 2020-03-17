@@ -4,11 +4,20 @@
 \alias{MachineLearningMulti}
 \title{Create an ensemble or comparison table of new MachineLearning and/or Regression models}
 \usage{
-MachineLearningMulti(formula, data = NULL, subset = NULL,
-  weights = NULL, evaluation.subset = NULL,
-  missing = "Exclude cases with missing data", show.labels = FALSE,
-  seed = 12321, models.args = NULL, compare.only = FALSE,
-  optimal.ensemble = FALSE, output = "Comparison")
+MachineLearningMulti(
+  formula,
+  data = NULL,
+  subset = NULL,
+  weights = NULL,
+  evaluation.subset = NULL,
+  missing = "Exclude cases with missing data",
+  show.labels = FALSE,
+  seed = 12321,
+  models.args = NULL,
+  compare.only = FALSE,
+  optimal.ensemble = FALSE,
+  output = "Comparison"
+)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}

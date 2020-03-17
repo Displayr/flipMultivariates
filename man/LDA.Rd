@@ -5,11 +5,22 @@
 \alias{LinearDiscriminantAnalysis}
 \title{Perform linear discriminant analysis}
 \usage{
-LDA(formula, data = NULL, subset = NULL, weights = NULL,
-  prior = "Observed", missing = "Exclude cases with missing data",
-  output = "Means", outcome.color = "#5B9BD5",
-  predictors.color = "#ED7D31", variance = "moment", seed = 12321,
-  auxiliary.data = NULL, show.labels = FALSE, ...)
+LDA(
+  formula,
+  data = NULL,
+  subset = NULL,
+  weights = NULL,
+  prior = "Observed",
+  missing = "Exclude cases with missing data",
+  output = "Means",
+  outcome.color = "#5B9BD5",
+  predictors.color = "#ED7D31",
+  variance = "moment",
+  seed = 12321,
+  auxiliary.data = NULL,
+  show.labels = FALSE,
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}

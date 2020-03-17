@@ -4,10 +4,19 @@
 \alias{DeepLearning}
 \title{Fit a neural network model}
 \usage{
-DeepLearning(formula, data = NULL, subset = NULL, weights = NULL,
-  output = "Accuracy", missing = "Exclude cases with missing data",
-  normalize = TRUE, seed = 12321, show.labels = FALSE,
-  hidden.nodes = 10, max.epochs = 100)
+DeepLearning(
+  formula,
+  data = NULL,
+  subset = NULL,
+  weights = NULL,
+  output = "Accuracy",
+  missing = "Exclude cases with missing data",
+  normalize = TRUE,
+  seed = 12321,
+  show.labels = FALSE,
+  hidden.nodes = 10,
+  max.epochs = 100
+)
 }
 \arguments{
 \item{formula}{A formula of the form \code{groups ~ x1 + x2 + ...}
