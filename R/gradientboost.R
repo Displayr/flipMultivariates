@@ -27,6 +27,7 @@
 #'
 #' @importFrom xgboost xgboost xgb.cv
 #' @importFrom flipTransformations OneHot
+#' @importFrom parallel detectCores
 #' @aliases GradientBoosting
 #' @export
 GradientBoost <- GradientBoosting <- function(formula,
@@ -93,11 +94,12 @@ GradientBoost <- GradientBoosting <- function(formula,
     ##### called 'original'.                                       #####
     ####################################################################
     set.seed(seed)
+    ncores <- detectCores()
 
     if (booster == "gbtree")
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
                         max_depth = 6, eta = 0.3, gamma = 0, subsample = 1, colsample_bytree = 1,
-                        alpha = 0, lambda = 1)
+                        alpha = 0, lambda = 1, nthread = ncores/2)
     else
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
                         lambda = 0, alpha = 0, lambda_bias = 0, nthread = 1)
@@ -143,6 +145,7 @@ GradientBoost <- GradientBoosting <- function(formula,
         best.index <- which.min(search.results[, "min.error"])
         best.error.rounds <- search.results[best.index, "rounds"]
         best.param <- search.results[best.index, -(1:2)]
+        best.param["nthread"] = ncores/2
         set.seed(seed)      # reset seed after searching
         result <- list(original = xgboost(data = numeric.data$X,
                                           label = numeric.data$y,
