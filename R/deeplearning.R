@@ -26,7 +26,7 @@
 #' hidden layer (and hence implicitly the number of hidden layers). Alternatively, a comma-delimited
 #' string of integers may be provided.
 #' @param max.epochs Integer; the maximum number of epochs for which to train the network.
-#'
+#' @param rand.verbose Prints extra info for checking the random number generation
 #' @details Categorical predictor variables are converted to binary (dummy) variables.
 #' @details The model is trained first using a random 70% of the data (after any subset) while measuring the
 #' cross-validation loss on the remaining 30% of the data. Training is stopped at the sooner of
@@ -44,6 +44,7 @@ DeepLearning <- function(formula,
                          missing  = "Exclude cases with missing data",
                          normalize = TRUE,
                          seed = 12321,
+                         rand.verbose = FALSE,
                          show.labels = FALSE,
                          hidden.nodes = 10,
                          max.epochs = 100)
@@ -114,6 +115,8 @@ DeepLearning <- function(formula,
                         numeric.outcome = prepared.data$numeric.outcome,
                         hidden.nodes = hidden.nodes,
                         max.epochs = max.epochs,
+                        seed = seed,
+                        rand.verbose = rand.verbose,
                         weights = cleaned.weights)
     result <- list(original = nn$original,
                    original.serial = nn$original.serial,
@@ -166,7 +169,8 @@ prepareDLChartData <- function(x, ...)
 }
 
 #' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical
-#' @importFrom keras compile fit serialize_model callback_early_stopping use_session_with_seed
+#' @importFrom keras compile fit serialize_model callback_early_stopping shape
+#' @importFrom reticulate py_set_seed
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
@@ -178,6 +182,7 @@ neuralNetwork <- function(X,
                           batch.size = 128,
                           numeric.outcome = TRUE,
                           seed = 12321,
+                          rand.verbose = FALSE,
                           weights = NULL) {
 
     # Note - below disables GPU computations and CPU parallelization by default, so slows performance
@@ -187,7 +192,15 @@ neuralNetwork <- function(X,
 
     # This line is used instead of use_session_with_seed to avoid bug with tf v2.0.0
     # https://github.com/rstudio/keras/issues/890
+    py_set_seed(seed)
     tensorflow::tf$random$set_seed(seed)
+    rtmp <- tensorflow::tf$random$uniform(shape(2,2)) # to fix DS-2879
+    if (rand.verbose)
+    {
+        cat("Seed:", seed, "\n")
+        cat("Some random numbers: ")
+        print(rtmp)
+    }
 
     # create a function that builds the model one layer at a time.
     # called for cross-validation then again for the final model

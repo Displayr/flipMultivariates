@@ -13,6 +13,7 @@ DeepLearning(
   missing = "Exclude cases with missing data",
   normalize = TRUE,
   seed = 12321,
+  rand.verbose = FALSE,
   show.labels = FALSE,
   hidden.nodes = 10,
   max.epochs = 100
@@ -46,6 +47,8 @@ or \code{"Network Layers"}.}
 and unit variance.}
 
 \item{seed}{The random number seed.}
+
+\item{rand.verbose}{Prints extra info for checking the random number generation}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variables label is an attribute (e.g., attr(foo, "label")).}

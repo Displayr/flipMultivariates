@@ -3,7 +3,7 @@ context("Machine Learning Ensembles")
 library(flipMultivariates)
 data(adult.2000, package = "flipExampleData")
 
-RNGversion("3.5.3")
+suppressWarnings(RNGversion("3.5.3"))
 set.seed(1234)
 missing.marital <- runif(2000) > 0.9
 missing.occupation <- runif(2000) > 0.9
