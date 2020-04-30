@@ -96,13 +96,13 @@ test_that("Random forests: weights and filters",{
     ## numeric dependent variable
     # no weight, no filte
     expect_error(z <- suppressWarnings(RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
-                                                    data = hair1, show.labels = TRUE), NA))
+                                                    data = hair1, show.labels = TRUE)), NA)
     Accuracy(z)
     ConfusionMatrix(z)
 
     # Filtered
     expect_error(z <- suppressWarnings(RandomForest(num ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
-                                                    data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE), NA))
+                                                    data = hair1, subset = split60 == "Estimation Sample", show.labels = TRUE)), NA)
     Accuracy(z)
     ConfusionMatrix(z)
 
