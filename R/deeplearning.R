@@ -289,8 +289,24 @@ neuralNetwork <- function(X,
 
     return(list(original = model,
                 original.serial = serialize_model(model),
-                cross.validation = history))
+                cross.validation = padMetrics(history)))
 }
+
+# This function fixes up a bug in keras::plot.keras_training_history
+# which started occurring after tensorflow updated to version 2.2.0
+padMetrics <- function(cv)
+{
+    epochs <- cv$params$epochs
+    for (i in 1:4)
+    {
+        tmp <- cv$metrics[[i]]
+        len <- length(tmp)
+        if (len < epochs)
+            cv$metrics[[i]] <- c(tmp, rep(NA, epochs - len))
+    }
+    return(cv)
+}
+
 
 
 #' @importFrom flipFormat DeepLearningTable ExtractCommonPrefix
