@@ -11,7 +11,7 @@
 #' @export
 #' @seealso \code{\link{SupportVectorMachine}}, \code{\link[flipTrees]{CART}},
 #' \code{\link{DeepLearning}}, \code{\link{GradientBoosting}},
-#' \code{\link{LinearDiscrinminantAnalysis}}, \code{\link{RandomForest}},
+#' \code{\link{LinearDiscriminantAnalysis}}, \code{\link{RandomForest}},
 #' \code{\link[flipRegression]{Regression}}
 MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
 {

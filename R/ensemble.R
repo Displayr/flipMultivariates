@@ -56,7 +56,10 @@ MachineLearningEnsemble <- function(models,
 
 
     result <- list()
-    class(result) <- c("MachineLearningEnsemble", class(result))
+    if (compare.only)
+        class(result) <- c("MachineLearningComparison", class(result))
+    else
+        class(result) <- c("MachineLearningEnsemble", class(result))
 
     if (!compare.only)
     {
@@ -281,10 +284,7 @@ print.MachineLearningEnsemble <- function(x, ...) {
     }
     else
     {
-        title <- paste("Comparison of", x$n.models, " models")
-        if (x$ensemble)
-            title <- paste0(title, " and Ensemble")
-
+        title <- paste("Comparison of", x$n.models, " models and Ensemble")
         footer <- NULL
         if (x$optimal.ensemble)
         {
@@ -299,6 +299,27 @@ print.MachineLearningEnsemble <- function(x, ...) {
                                footer = footer)
         tbl
     }
+}
+
+#' @importFrom flipFormat ComparisonTable
+#' @export
+print.MachineLearningComparison <- function(x, ...) {
+
+    title <- paste("Comparison of", x$n.models, " models")
+
+    footer <- NULL
+    if (x$optimal.ensemble)
+    {
+        footer <- x$comparison[x$optimal.models, 1, drop = FALSE]
+        footer <- cbind(rownames(footer), footer)
+        footer <- apply(footer, 1, function(x) paste0(x[1], " (", x[2], ")", collapse = ""))
+        footer <- paste0("Optimal ensemble models: ", paste(footer, collapse = ", "))
+    }
+
+    tbl <- ComparisonTable(x$comparison,
+                           title = title,
+                           footer = footer)
+    tbl
 }
 
 prepareEnsembleChartData <- function(x)
