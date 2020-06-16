@@ -72,7 +72,7 @@ GradientBoost <- GradientBoosting <- function(formula,
 
     if (prepared.data$numeric.outcome)
     {
-        objective <- "reg:linear"
+        objective <- "reg:squarederror"
         xval.metric <- "test_rmse_mean"
     }
     else if (length(numeric.data$outcome.levels) == 2)
@@ -100,7 +100,7 @@ GradientBoost <- GradientBoosting <- function(formula,
                         alpha = 0, lambda = 1)
     else
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        lambda = 0, alpha = 0, lambda_bias = 0, nthread = 1)
+                        lambda = 0, alpha = 0, nthread = 1)
 
     if (!grid.search)
     {
@@ -134,15 +134,14 @@ GradientBoost <- GradientBoosting <- function(formula,
                                        max_depth = c(4, 6, 9))
         else
             search.grid <- expand.grid(lambda = c(0, 0.1, 1),
-                                       alpha = c(0, 0.1, 1),
-                                       lambda_bias = c(0))
+                                       alpha = c(0, 0.1, 1))
 
         search.results <- apply(search.grid, 1, cross.validate, params.default, seed)
 
         search.results <- do.call(rbind.data.frame, c(search.results, stringsAsFactors = FALSE))
         best.index <- which.min(search.results[, "min.error"])
         best.error.rounds <- search.results[best.index, "rounds"]
-        best.param <- search.results[best.index, -(1:2)]
+        best.param <- as.list(search.results[best.index, -(1:2)])
         set.seed(seed)      # reset seed after searching
         result <- list(original = xgboost(data = numeric.data$X,
                                           label = numeric.data$y,
