@@ -28,8 +28,9 @@ Imports:
     rhtmlHeatmap,
     rhtmlLabeledScatter,
     rhtmlMoonPlot,
+    tensorflow,
     utils,
-    xgboost
+    xgboost (<= 1.0.0.2)
 Suggests:
     testthat,
     flipExampleData

@@ -171,6 +171,7 @@ prepareDLChartData <- function(x, ...)
 #' @importFrom keras keras_model_sequential optimizer_rmsprop %>% layer_dense layer_dropout to_categorical
 #' @importFrom keras compile fit serialize_model callback_early_stopping shape
 #' @importFrom reticulate py_set_seed
+#' @importFrom tensorflow tf
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
