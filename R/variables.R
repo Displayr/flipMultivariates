@@ -193,19 +193,21 @@ predict.GradientBoost <- function(object, newdata = NULL, ...)
         CheckPredictionVariables(object, newdata)
     newdata <- OneHot(newdata, object$outcome.name)$X
     object$original$feature_names <- colnames(newdata) # avoids error if newdata uses names and model uses labels
-    prediction <- try(predict(object$original, newdata = newdata, reshape = TRUE, ...))
+    prediction <- try(predict(object$original, newdata = newdata, reshape = TRUE, ...),
+                      TRUE)
 
     if (inherits(prediction, "try-error"))
     { # If an old output, try and recover it, otherwise suggest user recompute it.
         if (grepl("^Error in predict.xgb.Booster", prediction))
         {
             object$original$handle <- xgb.load.raw(object$original$raw)
-            prediction <- try(predict(object$original, newdata = newdata, reshape = TRUE, ...))
+            prediction <- try(predict(object$original, newdata = newdata,
+                                      reshape = TRUE, ...), TRUE)
         }
         # If still throwing an error after attempted salvaging old output attempt, suggest user recompute
         if (inherits(prediction, "try-error"))
-            stop("Unable to predict values on this gradient boosted output. If it is an old ",
-                 "output, please re-compute it since older gradient boosted outputs are ",
+            stop("Unable to predict values on this gradient boosting output. If it is an old ",
+                 "output, please re-compute it since older gradient boosting outputs are ",
                  "not compatible with newer versions of the gradient boosting prediction method. ",
                  "If errors persist after recomputing, please contact support for further help")
     }
