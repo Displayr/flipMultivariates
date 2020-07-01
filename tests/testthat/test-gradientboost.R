@@ -169,3 +169,14 @@ test_that("Gradient Boost: missing data",{
                               show.labels = FALSE, output = "Prediction-Accuracy Table",
                               missing = "Error if missing data", data = hair2), "The data contains missing values.")
 })
+
+test_that("DS-2970: Check older output can be computed or printed", {
+    # Load an output that was built using xgboost pre v1.1.1.1
+    older.xgb.output <- readRDS("old-xgb-output.rds")
+    # predict method works
+    expect_error(predicted <- predict(older.xgb.output), NA)
+    # print method works (suppress output)
+    expect_error(capture.output(print(predicted)), NA)
+    expect_equal(length(predicted), 4898L)
+    expect_true(is.numeric(predicted))
+})
