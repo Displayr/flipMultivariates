@@ -222,10 +222,7 @@ predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALS
         prediction <- factor(prediction, levels = object$outcome.levels)
     }
     if (object$original$params$objective == "multi:softprob" && !keep.soft.probs)
-    {
-        prediction <- factor(apply(prediction, 1, which.max), levels = as.character(1:length(object$outcome.levels)))
-        levels(prediction) <- object$outcome.levels
-    }
+        prediction <- factor(object$outcome.levels[apply(prediction, 1, which.max)])
 
     # Since xgboost predicts regardless of missing data, overwrite with NA if not complete.cases
     prediction[!complete.cases(newdata)] <- NA

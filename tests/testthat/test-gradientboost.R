@@ -189,3 +189,14 @@ test_that("DS-2970: Check older output can be computed or printed", {
     expect_true(is.numeric(predicted))
     expect_equal(colnames(predicted),  c("Coca-Cola", "Other", "Pepsi "))
 })
+
+
+test_that("Check factor mapping consistent between Probabilities and predict methods", {
+    levels(hair1$cat) <- sample(LETTERS[1:26], 3)
+    z <- GradientBoost(cat ~ x6 + x7 + x8 + x9, booster = "gbtree", data = hair1,
+                       subset = split60 == "Estimation Sample")
+    expect_error(soft.prob <- Probabilities(z), NA)
+    expect_error(hard.classifications <- predict(z, keep.soft.probs = FALSE), NA)
+    categorized <- colnames(soft.prob)[apply(soft.prob, 1, which.max)]
+    expect_setequal(categorized, as.character(hard.classifications))
+})
