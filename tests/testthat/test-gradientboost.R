@@ -179,4 +179,13 @@ test_that("DS-2970: Check older output can be computed or printed", {
     expect_error(capture.output(print(predicted)), NA)
     expect_equal(length(predicted), 4898L)
     expect_true(is.numeric(predicted))
+    # Apply same tests for the categorical xgb multiclass classifier
+    older.xgb.output <- readRDS("old-xgb-categ-output.rds")
+    # probabilities prediction method works
+    expect_error(predicted <- Probabilities(older.xgb.output), NA)
+    # print method works (suppress output)
+    expect_error(capture.output(print(predicted)), NA)
+    expect_equal(dim(predicted), c(800L, 3L))
+    expect_true(is.numeric(predicted))
+    expect_equal(colnames(predicted),  c("Coca-Cola", "Other", "Pepsi "))
 })

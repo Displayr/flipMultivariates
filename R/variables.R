@@ -178,12 +178,15 @@ Probabilities.SupportVectorMachine <- function(x)
 #' @param object A \code{GradientBoost} object.
 #' @param newdata Optionally, a data frame including the variables used to fit the model.
 #' If omitted, the \code{data} supplied to \code{GradientBoost()} is used before any filtering.
+#' @param keep.soft.probs A logical to control whether output returns soft probabilities
+#' (i.e. probabilities for each categorical level) are kept or output is coerced to a factor
+#' via the largest probability.
 #' @param ... Additional arguments to pass to predict.xgb.Booster.
 #' @importFrom stats complete.cases
 #' @importFrom flipData CheckPredictionVariables
 #' @importFrom xgboost xgb.load.raw
 #' @export
-predict.GradientBoost <- function(object, newdata = NULL, ...)
+predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALSE, ...)
 {
     # CheckPredictionVariables is still required without newdata because empty training levels are removed
     newdata <- if (is.null(newdata))
@@ -218,7 +221,7 @@ predict.GradientBoost <- function(object, newdata = NULL, ...)
         prediction <- object$outcome.levels[prediction]
         prediction <- factor(prediction, levels = object$outcome.levels)
     }
-    if (object$original$params$objective == "multi:softprob")
+    if (object$original$params$objective == "multi:softprob" && !keep.soft.probs)
     {
         prediction <- factor(apply(prediction, 1, which.max), levels = as.character(1:length(object$outcome.levels)))
         levels(prediction) <- object$outcome.levels
@@ -240,15 +243,13 @@ Probabilities.GradientBoost <- function(object)
     if(object$numeric.outcome)
         stop("Probabilities are only applicable to models with categorical outcome variables.")
 
-    data <- CheckPredictionVariables(object, object$model)
-    data <- OneHot(data, object$outcome.name)$X
-    probabilities <- data.frame(predict(object$original, newdata = data, reshape = TRUE))
+    probabilities <- data.frame(predict(object, newdata = object$model, keep.soft.probs = TRUE))
     if (object$original$params$objective == "binary:logistic")
         probabilities <- cbind(1 - probabilities, probabilities)
 
     # add NA probability for instances with missing prediction variables
     colnames(probabilities) <- object$outcome.levels
-    probabilities[!complete.cases(data), ] <- NA
+    probabilities[!complete.cases(object$model), ] <- NA
     return(as.matrix(probabilities))
 }
 
