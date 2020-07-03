@@ -215,7 +215,7 @@ predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALS
                  "If errors persist after recomputing, please contact support for further help")
     }
 
-    if (object$original$params$objective == "binary:logistic")
+    if (object$original$params$objective == "binary:logistic" && !keep.soft.probs)
     {
         prediction <- ceiling(2 * prediction)
         prediction <- object$outcome.levels[prediction]
