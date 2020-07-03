@@ -188,6 +188,9 @@ test_that("DS-2970: Check older output can be computed or printed", {
     expect_equal(dim(predicted), c(800L, 3L))
     expect_true(is.numeric(predicted))
     expect_equal(colnames(predicted),  c("Coca-Cola", "Other", "Pepsi "))
+    # Check fallback message is used by destroying the raw object inside
+    older.xgb.output$original$raw <- 1
+    expect_error(predict(older.xgb.output), "^Unable to predict values on this gradient boosting output")
 })
 
 
