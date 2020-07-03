@@ -4,13 +4,17 @@
 \alias{predict.GradientBoost}
 \title{\code{predict.GradientBoost}}
 \usage{
-\method{predict}{GradientBoost}(object, newdata = NULL, ...)
+\method{predict}{GradientBoost}(object, newdata = NULL, keep.soft.probs = FALSE, ...)
 }
 \arguments{
 \item{object}{A \code{GradientBoost} object.}
 
 \item{newdata}{Optionally, a data frame including the variables used to fit the model.
 If omitted, the \code{data} supplied to \code{GradientBoost()} is used before any filtering.}
+
+\item{keep.soft.probs}{A logical to control whether output returns soft probabilities
+(i.e. probabilities for each categorical level) are kept or output is coerced to a factor
+via the largest probability.}
 
 \item{...}{Additional arguments to pass to predict.xgb.Booster.}
 }
