@@ -23,6 +23,12 @@ for (alg in algorithms)
                                                   marital = " Married-civ-spouse",
                                                   workclass = " Private"))
         expect_equal(first.pred, pred.from.chars)
+
+        # NOTE: if the test below fails due to class names changing, ALL
+        #       extension buttons in the wiki that refer to this class name should
+        #       be updated with the new class name.
+        if (alg != "Regression")
+            expect_true(inherits(ml, "MachineLearning"))
     })
 }
 

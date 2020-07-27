@@ -261,4 +261,15 @@ test_that("MachineLearningEnsemble: numeric outcome", {
     expect_true(isTRUE(all.equal(new.models.en$comparison, comparison.table)))
 })
 
+test_that("Output contains the right class for extension buttons", {
+    # NOTE: if the test below fails due to class names changing, ALL
+    #       extension buttons in the wiki that refer to this class name should
+    #       be updated with the new class name.
 
+    en <- MachineLearningEnsemble(models,
+                                  compare.only = FALSE,
+                                  evaluation.subset = eval.subset,
+                                  evaluation.weights = weights)
+
+    expect_true(inherits(en, "MachineLearningEnsemble"))
+})

@@ -247,5 +247,17 @@ test_that("LDA: missing data",{
                               missing = "Error if missing data", data = hair2), "The data contains missing values.")
 })
 
+test_that("Output contains the right class for extension buttons", {
+    # NOTE: if the test below fails due to class names changing, ALL
+    #       extension buttons in the wiki that refer to this class name should
+    #       be updated with the new class name.
+
+    result <- suppressWarnings(LDA(x1 ~ x6 + x7 + x8 + x9 + x10 + x11 + x12,
+                                  show.labels = FALSE,
+                                  output = "Prediction-Accuracy Table",
+                                  data = hair))
+
+    expect_true(inherits(result, "LDA"))
+})
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
