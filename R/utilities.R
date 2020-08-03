@@ -39,11 +39,19 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     if (strict.var.names)
     {
         vars <- AllVariablesNames(input.formula, data = data)
-        vars <- gsub("\\`", "", vars)   # remove backticks
-        vars <- gsub("[$ ]", ".", vars) # replace dollar and space with dot
+        ## strip off data set name so names look prettier in
+        ##   htmlwidget output if no label attribute is available for some variables
+        vars <- sub("^[[:print:]]*[$](Variables|Questions)[$]", "", vars)
+        vars <- sub("^`", "", vars)
+        vars <- sub("`$", "", vars)
+        vars <- make.names(vars)
+        cnames <- colnames(data)
+        cnames <- sub("^[[:print:]]*[$](Variables|Questions)[$]", "", cnames)
+        cnames <- sub("^`", "", cnames)
+        cnames <- sub("`$", "", cnames)
+        cnames <- make.names(cnames)
+        colnames(data) <- cnames
         input.formula <- formula(paste0(vars[1], "~", paste0(vars[-1], collapse = "+")))
-        colnames(data) <- gsub("\\`", "", colnames(data))
-        colnames(data) <- gsub("[$ ]", ".", colnames(data))
     }
 
     row.names <- rownames(data)

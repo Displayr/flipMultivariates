@@ -187,6 +187,30 @@ test_that("DS-2766: check that output doesn't get too big",
         hair100 <- rbind(hair100, hair1)
 
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
-                      show.labels = TRUE, output = "Importance", data = hair100,)
+                      show.labels = TRUE, output = "Importance", data = hair100)
     expect_true(object.size(z) < 9000000)
+})
+
+test_that("DS-2607: RF $ and other non-syntatic names in formula/data set name",
+{
+    set.seed(301)
+    `Cola Tracking - January to September.sav$Variables$d1` <- runif(100)
+    `Cola Tracking - January to September.sav$Variables$d2` <- runif(100)
+    `Cola Tracking - January to September.sav$Variables$d3` <- runif(100)
+    form <- `Cola Tracking - January to September.sav$Variables$d1` ~
+        `Cola Tracking - January to September.sav$Variables$d2` +
+        `Cola Tracking - January to September.sav$Variables$d3`
+    expect_error(out <- MachineLearning(algorithm = "Random Forest", formula = form),
+                 NA)
+    expect_equal(out$formula, d1 ~ d2 + d3, check.attributes = FALSE)
+    expect_error(print(out), NA)
+
+    ## Question with back ticks in question name
+    `Cola Tracking - January to September.sav$Questions$\`Long label: \`with ticks\`\`` <- runif(100)
+        form <- `Cola Tracking - January to September.sav$Questions$\`Long label: \`with ticks\`\`` ~
+          `Cola Tracking - January to September.sav$Variables$d2` +
+          `Cola Tracking - January to September.sav$Variables$d3`
+        expect_error(out <- MachineLearning(algorithm = "Random Forest", formula = form),
+                     NA)
+
 })
