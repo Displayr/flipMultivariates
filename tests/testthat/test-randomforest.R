@@ -204,4 +204,13 @@ test_that("DS-2607: RF $ and other non-syntatic names in formula/data set name",
                  NA)
     expect_equal(out$formula, d1 ~ d2 + d3, check.attributes = FALSE)
     expect_error(print(out), NA)
+
+    ## Question with back ticks in question name
+    `Cola Tracking - January to September.sav$Questions$\`Long label: \`with ticks\`\`` <- runif(100)
+        form <- `Cola Tracking - January to September.sav$Questions$\`Long label: \`with ticks\`\`` ~
+          `Cola Tracking - January to September.sav$Variables$d2` +
+          `Cola Tracking - January to September.sav$Variables$d3`
+        expect_error(out <- MachineLearning(algorithm = "Random Forest", formula = form),
+                     NA)
+
 })
