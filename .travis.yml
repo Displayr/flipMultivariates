@@ -13,7 +13,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libgdal-dev libproj-dev python-protobuf libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev libnlopt-dev
   - pyenv global 3.7
-  - export RETICULATE_PYTHON='/opt/python/3.7/python3.7'
+  - export RETICULATE_PYTHON='/opt/python/3.7/bin/python3.7'
   - sudo pip install pip --upgrade
   - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas keras tensorflow h5py six
   - rcode="options('testthat.progress.max_fails' = Inf); "
