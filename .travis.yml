@@ -13,13 +13,13 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libgdal-dev libproj-dev python-protobuf libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev libnlopt-dev
   - pyenv global 3.7
-  - export RETICULATE_PYTHON='/opt/python/3.7/bin/python3.7'
+  - export RETICULATE_PYTHON="/opt/python/3.7/bin/python3.7"
   - sudo pip install pip --upgrade
-  - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas keras tensorflow h5py six
-  - rcode="options('testthat.progress.max_fails' = Inf); "
-  - rcode+="tfile <- tempfile(); capture.output(res<-devtools::test(), file = tfile); out <- readLines(tfile); cat(out, sep = '\n'); "
+  - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas tensorflow keras h5py six
+  - rcode="tfile <- tempfile(); capture.output(res<-devtools::test(), file = tfile); out <- readLines(tfile); cat(out, sep = '\n'); "
   - rcode+="tmp <- unlist(strsplit(split='[[:space:]]+', tail(out, 1))); "
   - rcode+="pos.fail <- grep('FAIL', tmp); n.fail <- as.numeric(tmp[pos.fail+1]); "
+  - rcode+="print(tmp); "
   - rcode+="res <- as.data.frame(res); out <- data.frame(file = unlist(res[['file']]), warning = unlist(res[['warning']])); "
   - rcode+="write.csv(out, file='test_results.csv'); "
   - rcode+="quit(status = !identical(n.fail, 0), save='no');"
