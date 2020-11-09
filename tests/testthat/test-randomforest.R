@@ -1,5 +1,7 @@
 context("Random Forest")
 
+library(verbs)
+
 test_that("CE-676 Incorrect error about missing values",{
     data(colas, package = "flipExampleData")
     expect_error(suppressWarnings(RandomForest(d1 ~ q2d, data = colas)), NA)
@@ -170,14 +172,14 @@ test_that("Weighted versus unweighted results",
                     D = factor(round(runif(n)*5)),
                     wgt = runif(n)/100 + .995)
       out = RandomForest(dep ~ A + B + C + D, data = df)
-      expect_equal(tail(out$original$rsq, 1), -0.1332517, tol = 0.00001)
+      expect_equal(Last(out$original$rsq, 1), -0.1332517, tol = 0.00001)
       expect_warning(RandomForest(dep ~ A + B + C + D, data = df), NA)
       # The weighted sample causes the measures of accuracy to be
       # very optimistic: https://stats.stackexchange.com/a/166492
       w <- capture_warnings(out <- RandomForest(dep ~ A + B + C + D, data = df, weights = df$wgt))
       expect_match(w[1], "are overly optimistic when a weight")
       expect_match(w[2], "Weights have been applied")
-      expect_equal(tail(out$original$rsq, 1), 0.392224, tol = 0.00001)
+      expect_equal(Last(out$original$rsq, 1), 0.392224, tol = 0.00001)
 })
 
 test_that("DS-2766: check that output doesn't get too big",

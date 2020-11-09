@@ -1,6 +1,6 @@
 Package: flipMultivariates
 Title: Multivariate models
-Version: 1.0.6
+Version: 1.0.7
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Multivariate models (e.g. LDA, random forest, SVM) according to the flip Project conventions.
@@ -30,7 +30,8 @@ Imports:
     rhtmlMoonPlot,
     tensorflow,
     utils,
-    xgboost (>= 1.1.1.1)
+    xgboost (>= 1.1.1.1),
+    verbs
 Suggests:
     testthat,
     flipExampleData
@@ -46,6 +47,7 @@ Remotes:
     Displayr/flipChartBasics,
     Displayr/rhtmlHeatmap,
     Displayr/rhtmlLabeledScatter,
-    Displayr/rhtmlMoonPlot
-RoxygenNote: 7.1.0
+    Displayr/rhtmlMoonPlot,
+    Displayr/verbs
+RoxygenNote: 7.1.1
 Encoding: UTF-8
