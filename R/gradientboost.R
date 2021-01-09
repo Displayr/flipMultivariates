@@ -73,16 +73,19 @@ GradientBoost <- GradientBoosting <- function(formula,
     if (prepared.data$numeric.outcome)
     {
         objective <- "reg:squarederror"
+        eval.metric <- "rmse"
         xval.metric <- "test_rmse_mean"
     }
     else if (length(numeric.data$outcome.levels) == 2)
     {
         objective <- "binary:logistic"
-        xval.metric <- "test_error_mean"
+        eval.metric <- "logloss"
+        xval.metric <- "test_logloss_mean"
     }
     else
     {
         objective <- "multi:softprob"
+        eval.metric <- "merror"
         n.class <- length(numeric.data$outcome.levels)
         xval.metric <- "test_merror_mean"
     }
@@ -97,10 +100,10 @@ GradientBoost <- GradientBoosting <- function(formula,
     if (booster == "gbtree")
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
                         max_depth = 6, eta = 0.3, gamma = 0, subsample = 1, colsample_bytree = 1,
-                        alpha = 0, lambda = 1)
+                        alpha = 0, lambda = 1, eval_metric = eval.metric)
     else
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
-                        lambda = 0, alpha = 0, nthread = 1)
+                        lambda = 0, alpha = 0, nthread = 1, eval_metric = eval.metric)
 
     if (!grid.search)
     {
