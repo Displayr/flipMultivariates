@@ -363,7 +363,7 @@ LDA.fit <- function (x,
     X <- sqrt((n * prior) * fac) * scale(group.means, center = xbar,
                                        scale = FALSE) %*% scaling
     X.s <- svd(X, nu = 0L)
-    rank <- sum(X.s$d > tol * X.s$d[1L])
+    rank <- Sum(X.s$d > tol * X.s$d[1L], remove.missing = FALSE)
     if (rank == 0L)
         stop("group means are numerically identical")
     scaling <- scaling %*% X.s$v[, 1L:rank]
