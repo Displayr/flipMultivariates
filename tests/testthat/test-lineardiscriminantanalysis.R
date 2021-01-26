@@ -217,8 +217,11 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
 
 test_that("LDA wrong prior", {
     data(colas, package = "flipExampleData")
-    zLDA <- expect_error(suppressWarnings(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = rep(0.1, 8)),
-                                        "The 'prior' must be one of."))
+    zLDA <- expect_error(expect_warning(LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = rep(0.1, 8)),
+                                        paste0("The smallest category of the outcome variable (Dislike all cola) ",
+                                               "contains 2 observations; a robust model is unlikely."),
+                                        fixed = TRUE),
+                         "The 'prior' must be one of.")
 })
 
 
