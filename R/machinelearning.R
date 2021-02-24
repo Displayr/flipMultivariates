@@ -62,6 +62,7 @@ getFunctionAndParameters <- function(function.name)
 #' @param parameter.names The names of parameters.
 #' @param arguments The arguments to match to the parameters.
 #' @param warn.if.no.match If TRUE, a warning is shown if any arguments are not matched.
+#' @importFrom verbs Sum
 #' @noRd
 substituteArgumentNames <- function(parameter.names, arguments, warn.if.no.match = TRUE)
 {
@@ -69,7 +70,7 @@ substituteArgumentNames <- function(parameter.names, arguments, warn.if.no.match
     p.names <- parameter.names
     a.unmatched <- !a.names %in% p.names
     p.unmatched <- !p.names %in% a.names
-    if (sum(a.unmatched) > 0) # Some argument names do not match parameter names
+    if (Sum(a.unmatched, remove.missing = FALSE) > 0) # Some argument names do not match parameter names
     {
         # Perform matches and update a.names
         .replaceMatches <- function(aa, pp)
@@ -89,7 +90,7 @@ substituteArgumentNames <- function(parameter.names, arguments, warn.if.no.match
         # Substituting synonyms
         a.unmatched <- !a.names %in% p.names
         p.unmatched <- !p.names %in% a.names
-        if (sum(a.unmatched) > 0)
+        if (Sum(a.unmatched, remove.missing = FALSE) > 0)
         {
             .replaceSynonyms <- function(names)
             {
@@ -108,7 +109,7 @@ substituteArgumentNames <- function(parameter.names, arguments, warn.if.no.match
         }
     }
     a.unmatched <- !a.names %in% p.names
-    if (sum(a.unmatched) > 0 && warn.if.no.match)
+    if (Sum(a.unmatched, remove.missing = FALSE) > 0 && warn.if.no.match)
         warning("The following arguments have been ignored: ", paste(a.names[a.unmatched], collapse = ", "))
     names(arguments) <- a.names
     arguments[!a.unmatched]
