@@ -30,9 +30,7 @@ MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
 reduceOutputSize <- function(fit)
 {
     attr(fit$call$formula, ".Environment") <- NULL
-    data <- as.data.frame(matrix(nrow = 0, ncol = ncol(fit$call$data)))
-    names(data) <- names(fit$call$data)
-    fit$call$data <- fit$summary$call$data <- data
+    fit$call$data <- fit$summary$call$data <- fit$call$data[FALSE, ]
     attr(fit$summary$call$formula, ".Environment") <- NULL
     return(fit)
 }
