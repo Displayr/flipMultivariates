@@ -8,6 +8,7 @@ warnings_are_errors: false
 # install debian libraries to match R-servers
 # update pre-installed packages to latest versions
 before_install:
+  - export flipRegression_BRANCH_NAME="DS-3339"
   - export R_REMOTES_NO_ERRORS_FROM_WARNINGS="true"
   - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get -qq update
