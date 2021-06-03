@@ -58,7 +58,7 @@ test_that("MachineLearningEnsemble: binary outcome", {
                                                output = "Ensemble"), NA)
 
     expect_error(predict(en), NA)
-    expect_error(Probabilities.MachineLearningEnsemble(en), NA)
+    expect_error(flipMultivariates:::Probabilities.MachineLearningEnsemble(en), NA)
 
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
@@ -139,7 +139,7 @@ test_that("MachineLearningEnsemble: categorical outcome", {
                                 output = "Ensemble"), NA)
 
     expect_error(predict(en), NA)
-    expect_error(Probabilities.MachineLearningEnsemble(en), NA)
+    expect_error(flipMultivariates:::Probabilities.MachineLearningEnsemble(en), NA)
 
     # no filter or weights - only training accuracy output
     expect_error(en <- MachineLearningEnsemble(models,
@@ -222,7 +222,7 @@ test_that("MachineLearningEnsemble: numeric outcome", {
 
     expect_equal(attr(en, "ChartData"), ExtractChartData(en$confusion))
     expect_error(predict(en), NA)
-    expect_error(Probabilities.MachineLearningEnsemble(en),
+    expect_error(flipMultivariates:::Probabilities.MachineLearningEnsemble(en),
                  "Probabilities are only applicable to models with categorical outcome variables.")
 
     # no filter or weights - only training accuracy output

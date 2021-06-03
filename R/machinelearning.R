@@ -23,7 +23,7 @@ MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
     fun.and.pars <- getFunctionAndParameters(machine.learning.function)
     arguments <- substituteArgumentNames(fun.and.pars$parameters, user.args, warn.if.no.match)
     out <- do.call(fun.and.pars$machine.learning.function, arguments)
-    out <- reduceOutputSize(out)
+    ## out <- reduceOutputSize(out)
     return(out)
 }
 
@@ -42,6 +42,8 @@ reduceOutputSize <- function(fit)
 #' @return A list with the following elements:
 #' \item{\code{machine.learning.function}}{The function}.
 #' \item{\code{parameters}}{The parameters in \code{machine.learning.function}}.
+#' @importFrom flipTrees CART
+#' @importFrom flipRegression Regression
 #' @noRd
 getFunctionAndParameters <- function(function.name)
 {
