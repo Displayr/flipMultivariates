@@ -250,4 +250,39 @@ Probabilities.GradientBoost <- function(object)
     return(as.matrix(probabilities))
 }
 
+#' @title Compute the Propensity Weight scores for a binary classification model
+#' @importFrom flipU OutcomeVariable
+#' @export
+PropensityWeights <- function(object)
+{
+    is.an.ML.model <- inherits(object, "MachineLearning")
+    is.a.Regression <- inherits(object, "Regression")
+    binary.outcome.msg <- paste0("Propensity Weights can only be saved for models with Binary outcomes ",
+                                 "(e.g. Binary Logit Regression or a Machine Learning models with a ",
+                                 "binary outcome variable)")
+    outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
 
+    is.categorical.outcome <- if (is.an.ML.model) isFALSE(object$numeric.outcome) else (is.factor(outcome.variable))
+    stopifnot(binary.outcome.msg = is.categorical.outcome)
+    probabilities <- Probabilities(object)
+    is.a.multinomial.logit <- inherits(object, "MultinomialLogitRegression")
+    n.classes <- NCOL(probabilities)
+    if (n.classes > 2L)
+        stop("The supplied model is a multiclass classification model with ", n.classes, ". ",
+             "Computing Propensity weights is only supported for binary classification models. ",
+             "E.g. Binary Logit, or a Machine Learning model with a Binary variable as the outcome variable. ",
+             "Consider merging categories in the outcome variable to produce a binary classification ",
+             "before computing propensity weights.")
+    stopifnot(binary.outcome.msg = (n.classes == 2L || (is.a.multinomial.logit && n.classes == 1L)))
+    if (is.a.multinomial.logit)
+    { # A multinomial logit with only a binary classification problem will produce a single column
+        probabilities <- array(c(1 - probabilities, probabilities),
+                               dim = c(length(probabilities), 2L),
+                               dimnames = list(rownames(probabilities), levels(outcome.variable)))
+    }
+    n.obs <- NROW(probabilities)
+    positive.class <- levels(outcome.variable)[2L]
+    # Return the inverse of the probability depending on the outcome variable
+    # If positive class, return the second column, otherwise first, use single indexing for speed.
+    1/probabilities[1:n.obs + n.obs * (outcome.variable == positive.class)]
+}
