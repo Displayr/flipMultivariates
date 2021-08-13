@@ -29,6 +29,7 @@ Imports:
     rhtmlLabeledScatter,
     rhtmlMoonPlot,
     tensorflow,
+    survey (<= 4.0),
     utils,
     xgboost (>= 1.1.1.1),
     verbs
