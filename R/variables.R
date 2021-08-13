@@ -251,35 +251,34 @@ Probabilities.GradientBoost <- function(object)
 }
 
 #' @title Compute the Propensity Weight scores for a binary classification model
+#' @description Computes the propensity weights from a binary classification model
+#'   using the inverse predicted probabilities of each observation being in the
+#'   positive class.
+#' @param object A \code{Regression} or \code{MachineLearning} output.
+#' @return A vector of numeric propensity weights for each case in the model.
 #' @importFrom flipU OutcomeVariable
 #' @export
 PropensityWeights <- function(object)
 {
-    is.an.ML.model <- inherits(object, "MachineLearning")
-    is.a.Regression <- inherits(object, "Regression")
-    binary.outcome.msg <- paste0("Propensity Weights can only be saved for models with Binary outcomes ",
+    is.binary.ML.model <- inherits(object, "MachineLearning") && !object$numeric.outcome
+    is.binary.Regression <- inherits(object, paste0(c("Binary", "Multinomial"), "LogitRegression"))
+    binary.outcome.msg <- paste0("Propensity Weights can only be saved for binary classification models ",
                                  "(e.g. Binary Logit Regression or a Machine Learning models with a ",
                                  "binary outcome variable)")
-    outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
-
-    is.categorical.outcome <- if (is.an.ML.model) isFALSE(object$numeric.outcome) else (is.factor(outcome.variable))
-    stopifnot(binary.outcome.msg = is.categorical.outcome)
+    if(!(is.binary.ML.model || is.binary.Regression))
+        stop(binary.outcome.msg)
     probabilities <- Probabilities(object)
-    is.a.multinomial.logit <- inherits(object, "MultinomialLogitRegression")
     n.classes <- NCOL(probabilities)
     if (n.classes > 2L)
-        stop("The supplied model is a multiclass classification model with ", n.classes, ". ",
-             "Computing Propensity weights is only supported for binary classification models. ",
-             "E.g. Binary Logit, or a Machine Learning model with a Binary variable as the outcome variable. ",
-             "Consider merging categories in the outcome variable to produce a binary classification ",
-             "before computing propensity weights.")
-    stopifnot(binary.outcome.msg = (n.classes == 2L || (is.a.multinomial.logit && n.classes == 1L)))
-    if (is.a.multinomial.logit)
-    { # A multinomial logit with only a binary classification problem will produce a single column
-        probabilities <- array(c(1 - probabilities, probabilities),
-                               dim = c(length(probabilities), 2L),
-                               dimnames = list(rownames(probabilities), levels(outcome.variable)))
-    }
+        stop("The supplied model is a multiclass classification model with ", n.classes, " ",
+             "outcome categories/class labels. Computing Propensity weights is only supported ",
+             "for binary classification models. E.g. Binary Logit, or a Machine Learning model ",
+             "with a Binary variable as the outcome variable. Consider merging categories ",
+             "in the outcome variable to produce a binary classification before computing ",
+             "propensity weights.")
+    outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
+    if (n.classes != 2L)
+        stop(binary.outcome.msg)
     n.obs <- NROW(probabilities)
     positive.class <- levels(outcome.variable)[2L]
     # Return the inverse of the probability depending on the outcome variable
