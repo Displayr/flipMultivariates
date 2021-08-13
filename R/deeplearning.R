@@ -413,7 +413,7 @@ Probabilities.DeepLearning <- function(object)
                                  center = object$training.means[!constants],
                                  scale = object$training.stdevs[!constants])
 
-    probabilities <- predict_proba(object$original, X)
+    probabilities <- predict(object$original, X)
     if (length(object$outcome.levels) == 2)
         probabilities <- cbind(1 - probabilities,probabilities)
     colnames(probabilities) <- object$outcome.levels
