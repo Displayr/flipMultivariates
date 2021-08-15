@@ -14,7 +14,7 @@ vectorOutput <- function(x)
 }
 
 test_that("Only relevant models are possible to use", {
-    binary.classifier.error.msg <- "Propensity Weights can only be saved for binary classification models"
+    binary.classifier.error.msg <- "Propensity weights can only be saved for binary classification models"
     numeric.formula <- Q10 ~ S1 + S2 + Q7
     binary.formula <- burgers ~ S1 + S2 + Q7
     multiclass.formula <- Q7 ~ S1 + S2

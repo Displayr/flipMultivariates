@@ -262,20 +262,21 @@ PropensityWeights <- function(object)
 {
     is.binary.ML.model <- inherits(object, "MachineLearning") && !object$numeric.outcome
     is.binary.Regression <- inherits(object, paste0(c("Binary", "Multinomial"), "LogitRegression"))
-    binary.outcome.msg <- paste0("Propensity Weights can only be saved for binary classification models ",
-                                 "(e.g. Binary Logit Regression or a Machine Learning models with a ",
-                                 "binary outcome variable)")
+    binary.outcome.msg <- paste0("Propensity weights can only be saved for binary classification models; ",
+                                 "e.g., Binary Logit Regression or Machine Learning models with a ",
+                                 "binary outcome variable.")
     if(!(is.binary.ML.model || is.binary.Regression))
         stop(binary.outcome.msg)
     probabilities <- Probabilities(object)
     n.classes <- NCOL(probabilities)
     if (n.classes > 2L)
-        stop("The supplied model is a multiclass classification model with ", n.classes, " ",
-             "outcome categories/class labels. Computing Propensity weights is only supported ",
-             "for binary classification models. E.g. Binary Logit, or a Machine Learning model ",
-             "with a Binary variable as the outcome variable. Consider merging categories ",
-             "in the outcome variable to produce a binary classification before computing ",
-             "propensity weights.")
+    {
+        msg <- paste0("The supplied model is a multiclass classification model with ",
+                      n.classes, " outcome categories/class labels. ", binary.outcome.msg,
+                      " Consider merging categories in the outcome variable to produce ",
+                      "a binary classification before computing propensity weights.")
+        stop(msg)
+    }
     outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
     if (n.classes != 2L)
         stop(binary.outcome.msg)
