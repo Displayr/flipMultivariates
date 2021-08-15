@@ -349,7 +349,7 @@ print.DeepLearning <- function(x, ...)
 #' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.DeepLearning.
 #' @importFrom flipData CheckPredictionVariables
-#' @importFrom keras predict_classes unserialize_model
+#' @importFrom keras k_argmax unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
 predict.DeepLearning <- function(object, newdata = NULL, ...)
@@ -372,12 +372,12 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
 
     if (!object$numeric.outcome)
     {
-        if (length(object$outcome.levels) > 2)
-            predictions <- predict_classes(object$original, X)
+        if (length(object$outcome.levels) > 2L)
+            predictions <- as.numeric(k_argmax(predict(object$original, X)))
         else
             predictions <- predict(object$original, X) > 0.5
 
-        predictions <- factor(predictions + 1,
+        predictions <- factor(predictions + 1L,
                               levels = seq(length(object$outcome.levels)),
                               labels = object$outcome.levels)
     }
@@ -394,7 +394,7 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
 #' analysis (including missing and filtered values).
 #' @param object A \code{DeepLearning} object.
 #' @importFrom flipData CheckPredictionVariables
-#' @importFrom keras predict_proba unserialize_model
+#' @importFrom keras unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
 Probabilities.DeepLearning <- function(object)
@@ -413,7 +413,7 @@ Probabilities.DeepLearning <- function(object)
                                  center = object$training.means[!constants],
                                  scale = object$training.stdevs[!constants])
 
-    probabilities <- predict_proba(object$original, X)
+    probabilities <- predict(object$original, X)
     if (length(object$outcome.levels) == 2)
         probabilities <- cbind(1 - probabilities,probabilities)
     colnames(probabilities) <- object$outcome.levels

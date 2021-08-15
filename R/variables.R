@@ -250,4 +250,39 @@ Probabilities.GradientBoost <- function(object)
     return(as.matrix(probabilities))
 }
 
-
+#' @title Compute the Propensity Weight scores for a binary classification model
+#' @description Computes the propensity weights from a binary classification model
+#'   using the inverse predicted probabilities of each observation being in the
+#'   positive class.
+#' @param object A \code{Regression} or \code{MachineLearning} output.
+#' @return A vector of numeric propensity weights for each case in the model.
+#' @importFrom flipU OutcomeVariable
+#' @export
+PropensityWeights <- function(object)
+{
+    is.binary.ML.model <- inherits(object, "MachineLearning") && !object$numeric.outcome
+    is.binary.Regression <- inherits(object, paste0(c("Binary", "Multinomial"), "LogitRegression"))
+    binary.outcome.msg <- paste0("Propensity weights can only be saved for binary classification models; ",
+                                 "e.g., Binary Logit Regression or Machine Learning models with a ",
+                                 "binary outcome variable.")
+    if(!(is.binary.ML.model || is.binary.Regression))
+        stop(binary.outcome.msg)
+    probabilities <- Probabilities(object)
+    n.classes <- NCOL(probabilities)
+    if (n.classes > 2L)
+    {
+        msg <- paste0("The supplied model is a multiclass classification model with ",
+                      n.classes, " outcome categories/class labels. ", binary.outcome.msg,
+                      " Consider merging categories in the outcome variable to produce ",
+                      "a binary classification before computing propensity weights.")
+        stop(msg)
+    }
+    outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
+    if (n.classes != 2L)
+        stop(binary.outcome.msg)
+    n.obs <- NROW(probabilities)
+    positive.class <- levels(outcome.variable)[2L]
+    # Return the inverse of the probability depending on the outcome variable
+    # If positive class, return the second column, otherwise first, use single indexing for speed.
+    1/probabilities[1:n.obs + n.obs * (outcome.variable == positive.class)]
+}
