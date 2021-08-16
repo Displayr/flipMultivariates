@@ -263,8 +263,8 @@ PropensityWeights <- function(object)
     is.binary.ML.model <- inherits(object, "MachineLearning") && !object$numeric.outcome
     is.binary.Regression <- inherits(object, paste0(c("Binary", "Multinomial"), "LogitRegression"))
     binary.outcome.msg <- paste0("Propensity weights can only be saved for binary classification models; ",
-                                 "e.g., Binary Logit Regression or Machine Learning models with a ",
-                                 "binary outcome variable.")
+                                 "e.g., Binary Logit Regression or Machine Learning classification model with an ",
+                                 "outcome variable that is ordinal or nominal variable with two categories.")
     if(!(is.binary.ML.model || is.binary.Regression))
         stop(binary.outcome.msg)
     probabilities <- Probabilities(object)
