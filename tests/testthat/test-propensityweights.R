@@ -35,7 +35,7 @@ test_that("Only relevant models are possible to use", {
     ml.models <- c("CART", "Random Forest", "Deep Learning", "Support Vector Machine", "Gradient Boosting")
     numeric.ml.models <- lapply(ml.models,
                                 function(x) do.call(MachineLearning,
-                                                    list(algorithm = x, data = burg, formula = numeric.formula, max.epocs = 1e3)))
+                                                    list(algorithm = x, data = burg, formula = numeric.formula, max.epochs = 1e3)))
     lapply(numeric.ml.models, function(x) expect_error(PropensityWeights(x), binary.classifier.error.msg))
     ml.classifiers <- c(ml.models, "Linear Discriminant Analysis")
     classifier.ml <- lapply(ml.classifiers[-1L],
