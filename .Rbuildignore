@@ -3,4 +3,5 @@
 .travis.yml
 .*~
 runTravisTests.sh
+StandardRTests.yml
 tools/travis_run_before_install.R$
