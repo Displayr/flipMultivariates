@@ -32,10 +32,10 @@ test_that("Only relevant models are possible to use", {
     multinomial.model <- flipRegression::Regression(multiclass.formula, data = burg, type = "Multinomial Logit")
     expect_error(PropensityWeights(multinomial.model), multiclass.error.msg)
 
-    ml.models <- c("Random Forest", "Deep Learning", "Support Vector Machine", "Gradient Boosting")
+    ml.models <- c("CART", "Random Forest", "Deep Learning", "Support Vector Machine", "Gradient Boosting")
     numeric.ml.models <- lapply(ml.models,
                                 function(x) do.call(MachineLearning,
-                                                    list(algorithm = x, data = burg, formula = numeric.formula)))
+                                                    list(algorithm = x, data = burg, formula = numeric.formula, max.epocs = 1e3)))
     lapply(numeric.ml.models, function(x) expect_error(PropensityWeights(x), binary.classifier.error.msg))
     ml.classifiers <- c(ml.models, "Linear Discriminant Analysis")
     classifier.ml <- lapply(ml.classifiers[-1L],
