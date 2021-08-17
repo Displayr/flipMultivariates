@@ -43,3 +43,13 @@ test_that("Only relevant models are possible to use", {
                                                 list(algorithm = x, data = burg, formula = binary.formula)))
     lapply(classifier.ml, vectorOutput)
 })
+
+test_that("Binary Logit with single class handled", {
+    y <- factor(rep(1, 10L))
+    x <- runif(10L)
+    expect_warning(logit.model <- flipRegression::Regression(y ~ x, type = "Binary Logit"),
+                   "The Outcome variable needs to contain two or more categories")
+    binary.classifier.error.msg <- "Propensity weights can only be saved for binary classification models"
+    expect_warning(expect_error(PropensityWeights(logit.model), binary.classifier.error.msg),
+                   "The Outcome variable only has a single category for this Binary Logit Regression model")
+})

@@ -278,7 +278,7 @@ PropensityWeights <- function(object)
         stop(msg)
     }
     outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
-    if (n.classes != 2L)
+    if (nlevels(outcome.variable) != 2L)
         stop(binary.outcome.msg)
     n.obs <- NROW(probabilities)
     positive.class <- levels(outcome.variable)[2L]
