@@ -54,7 +54,6 @@
 #' @importFrom flipStatistics Correlation MeanByGroup
 #' @importFrom flipU OutcomeName IsCount
 #' @importFrom stats aggregate
-#' @importFrom verbs Sum
 #' @aliases LinearDiscriminantAnalysis
 #' @export
 LDA <- LinearDiscriminantAnalysis <- function(formula,
@@ -151,7 +150,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
         stop(error)
     else if (length(prior) != n.levels)
         stop(error)
-    else if (abs(Sum(prior, remove.missing = FALSE) - 1) > 1e-10 | min(prior) <= 0 | max(prior) >= 1)
+    else if (abs(sum(prior) - 1) > 1e-10 | min(prior) <= 0 | max(prior) >= 1)
         stop(error)
 
     ####################################################################
@@ -238,7 +237,6 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
 #' @importFrom flipStatistics WeightedCounts
 #' @importFrom flipTransformations WeightedSVD
 #' @importFrom stats cov.wt cor alias
-#' @importFrom verbs Sum SumColumns
 #' @export
 LDA.fit <- function (x,
                    grouping,
@@ -259,7 +257,7 @@ LDA.fit <- function (x,
     stop("Input data contains infinite, NA or NaN values.")
     if (is.null(weights))
         weights <- rep(1, nrow(x))
-    n <- Sum(weights, remove.missing = FALSE)
+    n <- sum(weights)
     k <- ncol(x)
     if (nrow(x) != length(grouping))
         stop("'nrow(x)' and 'length(grouping)' are different")
@@ -273,7 +271,7 @@ LDA.fit <- function (x,
     {
         if (any(prior < 0))
             stop("Prior probabilities of class membership must not be negative.")
-        if (round(Sum(prior, remove.missing = FALSE), 5) != 1)
+        if (round(sum(prior), 5) != 1)
             stop("Prior probabilities of class membership must sum to 1.")
         if (length(prior) != nlevels(g))
             stop("There shoul be ", nlevels(g), " prior probabilities but ",
@@ -313,7 +311,7 @@ LDA.fit <- function (x,
                               "Variables %s are constant within groups and an LDA model cannot be fitted. Please remove the variables."),
                      paste(const, collapse = " ")), domain = NA)
     }
-    weights.sum = Sum(weights, remove.missing = FALSE)
+    weights.sum = sum(weights)
     scaling <- diag(1/f1, , k)
     fac <- if (method == "moment") 1 / (weights.sum - ng) else 1 / weights.sum
     if (method == "moment")
@@ -321,7 +319,7 @@ LDA.fit <- function (x,
     X <- sqrt(fac) * (x - group.means[g, ]) %*% scaling
     X.s <- suppressWarnings(WeightedSVD(X, weights, nu = 0L)) # warning is better handled below
     X.s$d[is.nan(X.s$d)] <- 0
-    rank <- Sum(X.s$d > tol, remove.missing = FALSE)
+    rank <- sum(X.s$d > tol)
     if (rank == 0L)
         stop("Variable(s) are constant but must contain different values.")
 
@@ -358,12 +356,12 @@ LDA.fit <- function (x,
     #     dimnames(posterior) <- list(rownames(x), lev1)
     #     return(list(class = cl, posterior = posterior))
     # }
-    xbar <- SumColumns(prior %*% group.means, remove.missing = FALSE)
+    xbar <- colSums(prior %*% group.means)
     fac <- if (method == "mle") 1/ng  else 1/(ng - 1)
     X <- sqrt((n * prior) * fac) * scale(group.means, center = xbar,
                                        scale = FALSE) %*% scaling
     X.s <- svd(X, nu = 0L)
-    rank <- Sum(X.s$d > tol * X.s$d[1L], remove.missing = FALSE)
+    rank <- sum(X.s$d > tol * X.s$d[1L])
     if (rank == 0L)
         stop("group means are numerically identical")
     scaling <- scaling %*% X.s$v[, 1L:rank]
@@ -390,7 +388,6 @@ LDA.fit <- function (x,
 
 # Calculate linear discriminant functions
 # as per equation 4.10 in Hastie, Elements of Statistical Learning
-#' @importFrom verbs Sum
 lda.functions <- function(x, groups, grp.means, prior, weights, functions.output){
 
     gr <- length(unique(groups))
@@ -400,11 +397,11 @@ lda.functions <- function(x, groups, grp.means, prior, weights, functions.output
 
     for(i in 1:gr){
         filter <- groups == unique(groups)[i]
-        cov <- cov.wt(x[filter, , drop = FALSE], wt = weights[filter], method = "ML")$cov * Sum(weights[filter], remove.missing = FALSE)
+        cov <- cov.wt(x[filter, , drop = FALSE], wt = weights[filter], method = "ML")$cov * sum(weights[filter])
         W <- W + cov
     }
 
-    V <- W / (Sum(weights, remove.missing = FALSE) - gr)
+    V <- W / (sum(weights) - gr)
     iV <- try(solve(V), TRUE)
     if (inherits(iV, "try-error"))
     {
@@ -478,7 +475,6 @@ prepareLDAChartData <- function(x)
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
 #' @importFrom rhtmlMoonPlot moonplot
-#' @importFrom verbs Sum
 #' @export
 print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") - 3L), ...)
 {
@@ -498,8 +494,8 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         subset <- x$subset
         weights <- x$weights[subset]
         confusion <- x$confusion
-        confusion <- confusion / Sum(confusion, remove.missing = FALSE)
-        subtitle = correctPredictionsText(Sum(diag(confusion), remove.missing = FALSE),
+        confusion <- confusion / sum(confusion)
+        subtitle = correctPredictionsText(sum(diag(confusion)),
                                           colnames(x$confusion),
                                     diag(confusion) / apply(confusion, 1, sum))
 

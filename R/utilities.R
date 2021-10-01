@@ -195,11 +195,10 @@ correctPredictionsText <- function(overall.accuracy, group.labels, group.accurac
 # The alternative definition of r^2 as cor(obs, pred)^2 is
 #   only valid when optimizing sum of squared errors.
 # https://stats.stackexchange.com/questions/83826/is-a-weighted-r2-in-robust-linear-model-meaningful-for-goodness-of-fit-analys
-#' @importFrom verbs Sum
 numericOutcomeMetrics <- function(obs, pred, weights) {
 
     obs.and.pred <- complete.cases(obs, pred)
-    if (Sum(obs.and.pred, remove.missing = FALSE) == 0)
+    if (sum(obs.and.pred) == 0)
         return(list(rmse = NA, r.squared = NA))
 
     if (is.null(weights))
@@ -209,11 +208,11 @@ numericOutcomeMetrics <- function(obs, pred, weights) {
     pred <- pred[obs.and.pred]
     weights <- weights[obs.and.pred]
 
-    sse <- Sum(weights * (obs - pred)^2, remove.missing = FALSE)
-    rmse <- sqrt(sse / Sum(weights, remove.missing = FALSE))
+    sse <- sum(weights * (obs - pred)^2)
+    rmse <- sqrt(sse / sum(weights))
 
-    weighted.mean <- Sum(obs * weights, remove.missing = FALSE) / Sum(weights, remove.missing = FALSE)
-    sst <- Sum(weights * (obs - weighted.mean)^2, remove.missing = FALSE)
+    weighted.mean <- sum(obs * weights) / sum(weights)
+    sst <- sum(weights * (obs - weighted.mean)^2)
     r.sq <- 1 - sse /sst
     if (r.sq < 0)
         r.sq <- NA
@@ -222,13 +221,12 @@ numericOutcomeMetrics <- function(obs, pred, weights) {
 }
 
 # Returns table for printing accuracy summary
-#' @importFrom verbs Sum
 calcAccuracy <- function(x)
 {
     if (!x$numeric.outcome)
     {
         confM <- x$confusion
-        class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/Sum(confM[i,], remove.missing = FALSE)}))
+        class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/sum(confM[i,])}))
         class.cor <- matrix(class.cor * 100, ncol = 1, dimnames = list(colnames(confM), "Accuracy by class (%)"))
         return(class.cor)
     }
@@ -243,7 +241,6 @@ calcAccuracy <- function(x)
     return(output.data)
 }
 
-#' @importFrom verbs Sum
 formatAccuracy <- function(x, algorithm)
 {
     output.data <- calcAccuracy(x)
@@ -258,7 +255,7 @@ formatAccuracy <- function(x, algorithm)
 
     if (!x$numeric.outcome)
     {
-        tot.cor <- Sum(diag(x$confusion), remove.missing = FALSE)/Sum(x$confusion, remove.missing = FALSE)
+        tot.cor <- sum(diag(x$confusion))/sum(x$confusion)
         subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
         tbl <- DeepLearningTable(output.data,
                                  column.labels = "Accuracy by class (%)",
@@ -279,5 +276,3 @@ formatAccuracy <- function(x, algorithm)
     }
     return(tbl)
 }
-
-
