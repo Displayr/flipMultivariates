@@ -195,11 +195,11 @@ correctPredictionsText <- function(overall.accuracy, group.labels, group.accurac
 # The alternative definition of r^2 as cor(obs, pred)^2 is
 #   only valid when optimizing sum of squared errors.
 # https://stats.stackexchange.com/questions/83826/is-a-weighted-r2-in-robust-linear-model-meaningful-for-goodness-of-fit-analys
-#' @importFrom verbs Sum
+#' @importFrom verbs Sum SumEmptyHandling
 numericOutcomeMetrics <- function(obs, pred, weights) {
 
     obs.and.pred <- complete.cases(obs, pred)
-    if (Sum(obs.and.pred, remove.missing = FALSE) == 0)
+    if (SumEmptyHandling(obs.and.pred, remove.missing = FALSE) == 0)
         return(list(rmse = NA, r.squared = NA))
 
     if (is.null(weights))

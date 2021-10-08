@@ -1,6 +1,6 @@
 Package: flipMultivariates
 Title: Multivariate models
-Version: 1.1.2
+Version: 1.1.3
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Multivariate models (e.g. LDA, random forest, SVM) according to the flip Project conventions.
