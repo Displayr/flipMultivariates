@@ -264,3 +264,10 @@ test_that("Output contains the right class for extension buttons", {
 })
 
 # In SPSS, the priors are always the oberved priors when fitting the model. In MASS:lda, the priors are used when fitting.
+
+# Ensure that factor levels are not being converted to a matrix. DS-3583
+test_that("Factor level info stored as list", {
+    data(colas, package = "flipExampleData")
+    expect_warning(zLDA <- LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"), "smallest category of the outcome")
+    expect_type(zLDA$factor.levels, "list")
+})
