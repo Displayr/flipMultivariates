@@ -39,6 +39,7 @@ r_github_packages:
   - CRAN/survey@4.0
 
 script:
+  - R -e "packageVersion('survey')"
   - R CMD build --no-manual --no-build-vignettes --no-resave-data .
   - R CMD check --as-cran --no-manual --no-build-vignettes --no-tests *.tar.gz
   - if [ -d tests/testthat ]; then
