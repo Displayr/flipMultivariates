@@ -32,14 +32,14 @@ before_install:
 r_packages:
   - devtools
   - roxygen2
+  - survey
 
 r_github_packages:
   - Displayr/flipDevTools
   - Displayr/flipExampleData
-  - CRAN/survey@4.0
 
 script:
-  - R -e "packageVersion('survey')"
+  - Rscript -e "print(packageVersion('survey'))"
   - R CMD build --no-manual --no-build-vignettes --no-resave-data .
   - R CMD check --as-cran --no-manual --no-build-vignettes --no-tests *.tar.gz
   - if [ -d tests/testthat ]; then
