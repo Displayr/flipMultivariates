@@ -177,6 +177,8 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ####################################################################
 
     result$original$call <- match.call()
+    if (!is.null(result$original$discriminant.functions))
+        class(result$original$discriminant.functions) <- c(class(result$original$discriminant.functions), "visualization-selector")
     class(result) <- c("LDA", class(result))
     result$output <- output
     result$outcome.color <- outcome.color
