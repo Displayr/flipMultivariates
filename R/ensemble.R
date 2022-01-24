@@ -238,7 +238,7 @@ checkModelsComparable <- function(models, evaluation.subset, evaluation.weights)
 
     numeric.outcomes <- sapply(models, hasNumericOutcome)
     if (length(unique(numeric.outcomes)) != 1)
-        stop("Outcomes must be all either numeric or categorical to comapre models.")
+        stop("Outcomes must be all either numeric or categorical to compare models.")
 
     valid.classes <- sapply(models, function(model) (any(c("Regression", "MachineLearning") %in% class(model))))
     if (!all(valid.classes))
