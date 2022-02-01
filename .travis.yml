@@ -1,6 +1,6 @@
 language: r
 r:
-  - 4.1
+  - devel
 dist: bionic
 cache: packages
 warnings_are_errors: false
@@ -36,7 +36,6 @@ r_packages:
 r_github_packages:
   - Displayr/flipDevTools
   - Displayr/flipExampleData
-  - CRAN/survey@4.0
 
 script:
   - R CMD build --no-manual --no-build-vignettes --no-resave-data .
