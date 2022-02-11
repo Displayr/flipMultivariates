@@ -143,7 +143,7 @@ print.RandomForest <- function(x, ...)
             rownames(imp) <- extracted$shortened.labels
         }
         subtitle <- if (x$numeric.outcome)
-            paste("R-squared:", FormatAsReal(x$original$rsq[length(x$original$rsq)], decimals = 3))
+            paste("R-squared (based on out-of-bag sample):", FormatAsReal(x$original$rsq[length(x$original$rsq)], decimals = 3))
         else
         {
             err <- x$original$err.rate
