@@ -31,13 +31,13 @@ test_that("Print Deep Learning: outcome types", {
     dl <- suppressWarnings(DeepLearning(country ~ ., data = adult.2000,
                         hidden.nodes = c(50, 35, 20), max.epochs = 10, output = "Network Layers"))
     expect_error(capture.output(print(dl)), NA)
-    expect_equal(attr(dl, "ChartData")[1] , "Model")
+    expect_true(startsWith(attr(dl, "ChartData")[1] , "Model"))
 
     # single predictor
     dl <- suppressWarnings(DeepLearning(occupation ~ age, data = adult.2000,
                                         hidden.nodes = 5, max.epochs = 10, output = "Detail"))
     expect_error(capture.output(print(dl)), NA)
-    expect_equal(attr(dl, "ChartData")[1], "Model")
+    expect_true(startsWith(attr(dl, "ChartData")[1], "Model"))
 
 })
 
