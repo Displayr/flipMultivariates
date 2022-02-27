@@ -32,6 +32,7 @@ before_install:
 r_packages:
   - devtools
   - roxygen2
+  - htmlwidgets
 
 r_github_packages:
   - Displayr/flipDevTools
