@@ -240,7 +240,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
 #' @importFrom flipStatistics WeightedCounts
 #' @importFrom flipTransformations WeightedSVD
 #' @importFrom stats cov.wt cor alias
-#' @importFrom verbs Sum SumColumns
+#' @importFrom verbs Sum SumEachColumn
 #' @export
 LDA.fit <- function (x,
                    grouping,
@@ -360,7 +360,7 @@ LDA.fit <- function (x,
     #     dimnames(posterior) <- list(rownames(x), lev1)
     #     return(list(class = cl, posterior = posterior))
     # }
-    xbar <- SumColumns(prior %*% group.means, remove.missing = FALSE)
+    xbar <- SumEachColumn(prior %*% group.means, remove.missing = FALSE)
     fac <- if (method == "mle") 1/ng  else 1/(ng - 1)
     X <- sqrt((n * prior) * fac) * scale(group.means, center = xbar,
                                        scale = FALSE) %*% scaling
