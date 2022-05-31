@@ -19,7 +19,7 @@ before_install:
   - pyenv global 3.7
   - export RETICULATE_PYTHON="/opt/python/3.7/bin/python3.7"
   - sudo pip install pip --upgrade
-  - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas tensorflow keras h5py six
+  - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas tensorflow==2.4.1 keras h5py six
   - rcode="options('testthat.progress.max_fails' = Inf); "
   - rcode+="tfile <- tempfile(); capture.output(res<-devtools::test(), file = tfile); out <- readLines(tfile); cat(out, sep = '\n'); "
   - rcode+="line.fail <- max(grep('FAIL', out)); "
