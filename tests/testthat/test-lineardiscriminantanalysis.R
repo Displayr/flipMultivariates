@@ -271,3 +271,13 @@ test_that("Factor level info stored as list", {
     expect_warning(zLDA <- LDA(q3 ~ Q5_5_1 + Q5_7_1 + Q5_13_1, data = colas, prior = "Observed"), "smallest category of the outcome")
     expect_type(zLDA$factor.levels, "list")
 })
+
+test_that("DS-3851 Character varibles are handled appropriately", {
+    test <- replicate(4L, sample(letters[1:3], size = 100, replace = TRUE), simplify = FALSE)
+    test <- as.data.frame(test)
+    names(test) <- c("Outcome", paste0("Var", 1:3))
+    expected.warning <- paste0(sQuote("data"), " argument contains character variables",
+                               " (", paste0(dQuote(names(test)), collapse = ", "), "). ",
+                               "These have been changed to categorical factor variables for analysis.")
+    expect_warning(LDA(Outcome ~ Var1 + Var2 + Var3, data = test), expected.warning, fixed = TRUE)
+})

@@ -35,6 +35,14 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     data <- GetData(input.formula, data, auxiliary.data = NULL)
 
+    if (!is.null(data) && any(character.vars <- vapply(data, is.character, logical(1L)))) {
+        data[character.vars] <- lapply(data[character.vars], as.factor)
+        labels <- Labels(data, names(which(character.vars)))
+        pasted.labels <- paste0(dQuote(labels), collapse = ", ")
+        warning(sQuote("data"), " argument contains character variables (", pasted.labels, "). ",
+               "These have been changed to categorical factor variables for analysis.")
+    }
+
     # randomForest fails with data when variable names contain "$" even if surrounded by backticks
     if (strict.var.names)
     {
