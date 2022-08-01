@@ -239,7 +239,7 @@ calcAccuracy <- function(x)
     {
         confM <- x$confusion
         class.cor <- diag(confM) / SumEachRow(confM, remove.missing = FALSE)
-        class.cor <- as.matrix(class.cor, row.names = colnames(confM))
+        class.cor <- as.matrix(class.cor * 100, row.names = colnames(confM))
         colnames(class.cor) <- "Accuracy by class (%)"
         return(class.cor)
     }
