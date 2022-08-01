@@ -13,27 +13,37 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
                                        strict.var.names = FALSE,
                                        allow.single.categories = TRUE)
 {
-    input.formula <- formula # To work past scoping issues in car package: https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
+    # To work past scoping issues in car package:
+    # https://cran.r-project.org/web/packages/car/vignettes/embedding.pdf.
+    input.formula <- formula
 
     if (!is.null(subset))
     {
-        if (is.null(subset.description) | (class(subset.description) == "try-error") | !is.null(attr(subset, "name"))
-            | length(subset.description) > 0)
+        if (is.null(subset.description)    || (class(subset.description) == "try-error") ||
+            !is.null(attr(subset, "name")) || length(subset.description) > 0)
             subset.description <- Labels(subset)
         if (is.null(attr(subset, "name")))
             attr(subset, "name") <- subset.description
     }
 
-    if(!is.null(weights))
+    if (!is.null(weights))
     {
-        if (is.null(weights.description) | (class(weights.description) == "try-error") | !is.null(attr(weights, "name"))
-            | length(weights.description) > 0)
+        if (is.null(weights.description)    || (class(weights.description) == "try-error") ||
+            !is.null(attr(weights, "name")) || length(weights.description) > 0)
             weights.description <- Labels(weights)
         if (is.null(attr(weights, "name")))
             attr(weights, "name") <- weights.description
     }
 
     data <- GetData(input.formula, data, auxiliary.data = NULL)
+
+    if (!is.null(data) && any(character.vars <- vapply(data, is.character, logical(1L)))) {
+        data[character.vars] <- lapply(data[character.vars], as.factor)
+        labels <- Labels(data, names(which(character.vars)))
+        pasted.labels <- paste0(dQuote(labels), collapse = ", ")
+        warning(sQuote("data"), " argument contains character variables (", pasted.labels, "). ",
+               "These have been changed to categorical factor variables for analysis.")
+    }
 
     # randomForest fails with data when variable names contain "$" even if surrounded by backticks
     if (strict.var.names)
@@ -77,9 +87,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     outcome.label <- variable.labels[outcome.i]
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
-    if (!is.null(weights) & length(weights) != nrow(data))
+    if (!is.null(weights) && length(weights) != nrow(data))
         stop("'weights' and 'data' are required to have the same number of observations. They do not.")
-    if (!is.null(subset) & length(subset) > 1 & length(subset) != nrow(data))
+    if (!is.null(subset) && length(subset) > 1 && length(subset) != nrow(data))
         stop("'subset' and 'data' are required to have the same number of observations. They do not.")
 
     # Treatment of missing values.
@@ -222,25 +232,22 @@ numericOutcomeMetrics <- function(obs, pred, weights) {
 }
 
 # Returns table for printing accuracy summary
-#' @importFrom verbs Sum
+#' @importFrom verbs SumEachRow
 calcAccuracy <- function(x)
 {
     if (!x$numeric.outcome)
     {
         confM <- x$confusion
-        class.cor <- unlist(lapply(1:nrow(confM), function(i) {confM[i,i]/Sum(confM[i,], remove.missing = FALSE)}))
-        class.cor <- matrix(class.cor * 100, ncol = 1, dimnames = list(colnames(confM), "Accuracy by class (%)"))
+        class.cor <- diag(confM) / SumEachRow(confM, remove.missing = FALSE)
+        class.cor <- as.matrix(class.cor, row.names = colnames(confM))
+        colnames(class.cor) <- "Accuracy by class (%)"
         return(class.cor)
     }
-    else
-    {
-        metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
-                                           predict(x)[x$subset],
-                                           x$weights[x$subset])
-        output.data <- c("Root Mean Squared Error" = metrics$rmse,
-                         "R-squared" = metrics$r.squared)
-    }
-    return(output.data)
+    metrics <- numericOutcomeMetrics(Observed(x)[x$subset],
+                                       predict(x)[x$subset],
+                                       x$weights[x$subset])
+    c("Root Mean Squared Error" = metrics$rmse,
+      "R-squared" = metrics$r.squared)
 }
 
 #' @importFrom verbs Sum
@@ -258,8 +265,8 @@ formatAccuracy <- function(x, algorithm)
 
     if (!x$numeric.outcome)
     {
-        tot.cor <- Sum(diag(x$confusion), remove.missing = FALSE)/Sum(x$confusion, remove.missing = FALSE)
-        subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor*100)
+        tot.cor <- Sum(diag(x$confusion), remove.missing = FALSE) / Sum(x$confusion, remove.missing = FALSE)
+        subtitle <- sprintf("Overall Accuracy: %.2f%%", tot.cor * 100)
         tbl <- DeepLearningTable(output.data,
                                  column.labels = "Accuracy by class (%)",
                                  order.values = FALSE,
@@ -279,5 +286,3 @@ formatAccuracy <- function(x, algorithm)
     }
     return(tbl)
 }
-
-

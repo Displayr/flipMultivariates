@@ -104,7 +104,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
 
-    if (!is.factor(required.data[, outcome.name]) & !IsCount(required.data[, outcome.name]))
+    if (!is.factor(required.data[, outcome.name]) && !IsCount(required.data[, outcome.name]))
         stop("LDA requires the outcome variable to be categorical or a count.")
     factor.levels <- attr(required.data, "factor.levels")
     required.data <- CreatingFactorDependentVariableIfNecessary(formula, required.data)
