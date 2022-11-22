@@ -29,8 +29,9 @@ before_install:
   - rcode+="line.fail <- max(grep('FAIL', out)); "
   - rcode+="tmp <- unlist(strsplit(split='[[:space:]]+', out[line.fail])); "
   - rcode+="pos.fail <- grep('FAIL', tmp); n.fail <- as.numeric(tmp[pos.fail+1]); "
-  - rcode+="res <- as.data.frame(res); out <- data.frame(file = unlist(res[['file']]), warning = unlist(res[['warning']])); "
-  - rcode+="write.csv(out, file='test_results.csv'); "
+  - rcode+="res <- as.data.frame(res);"
+  - rcode+="out <- data.frame(fail = res[['failed']] + res[['error']], file = unlist(res[['file']]), warning = unlist(res[['warning']])); "
+  - rcode+="write.csv(out, file='test_results.csv', row.names = FALSE); "
   - rcode+="quit(status = !identical(n.fail, 0), save='no');"
   - Rscript tools/travis_run_before_install.R
 
@@ -64,3 +65,5 @@ notifications:
 # committing a new change to .travis.yml in each repository
 after_success:
   - Rscript -e "require(flipDevTools); NotifyWarnings(); TriggerDownstreamBuilds()"
+after_failure:
+  - Rscript -e "require(flipDevTools); NotifyWarnings()"
