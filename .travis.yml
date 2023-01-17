@@ -25,6 +25,7 @@ before_install:
   - sudo pip install pip --upgrade
   - sudo /opt/python/3.7/bin/python3.7 -m pip install --ignore-installed numpy pandas tensorflow==2.4.1 keras h5py six
   - rcode="options('testthat.progress.max_fails' = Inf); "
+  - export flipRegression_BRANCH_NAME=DS-3885
   - rcode+="tfile <- tempfile(); capture.output(res<-devtools::test(), file = tfile); out <- readLines(tfile); cat(out, sep = '\n'); "
   - rcode+="line.fail <- max(grep('FAIL', out)); "
   - rcode+="tmp <- unlist(strsplit(split='[[:space:]]+', out[line.fail])); "
