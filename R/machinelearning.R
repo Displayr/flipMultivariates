@@ -34,6 +34,8 @@ MachineLearning <- function(algorithm, ..., warn.if.no.match = FALSE)
 #' @return A list with the following elements:
 #' \item{\code{machine.learning.function}}{The function}.
 #' \item{\code{parameters}}{The parameters in \code{machine.learning.function}}.
+#' @importFrom flipRegression Regression
+#' @importFrom flipTrees CART
 #' @noRd
 getFunctionAndParameters <- function(function.name)
 {
@@ -44,9 +46,9 @@ getFunctionAndParameters <- function(function.name)
 
     # Getting the function
     if (machine.learning.function == "CART")
-        machine.learning.function <- flipTrees::CART
+        machine.learning.function <- CART
     else if (machine.learning.function == "Regression")
-        machine.learning.function <- flipRegression::Regression
+        machine.learning.function <- Regression
     else
         machine.learning.function <- get0(machine.learning.function, mode = "function")
 
@@ -150,4 +152,3 @@ parametersEqual <- function(recipient, donor)
         return((all(recipient.split == donor.split)))
     return(FALSE)
 }
-
