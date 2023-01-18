@@ -27,7 +27,6 @@ Imports:
     rhtmlLabeledScatter,
     rhtmlMoonPlot,
     tensorflow,
-    survey,
     utils,
     xgboost (>= 1.1.1.1),
     verbs
@@ -46,7 +45,6 @@ Remotes:
     Displayr/flipTransformations,
     Displayr/flipTrees,
     Displayr/flipU,
-    Displayr/rhtmlHeatmap,
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
