@@ -5,7 +5,7 @@
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName AllVariablesNames
 #' @importFrom flipTransformations AdjustDataToReflectWeights
-#' @importFrom stats as.formula var
+#' @importFrom stats reformulate var
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed,
@@ -99,10 +99,12 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     # Treatment of missing values.
     # rebuild formula because there are new variables for each level of factorial predictors
-    predictor.names <- colnames(data)[colnames(data) != outcome.name]
-    form <- as.formula(paste(outcome.name, "~",
-                             paste(predictor.names[predictor.names != outcome.name], collapse = "+")))
-    processed.data <- EstimationData(form, data, subset, weights, missing, seed = seed)
+    if (dummy) {
+        predictor.names <- colnames(data)[colnames(data) != outcome.name]
+        input.formula <- reformulate(predictor.names, response = outcome.name,
+                                     env = environment(input.formula))
+    }
+    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
     ErrorIfInfinity(unweighted.training.data)
 
