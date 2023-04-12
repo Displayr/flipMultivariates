@@ -126,10 +126,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     if (!allow.single.categories && any(level.counts == 1))
     {
         stop("Categorical predictors must have more than one category, after applying any ",
-                "filter, weights and missing data treatment. This is not the case for: ",
-                paste(names(level.counts)[level.counts == 1], collapse = ", "),
-                ". Please remove those variables to proceed.")
-        weighted.training.data <- weighted.training.data[, level.counts != 1]
+             "filter, weights and missing data treatment. This is not the case for: ",
+             paste(names(level.counts)[level.counts == 1], collapse = ", "), ". ",
+             "Please remove those variables to proceed.")
     }
 
     list(
