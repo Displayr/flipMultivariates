@@ -17,28 +17,42 @@
 predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
     # CheckPredictionVariables is still required without newdata because empty training levels are removed
-    newdata <- if (is.null(newdata))
+    if (is.null(newdata)) {
         # no warnings from CheckPredictionVariables if predicting training data
-        suppressWarnings(CheckPredictionVariables(object, object$model))
-    else
-    {
-        predictor.cols <- sapply(colnames(newdata), match, names(object$factor.levels))
-
-        for (newdata.col in seq(length(predictor.cols)))
-        {
-            predictor.col <- predictor.cols[newdata.col]
-            if (!is.na(newdata.col) && !is.null(object$factor.levels[[predictor.col]]))
-            {
-                newdata[, newdata.col] <- factor(as.character(newdata[, newdata.col]),
-                                                 levels = object$factor.levels[[predictor.col]])
-            }
-        }
-        newdata[, is.na(predictor.cols)] <- NULL
-        newdata <- AsNumeric(newdata, binary = TRUE, remove.first = TRUE)
-        ErrorIfInfinity(newdata)
-        CheckPredictionVariables(object, newdata)
+        newdata <- suppressWarnings(CheckPredictionVariables(object, object$model))
+        predictions <- ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
+        return(predictions)
     }
+    stopifnot("newdata must be a data.frame" = is.data.frame(newdata))
 
+    predictor.cols <- match(colnames(newdata), names(object[["factor.levels"]]))
+    # Remove unnecessary variables to avoid pointless computation later in AsNumeric
+    if (anyNA(predictor.cols)) {
+        unused.variables <- is.na(predictor.cols)
+        newdata[unused.variables] <- NULL
+        predictor.cols <- predictor.cols[!unused.variables]
+        newdata[object[["outcome.name"]]] <- NULL
+    }
+    # Validate categorical variables and convert to factors if necessary
+    factor.levels <- Filter(length, object[["factor.levels"]][predictor.cols])
+    for (variable in names(factor.levels))
+    { # If variable already a factor, realign the levels if required
+        if (is.factor(newdata[[variable]])) {
+            if (identical(levels(newdata[[variable]]), factor.levels[[variable]])) next
+            newdata[[variable]] <- factor(newdata[[variable]], levels = factor.levels[[variable]])
+            next
+        }
+        # If it is numeric or character, convert to factor with correct levels
+        new.variable <- newdata[[variable]]
+        if (is.numeric(new.variable))
+            new.variable <- as.character(new.variable)
+        newdata[[variable]] <- factor(new.variable, levels = factor.levels[[variable]])
+    }
+    # Expand the factors into dummy encoding
+    if (length(factor.levels))
+        newdata <- AsNumeric(newdata, binary = TRUE, remove.first = TRUE)
+    ErrorIfInfinity(newdata)
+    CheckPredictionVariables(object, newdata)
     ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
 }
 

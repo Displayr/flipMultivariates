@@ -281,3 +281,55 @@ test_that("DS-3851 Character varibles are handled appropriately", {
                                "These have been changed to categorical factor variables for analysis.")
     expect_warning(LDA(Outcome ~ Var1 + Var2 + Var3, data = test), expected.warning, fixed = TRUE)
 })
+
+test_that("DS-4360 LDA predict working with newdata argument", {
+    smaller.hair <- subset(hair, select = c("x1", "x6", "x5", "x19", "x4"))
+    expect_equal(vapply(smaller.hair, class, character(1L)),
+                 c(x1 = "factor", x6 = "numeric", x5 = "factor", x19 = "numeric", x4 = "factor"))
+    expect_silent(hairlda <- LDA(x1 ~ x6 + x5 + x19 + x4, data = smaller.hair))
+    # Expect error if wrong input for newdata
+    for (newdat.arg in list(1, "foo", list(1, 2, 3)))
+        expect_error(predict(hairlda, newdata = newdat.arg),
+                     "newdata must be a data.frame", fixed = TRUE)
+    # basic tests
+    basic.df <- data.frame(x6  = 5:10,
+                           x5  = smaller.hair[["x5"]][1:2],
+                           x19 = 4:9,
+                           x4  = smaller.hair[["x4"]][1:2])
+    outcome.levels <- levels(smaller.hair[["x1"]])
+    expected.predictions <- factor(c(1, 1, 1, 3, 2, 3), labels = levels(smaller.hair[["x1"]]))
+    expect_equal(predict(hairlda, newdata = basic.df), expected.predictions)
+    # Unused variables should be ignored
+    test.df <- basic.df
+    test.df[["foo"]] <- 1:6
+    expect_equal(predict(hairlda, newdata = test.df), expected.predictions)
+    # Unused factors also ignored
+    test.df <- basic.df
+    test.df[["foo"]] <- factor(1:6)
+    expect_equal(predict(hairlda, newdata = test.df), expected.predictions)
+    # Character variables should be converted to factors
+    test.df <- basic.df
+    test.df[vapply(test.df, is.factor, logical(1L))] <- lapply(test.df[vapply(test.df, is.factor, logical(1L))],
+                                                               as.character) |> as.data.frame()
+    expect_equal(predict(hairlda, newdata = test.df), expected.predictions)
+    # Incorrect leveling handled
+    test.df <- basic.df
+    test.df[["x4"]] <- relevel(basic.df[["x4"]], ref = levels(basic.df[["x4"]])[2])
+    test.df[["x5"]] <- relevel(basic.df[["x5"]], ref = levels(basic.df[["x5"]])[2])
+    expect_equal(predict(hairlda, newdata = test.df), expected.predictions)
+    # Character representation handled
+    test.df <- basic.df
+    test.df[["x4"]] <- as.character(test.df[["x4"]])
+    test.df[["x5"]] <- as.character(test.df[["x5"]])
+    expect_equal(predict(hairlda, newdata = test.df), expected.predictions)
+    # integer representation recoverable
+    numeric.df <- smaller.hair |> lapply(as.numeric) |> as.data.frame()
+    numeric.df[["x4"]] <- as.factor(numeric.df[["x4"]])
+    numeric.df[["x5"]] <- as.factor(numeric.df[["x5"]])
+    numeric.df[["x1"]] <- smaller.hair[["x1"]]
+    expect_silent(hairlda.int <- LDA(x1 ~ x6 + x5 + x19 + x4, data = numeric.df))
+    test.df <- basic.df
+    test.df[["x4"]] <- as.integer(test.df[["x4"]])
+    test.df[["x5"]] <- as.integer(test.df[["x5"]])
+    expect_equal(predict(hairlda.int, newdata = test.df), expected.predictions)
+})
