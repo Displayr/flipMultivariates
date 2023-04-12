@@ -122,7 +122,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     else
         AdjustDataToReflectWeights(unweighted.training.data, cleaned.weights)
 
-    level.counts <- sapply(weighted.training.data, function(x) length(levels(x)))
+    level.counts <- vapply(weighted.training.data, nlevels, integer(1L))
     if (!allow.single.categories && any(level.counts == 1))
     {
         stop("Categorical predictors must have more than one category, after applying any ",
