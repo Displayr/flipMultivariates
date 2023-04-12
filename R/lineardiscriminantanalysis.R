@@ -104,19 +104,19 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ##### Data manipulation specific to LDA                        #####
     ####################################################################
 
-    if (!is.factor(required.data[, outcome.name]) && !IsCount(required.data[, outcome.name]))
+    if (!is.factor(required.data[[outcome.name]]) && !IsCount(required.data[[outcome.name]]))
         stop("LDA requires the outcome variable to be categorical or a count.")
     factor.levels <- attr(required.data, "factor.levels")
     required.data <- CreatingFactorDependentVariableIfNecessary(formula, required.data)
     unweighted.training.data <- CreatingFactorDependentVariableIfNecessary(formula, unweighted.training.data)
 
     extracted <- ExtractCommonPrefix(prepared.data$variable.labels[-outcome.i])
-    by.label <- if(is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
+    by.label <- if (is.na(extracted$common.prefix)) "" else paste0(" by ", extracted$common.prefix)
     labels <- extracted$shortened.labels
     prepared.data$outcome.label <- paste0(prepared.data$outcome.label, if (output == "Scatterplot") "" else by.label)
 
     # Computing and checking the prior.
-    filtered.outcome.variable <- Factor(unweighted.training.data[, outcome.name])
+    filtered.outcome.variable <- Factor(unweighted.training.data[[outcome.name]])
     if (is.null(weights))
         observed.prior <- as.numeric(prop.table(table(filtered.outcome.variable)))
     else
@@ -127,32 +127,35 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     }
     n.levels <- nlevels(filtered.outcome.variable)
     if (n.levels > 10)
-        warning(paste("The outcome variable contains", n.levels, "categories. Consider either merging categories, or, using a model more appropriate for such data (e.g., Linear Regression)."))
+        warning("The outcome variable contains ", n.levels, "categories. ",
+                "Consider either merging categories, or, using a model more ",
+                "appropriate for such data (e.g., Linear Regression).",
+                call. = FALSE)
     if (n.levels == 1)
-        stop("The outcome variable contains only one category, after applying any filter. At least 2 categories are required to produce a model.")
+        stop("The outcome variable contains only one category, after ",
+             "applying any filter. At least 2 categories are required to ",
+             "produce a model.", call. = FALSE)
     n.smallest <- round((min.o <- min(observed.prior)) * prepared.data$n)
     if (n.smallest < 30)
     {
         smallest.category <- levels(required.data[, outcome.i])[match(min.o, observed.prior)[1]]
-        warning(paste0("The smallest category of the outcome variable (", smallest.category, ") contains ",
-                       n.smallest, " observations; a robust model is unlikely."))
+        warning("The smallest category of the outcome variable ",
+                "(", smallest.category, ") contains ", n.smallest,
+                " observations; a robust model is unlikely.", call. = FALSE)
     }
     equal.prior <- rep(1 / n.levels, n.levels)
     if (is.character(prior))
         prior <- switch(prior,
             "Observed" = observed.prior,
             "Equal" = equal.prior)
-    error <- paste0("The 'prior' must be one of: (1) 'Equal', ",
-                    "(2) 'Observed', ",
-                    "(3) or a vector of length ", n.levels, " containing values greater than 0 and less than 1 which sum to 1.")
     if (is.null(prior))
-        stop(error)
-    else if (!is.numeric(prior))
-        stop(error)
-    else if (length(prior) != n.levels)
-        stop(error)
-    else if (abs(Sum(prior, remove.missing = FALSE) - 1) > 1e-10 | min(prior) <= 0 | max(prior) >= 1)
-        stop(error)
+        throwErrorInvalidPrior(n.levels)
+    if (!is.numeric(prior))
+        throwErrorInvalidPrior(n.levels)
+    if (length(prior) != n.levels)
+        throwErrorInvalidPrior(n.levels)
+    if (abs(sum(prior) - 1) > 1e-10 || min(prior) <= 0 || max(prior) >= 1)
+        throwErrorInvalidPrior(n.levels)
 
     ####################################################################
     ##### Fitting the model. Ideally, this should be a call to     #####
@@ -552,4 +555,13 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
         x$original$call <- x$formula
         print(x$original, ...)
     }
+}
+
+# Throws an error for invalid prior
+throwErrorInvalidPrior <- function(n.levels) {
+    stop("The 'prior' must be one of: (1) 'Equal', ",
+         "(2) 'Observed', ",
+         "(3) or a vector of length ", n.levels, " containing values greater ",
+         "than 0 and less than 1 which sum to 1.", call. = FALSE)
+
 }

@@ -8,7 +8,7 @@ adult.2000$wgt <- runif(2000) * 10
 adult.2000$subset <- rep(c(TRUE, TRUE, TRUE, FALSE), 500)
 
 algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
-               "Gradient Boosting", "Linear Discriminant Analysis", "CART", "Regression")
+                "Gradient Boosting", "Linear Discriminant Analysis", "CART", "Regression")
 
 for (alg in algorithms)
 {
