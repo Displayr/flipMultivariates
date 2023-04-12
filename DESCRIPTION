@@ -11,7 +11,7 @@ Imports:
     Ckmeans.1d.dp,
     e1071,
     flipAnalysisOfVariance,
-    flipData (>= 1.1.3),
+    flipData (>= 1.7.0),
     flipFormat,
     flipRegression (>= 1.3.40),
     flipStatistics,
@@ -50,5 +50,5 @@ Remotes:
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Encoding: UTF-8

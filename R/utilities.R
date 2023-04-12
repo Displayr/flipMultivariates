@@ -1,7 +1,7 @@
 
 #' Perform standard data checking and tidying actions before fitting a machine learning model
 #'
-#' @importFrom flipData GetData EstimationData DataFormula ErrorIfInfinity
+#' @importFrom flipData GetData EstimationData EstimationDataTemplate DataFormula ErrorIfInfinity
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName AllVariablesNames
 #' @importFrom flipTransformations AdjustDataToReflectWeights
@@ -68,6 +68,11 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
 
+    # Create EstimationDataTemplate as the data has not been broken into dummy variable (0/1)
+    # coding and the outcome name has been standardized for randomForest
+
+    estimation.data.template <- EstimationDataTemplate(data, outcome.name = outcome.name)
+
     if (dummy)
     {
         factor.levels <- lapply(data[, -outcome.i], levels)
@@ -125,23 +130,26 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
         weighted.training.data <- weighted.training.data[, level.counts != 1]
     }
 
-    return(list(unweighted.training.data = unweighted.training.data,
-                weighted.training.data = weighted.training.data,
-                required.data = data,
-                imputed.data = processed.data$data,
-                cleaned.weights = cleaned.weights,
-                data.formula = DataFormula(input.formula, data),
-                row.names = row.names,
-                unfiltered.weights = processed.data$unfiltered.weights,
-                outcome.name = outcome.name,
-                sample.description = processed.data$description,
-                n = n,
-                numeric.outcome = numeric.outcome,
-                outcome.label = outcome.label,
-                variable.labels = variable.labels,
-                outcome.i = outcome.i,
-                input.formula = input.formula,
-                subset.missing.removed = processed.data$post.missing.data.estimation.sample))
+    list(
+        unweighted.training.data = unweighted.training.data,
+        weighted.training.data = weighted.training.data,
+        estimation.data.template = estimation.data.template,
+        required.data = data,
+        imputed.data = processed.data$data,
+        cleaned.weights = cleaned.weights,
+        data.formula = DataFormula(input.formula, data),
+        row.names = row.names,
+        unfiltered.weights = processed.data$unfiltered.weights,
+        outcome.name = outcome.name,
+        sample.description = processed.data$description,
+        n = n,
+        numeric.outcome = numeric.outcome,
+        outcome.label = outcome.label,
+        variable.labels = variable.labels,
+        outcome.i = outcome.i,
+        input.formula = input.formula,
+        subset.missing.removed = processed.data$post.missing.data.estimation.sample
+    )
 }
 
 #' Save standard data after fitting a machine learning model

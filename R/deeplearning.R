@@ -139,6 +139,7 @@ DeepLearning <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    result[["estimation.data.template"]] <- prepared.data[["estimation.data.template"]]
     attr(result, "ChartData") <- prepareDLChartData(result)
     result
 }
@@ -419,7 +420,3 @@ Probabilities.DeepLearning <- function(object)
     colnames(probabilities) <- object$outcome.levels
     return(probabilities)
 }
-
-
-
-

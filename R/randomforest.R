@@ -92,6 +92,7 @@ RandomForest <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    result[["estimation.data.template"]] <- prepared.data[["estimation.data.template"]]
     if (result$show.labels)
     {
         if (result$numeric.outcome)
