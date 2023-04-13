@@ -19,7 +19,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     if (!is.null(subset))
     {
-        if (is.null(subset.description)    || (class(subset.description) == "try-error") ||
+        if (is.null(subset.description)    || inherits(subset.description, "try-error") ||
             !is.null(attr(subset, "name")) || length(subset.description) > 0)
             subset.description <- Labels(subset)
         if (is.null(attr(subset, "name")))
@@ -28,7 +28,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     if (!is.null(weights))
     {
-        if (is.null(weights.description)    || (class(weights.description) == "try-error") ||
+        if (is.null(weights.description)    || inherits(weights.description, "try-error") ||
             !is.null(attr(weights, "name")) || length(weights.description) > 0)
             weights.description <- Labels(weights)
         if (is.null(attr(weights, "name")))
