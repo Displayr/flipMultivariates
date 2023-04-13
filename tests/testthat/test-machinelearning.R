@@ -10,25 +10,37 @@ adult.2000$subset <- rep(c(TRUE, TRUE, TRUE, FALSE), 500)
 algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
                 "Gradient Boosting", "Linear Discriminant Analysis", "CART", "Regression")
 
+ml.args <- list(
+    formula = sex ~ education_num + marital + workclass,
+    data = adult.2000
+)
+newdata.test <- data.frame(
+    education_num = 9,
+    marital = " Married-civ-spouse",
+    workclass = " Private"
+)
+
 for (alg in algorithms)
 {
     test_that(paste0("Machine Learning: ", alg), {
-
-        expect_error(ml <- suppressWarnings(MachineLearning(alg,
-                              formula = sex ~ education_num + marital + workclass,
-                              data = adult.2000)), NA)
-        suppressWarnings(print(ml))
+        test.args <- c(ml.args, list(algorithm = alg))
+        if (alg == "Deep Learning") # Avoid warning about convergence
+            test.args[["max.epochs"]] <- 120L
+        if (alg == "Regression") # Avoid warnings about binary class in Linear Reg
+            test.args[["type"]] <- "Binary Logit"
+        # Avoid warnings about outlier removal in printing
+        expected.warn <- if (alg == "Regression") "Unusual observations detected" else NA
+        expect_error(ml <- do.call(MachineLearning, test.args), NA)
+        expect_warning(print(ml), expected.warn)
         first.pred <- predict(ml)[1]
-        pred.from.chars <- predict(ml, data.frame(education_num = 9,
-                                                  marital = " Married-civ-spouse",
-                                                  workclass = " Private"))
+        pred.from.chars <- predict(ml, newdata.test)
         expect_equal(first.pred, pred.from.chars)
 
         # NOTE: if the test below fails due to class names changing, ALL
         #       extension buttons in the wiki that refer to this class name should
         #       be updated with the new class name.
-        if (alg != "Regression")
-            expect_true(inherits(ml, "MachineLearning"))
+        expected.class <- if (alg == "Regression") "Regression" else "MachineLearning"
+        expect_true(inherits(ml, expected.class))
     })
 }
 
@@ -37,16 +49,18 @@ adult.2000$age[runif(2000) > 0.9] <- -Inf
 adult.2000$hrs_per_week[runif(2000) > 0.9] <- Inf
 algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
                 "Gradient Boosting", "Linear Discriminant Analysis")
+ml.args[["formula"]] <- sex ~ education_num + marital + age + hrs_per_week
+ml.args[["data"]] <- adult.2000
+expected.error <- paste0("Variable(s) age, hrs_per_week contain infinite values. ",
+                         "Either recode the infinities to finite values or set ",
+                         "them as missing data.")
 
 for (alg in algorithms)
 {
     test_that(paste0("Machine Learning infinity: ", alg), {
-
-        expect_error(ml <- suppressWarnings(MachineLearning(alg,
-                                                            formula = sex ~ education_num + marital + age + hrs_per_week,
-                                                            data = adult.2000)),
-                     "Variable(s) age, hrs_per_week contain infinite values. Either recode the infinities to finite values or set them as missing data.",
-                     fixed = TRUE)
+        ml.args[["algorithm"]] <- alg
+        expect_error(ml <- do.call(MachineLearning, ml.args),
+                     expected.error, fixed = TRUE)
     })
 }
 
