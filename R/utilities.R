@@ -1,11 +1,11 @@
 
 #' Perform standard data checking and tidying actions before fitting a machine learning model
 #'
-#' @importFrom flipData GetData EstimationData DataFormula ErrorIfInfinity
+#' @importFrom flipData GetData EstimationData EstimationDataTemplate DataFormula ErrorIfInfinity
 #' @importFrom flipFormat Labels
 #' @importFrom flipU OutcomeName AllVariablesNames
 #' @importFrom flipTransformations AdjustDataToReflectWeights
-#' @importFrom stats as.formula var
+#' @importFrom stats reformulate var
 #' @noRd
 prepareMachineLearningData <- function(formula, data, subset, subset.description,
                                        weights, weights.description, missing, seed,
@@ -19,7 +19,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     if (!is.null(subset))
     {
-        if (is.null(subset.description)    || (class(subset.description) == "try-error") ||
+        if (is.null(subset.description)    || inherits(subset.description, "try-error") ||
             !is.null(attr(subset, "name")) || length(subset.description) > 0)
             subset.description <- Labels(subset)
         if (is.null(attr(subset, "name")))
@@ -28,7 +28,7 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     if (!is.null(weights))
     {
-        if (is.null(weights.description)    || (class(weights.description) == "try-error") ||
+        if (is.null(weights.description)    || inherits(weights.description, "try-error") ||
             !is.null(attr(weights, "name")) || length(weights.description) > 0)
             weights.description <- Labels(weights)
         if (is.null(attr(weights, "name")))
@@ -68,6 +68,11 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     outcome.name <- OutcomeName(input.formula, data)
     outcome.i <- match(outcome.name, names(data))
 
+    # Create EstimationDataTemplate as the data has not been broken into dummy variable (0/1)
+    # coding and the outcome name has been standardized for randomForest
+
+    estimation.data.template <- EstimationDataTemplate(data, outcome.name = outcome.name)
+
     if (dummy)
     {
         factor.levels <- lapply(data[, -outcome.i], levels)
@@ -94,10 +99,12 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     # Treatment of missing values.
     # rebuild formula because there are new variables for each level of factorial predictors
-    predictor.names <- colnames(data)[colnames(data) != outcome.name]
-    form <- as.formula(paste(outcome.name, "~",
-                             paste(predictor.names[predictor.names != outcome.name], collapse = "+")))
-    processed.data <- EstimationData(form, data, subset, weights, missing, seed = seed)
+    if (dummy) {
+        predictor.names <- colnames(data)[colnames(data) != outcome.name]
+        input.formula <- reformulate(predictor.names, response = outcome.name,
+                                     env = environment(input.formula))
+    }
+    processed.data <- EstimationData(input.formula, data, subset, weights, missing, seed = seed)
     unweighted.training.data <- processed.data$estimation.data
     ErrorIfInfinity(unweighted.training.data)
 
@@ -115,33 +122,35 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     else
         AdjustDataToReflectWeights(unweighted.training.data, cleaned.weights)
 
-    level.counts <- sapply(weighted.training.data, function(x) length(levels(x)))
+    level.counts <- vapply(weighted.training.data, nlevels, integer(1L))
     if (!allow.single.categories && any(level.counts == 1))
     {
         stop("Categorical predictors must have more than one category, after applying any ",
-                "filter, weights and missing data treatment. This is not the case for: ",
-                paste(names(level.counts)[level.counts == 1], collapse = ", "),
-                ". Please remove those variables to proceed.")
-        weighted.training.data <- weighted.training.data[, level.counts != 1]
+             "filter, weights and missing data treatment. This is not the case for: ",
+             paste(names(level.counts)[level.counts == 1], collapse = ", "), ". ",
+             "Please remove those variables to proceed.")
     }
 
-    return(list(unweighted.training.data = unweighted.training.data,
-                weighted.training.data = weighted.training.data,
-                required.data = data,
-                imputed.data = processed.data$data,
-                cleaned.weights = cleaned.weights,
-                data.formula = DataFormula(input.formula, data),
-                row.names = row.names,
-                unfiltered.weights = processed.data$unfiltered.weights,
-                outcome.name = outcome.name,
-                sample.description = processed.data$description,
-                n = n,
-                numeric.outcome = numeric.outcome,
-                outcome.label = outcome.label,
-                variable.labels = variable.labels,
-                outcome.i = outcome.i,
-                input.formula = input.formula,
-                subset.missing.removed = processed.data$post.missing.data.estimation.sample))
+    list(
+        unweighted.training.data = unweighted.training.data,
+        weighted.training.data = weighted.training.data,
+        estimation.data.template = estimation.data.template,
+        required.data = data,
+        imputed.data = processed.data$data,
+        cleaned.weights = cleaned.weights,
+        data.formula = DataFormula(input.formula, data),
+        row.names = row.names,
+        unfiltered.weights = processed.data$unfiltered.weights,
+        outcome.name = outcome.name,
+        sample.description = processed.data$description,
+        n = n,
+        numeric.outcome = numeric.outcome,
+        outcome.label = outcome.label,
+        variable.labels = variable.labels,
+        outcome.i = outcome.i,
+        input.formula = input.formula,
+        subset.missing.removed = processed.data$post.missing.data.estimation.sample
+    )
 }
 
 #' Save standard data after fitting a machine learning model

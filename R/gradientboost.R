@@ -168,6 +168,7 @@ GradientBoost <- GradientBoosting <- function(formula,
     ####################################################################
 
     result <- saveMachineLearningResults(result, prepared.data, show.labels)
+    result[["estimation.data.template"]] <- prepared.data[["estimation.data.template"]]
     attr(result, "ChartData") <- prepareGBChartData(result)
     result
 }
