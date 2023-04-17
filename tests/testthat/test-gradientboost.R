@@ -49,7 +49,7 @@ test_that("Print Gradient Boost: binary outcome",{
     }
 })
 
-test_that("Print Gradient Boost Importance",{
+test_that("Print Gradient Boost Importance", {
     for (grid.search in c(TRUE, FALSE))
     {
         z <- GradientBoost(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
@@ -57,10 +57,15 @@ test_that("Print Gradient Boost Importance",{
                             booster = "gbtree", grid.search = grid.search)
         expect_error(capture.output(print(z)), NA)
         z <- GradientBoost(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
-                           show.labels = FALSE, output = "Imporance", data = hair1, subset = split60 == "Estimation Sample",
+                           show.labels = FALSE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample",
                            booster = "gbtree", grid.search = grid.search)
         expect_error(capture.output(print(z)), NA)
-            }
+    }
+    # Check informative error if Ckmeans.1d.dp is not installed
+    require.as.list <- as.list(body(requireNamespace))
+    trace(requireNamespace, quote(res <- FALSE), at = length(require.as.list))
+    expect_error(print(z), "The package 'Ckmeans.1d.dp' needs to be installed for importance plots.")
+    untrace(requireNamespace)
 })
 
 library(flipRegression)
