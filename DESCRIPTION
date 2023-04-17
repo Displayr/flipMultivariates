@@ -30,6 +30,7 @@ Imports:
     xgboost (>= 1.1.1.1),
     verbs
 Suggests:
+    Ckmeans.1d.dp,
     testthat,
     flipExampleData
 Remotes:

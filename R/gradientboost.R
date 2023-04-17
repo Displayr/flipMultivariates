@@ -190,6 +190,8 @@ print.GradientBoost <- function(x, ...)
         print(x$confusion)
     else if (x$output == "Importance")
     {
+        if (!requireNamespace("Ckmeans.1d.dp", quietly = TRUE))
+            stop("The package 'Ckmeans.1d.dp' needs to be installed for importance plots.")
         importance <- xgb.importance(feature_names = x$prediction.columns, model = x$original)
         #xgb.plot.importance(importance, rel_to_first = TRUE, xlab = "Relative importance") base graphics plot
         gg <- xgb.ggplot.importance(importance, rel_to_first = TRUE, top_n = 10)
