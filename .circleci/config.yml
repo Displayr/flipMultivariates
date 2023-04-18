@@ -30,13 +30,24 @@ jobs:
             sudo add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+
             sudo apt update && sudo apt install -y ccache pandoc libgit2-dev libharfbuzz-dev \
             libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
-            libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools
+            libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow
             R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
             echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
             export R_HOME=`R RHOME`
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
+            sudo apt install -y python3-pip python3-testresources python3.10-venv
+            sudo pip install pip --upgrade
+            sudo pip install numpy pandas tensorflow keras h5py six
+            sudo pip3 install virtualenv
+            echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
+            sudo tee -a $R_HOME/etc/Renviron.site
+            export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
+            ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
+            R -e "tensorflow::install_tensorflow(version='cpu',\
+            extra_packages = c('tensorflow-hub'), envname='r-tensorflow')"
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
 
       - save_cache:
