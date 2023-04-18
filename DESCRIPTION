@@ -35,14 +35,15 @@ Suggests:
     flipExampleData
 Remotes:
     Displayr/flipAnalysisOfVariance,
+    Displayr/flipChartBasics,
     Displayr/flipData,
+    Displayr/flipExampleData,
     Displayr/flipFormat,
     Displayr/flipRegression,
     Displayr/flipStatistics,
     Displayr/flipTransformations,
     Displayr/flipTrees,
     Displayr/flipU,
-    Displayr/flipChartBasics,
     Displayr/rhtmlHeatmap,
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
