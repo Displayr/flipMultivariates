@@ -46,7 +46,7 @@ jobs:
             export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
             ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
             echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
-            R -e "tensorflow::install_tensorflow(version='2.4.1-cpu',\
+            R -e "tensorflow::install_tensorflow(version='2.8.0-cpu',\
             extra_packages = c('tensorflow-hub'), envname='r-tensorflow')"
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
