@@ -37,13 +37,13 @@ jobs:
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
-            echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
+            sudo apt install -y python3-pip python3-testresources python3.10-venv
+            echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
-            R -q -e "reticulate::conda_create('r-tensorflow', python_version = '3.10')"
-            R -q -e "tensorflow::install_tensorflow(version='cpu', conda='auto', conda_python_version = '3.10')"
-            R -q -e "keras::install_keras(method = 'conda', conda='auto')"
+            R -q -e "tensorflow::install_tensorflow(version='cpu', envname = 'r-tensorflow')"
+            R -q -e "keras::install_keras(method = 'virtualenv', envname = 'r-tensorflow')"
 
       - save_cache:
           key: R-package-library-{{ checksum "/tmp/cache_vers" }}-{{ checksum "/tmp/R_version" }}
