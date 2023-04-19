@@ -37,13 +37,8 @@ jobs:
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
-            sudo apt install -y python3-pip python3-testresources python3.8-venv
-            pip3 install virtualenv
             echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
-            export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
-            ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-            echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
             R -e "tensorflow::install_tensorflow(version='cpu', envname='r-tensorflow')"
