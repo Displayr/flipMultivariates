@@ -46,7 +46,7 @@ jobs:
             echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
-            R -e "tensorflow::install_tensorflow(version='2.4.1-cpu', envname='r-tensorflow')"
+            R -e "tensorflow::install_tensorflow(version='2.4.1', envname='r-tensorflow')"
             R -e "keras::install_keras(method = 'virtualenv', envname='r-tensorflow')"
 
       - save_cache:
