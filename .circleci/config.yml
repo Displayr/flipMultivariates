@@ -39,14 +39,14 @@ jobs:
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             sudo apt install -y python3-pip python3-testresources python3.10-venv
             pip3 install virtualenv
-            echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
+            echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
             export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
             ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
             echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
-            R -e "tensorflow::install_tensorflow(version='2.8.0-cpu', envname='r-tensorflow')"
+            R -e "tensorflow::install_tensorflow(version='2.4.1-cpu', envname='r-tensorflow')"
             R -e "keras::install_keras(method = 'virtualenv', envname='r-tensorflow')"
 
       - save_cache:
