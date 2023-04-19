@@ -38,7 +38,7 @@ jobs:
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             sudo apt install -y python3-pip python3-testresources python3.10-venv
-            echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
+            echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/usr/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
