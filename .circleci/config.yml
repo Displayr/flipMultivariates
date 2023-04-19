@@ -39,7 +39,7 @@ jobs:
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             sudo apt install -y python3-pip python3-testresources python3.10-venv
             sudo pip install pip --upgrade
-            sudo pip install numpy pandas tensorflow keras h5py six
+            sudo pip install numpy pandas tensorflow==2.4.1 keras h5py six
             sudo pip3 install virtualenv
             echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
