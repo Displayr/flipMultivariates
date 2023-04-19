@@ -37,17 +37,8 @@ jobs:
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
-            sudo apt install -y python3-pip python3-testresources python3.10-venv
             sudo pip install pip --upgrade
-            sudo pip install numpy pandas keras h5py six
-            sudo pip3 install virtualenv
-            echo 'RETICULATE_PYTHON="/usr/bin/python3.10"' | \
-            sudo tee -a $R_HOME/etc/Renviron.site
-            export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
-            ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-            echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
-            R -e "tensorflow::install_tensorflow(version='2.8.0-cpu',\
-            extra_packages = c('tensorflow-hub'), envname='r-tensorflow')"
+            sudo pip install numpy pandas keras tensorflow==2.8.0 h5py six
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
 
