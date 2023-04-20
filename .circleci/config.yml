@@ -31,12 +31,12 @@ jobs:
             libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
             libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow \
             python3.8 python3.8-venv libpython3.8-dev python3-pip
+            sudo apt-get install --reinstall libc6
             R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
             echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
             export R_HOME=`R RHOME`
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
-            R -q -e 'install.packages(c("Rcpp", "RcppEigen"))'
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             python3.8 -m venv ~/.virtualenvs/r-tensorflow
             source ~/.virtualenvs/r-tensorflow/bin/activate
