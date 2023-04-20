@@ -41,8 +41,9 @@ jobs:
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             python3.7 -m venv ~/.virtualenvs/r-tensorflow
             source ~/.virtualenvs/r-tensorflow/bin/activate
-            python3 -m pip install --upgrade pip
-            python3 -m pip install tensorflow==2.4.1 keras==2.10.0
+            python -m pip install --upgrade pip
+            python -m pip install tensorflow==2.4.1 keras==2.10.0
+            echo "$(which python)"
             echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
