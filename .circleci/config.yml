@@ -23,15 +23,13 @@ jobs:
           name: "[r-release] Install dependencies"
           command: |
             sudo apt update -qq
-            sudo apt install -y software-properties-common dirmngr
-            sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+            sudo apt install --no-install-recommends software-properties-common dirmngr
             wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
             sudo add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
             sudo add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+
             sudo apt update && sudo apt install -y ccache pandoc libgit2-dev libharfbuzz-dev \
             libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
-            libnlopt-dev libgdal-dev libproj-dev r-base
-            sudo apt-get build-dep r-cran-devtools r-cran-tensorflow \
+            libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow \
             python3.8 python3.8-venv libpython3.8-dev python3-pip
             R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
             echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
