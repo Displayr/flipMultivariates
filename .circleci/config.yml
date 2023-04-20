@@ -32,7 +32,7 @@ jobs:
             sudo apt update && sudo apt install -y ccache pandoc libgit2-dev libharfbuzz-dev \
             libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
             libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow \
-            python3.7 python3.7dev python3.7-venv python3-pip
+            python3.7 python3.7-venv python3-pip
             R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
             echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
             export R_HOME=`R RHOME`
@@ -41,8 +41,10 @@ jobs:
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
             python3.7 -m venv ~/.virtualenvs/r-tensorflow
             source ~/.virtualenvs/r-tensorflow/bin/activate
-            echo "$(which python)"
+            python3 -m pip install --upgrade pip
             python3 -m pip install tensorflow==2.4.1 keras==2.10.0
+            echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
+            sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
 
