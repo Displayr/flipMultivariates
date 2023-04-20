@@ -5,7 +5,7 @@ jobs:
   r-release:
     machine:
         image: ubuntu-2204:current
-    resource_class: large
+    resource_class: small
 
     steps:
       - checkout
@@ -40,7 +40,7 @@ jobs:
             sudo apt install -y python3-pip python3-testresources python3.10-venv
             python3.10 -m venv ~/.virtualenvs/r-tensorflow
             source ~/.virtualenvs/r-tensorflow/bin/activate
-            python3.10 -m pip install tensorflow==2.4.1 keras==2.11.0
+            python3.10 -m pip install tensorflow==2.12.0 keras==2.12.0
             echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/usr/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
