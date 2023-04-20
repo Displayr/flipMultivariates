@@ -4,7 +4,7 @@ version: 2.1
 jobs:
   r-release:
     machine:
-        image: ubuntu-2204:current
+        image: ubuntu-2004:current
     resource_class: small
 
     steps:
@@ -32,14 +32,14 @@ jobs:
             sudo apt update && sudo apt install -y ccache pandoc libgit2-dev libharfbuzz-dev \
             libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
             libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow \
-            python3.7 python3.7-venv python3-pip
+            python3.6 python3.6-venv libpython3.6-dev python3-pip
             R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
             echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
             export R_HOME=`R RHOME`
             echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
             sudo tee -a $R_HOME/etc/Rprofile.site
             R -q -e 'remotes::install_github("Displayr/flipDevTools")'
-            python3.7 -m venv ~/.virtualenvs/r-tensorflow
+            python3.6 -m venv ~/.virtualenvs/r-tensorflow
             source ~/.virtualenvs/r-tensorflow/bin/activate
             python -m pip install --upgrade pip
             python -m pip install tensorflow==2.4.1 keras==2.10.0
