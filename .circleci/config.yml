@@ -46,6 +46,9 @@ jobs:
             echo "$(which python)"
             echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
+            export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:\
+            ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            echo "LD_LIBRARY_PATH='${LD_LIBRARY_PATH}'" | sudo tee -a $R_HOME/etc/Renviron.site
             R -q -e 'remotes::install_github("cran/survey@4.0")'
             R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
 
