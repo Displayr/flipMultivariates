@@ -187,6 +187,11 @@ neuralNetwork <- function(X,
                           rand.verbose = FALSE,
                           weights = NULL) {
 
+    # If using tensorflow>=2.12, use legacy optimizer
+    tf.above.2.11 <- package_version(tensorflow::tf$version$VERSION) >= package_version("2.12")
+    if (tf.above.2.11)
+        optimizer <- tensorflow::tf$optimizers$legacy$RMSprop()
+
     # Note - below disables GPU computations and CPU parallelization by default, so slows performance
     # This should be removed when we require more speed
     # https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development
@@ -260,16 +265,16 @@ neuralNetwork <- function(X,
 
     # train until no improvement in validation loss for 3 epochs
     model <- build.model()
-    history <- fit(model,
-        X,
-        Y,
+    fit.args <- list(
+        model, X, Y,
         epochs = max.epochs,
         batch_size = batch.size,
         validation_split = 0.3,   # last 30% of samples are used for validation
-        sample_weight = weights,
         callbacks = c(callback_early_stopping(patience = 3)),
         verbose = 0
     )
+    fit.args[[if (tf.above.2.11) "weighted_metrics" else "sample_weights"]] <- weights
+    history <- do.call(fit, fit.args)
     history$metrics <- history$metrics[sort(names(history$metrics))]    # fix unstable ordering
     history$params <- history$params[sort(names(history$params))]
 
