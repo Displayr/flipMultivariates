@@ -265,16 +265,16 @@ neuralNetwork <- function(X,
 
     # train until no improvement in validation loss for 3 epochs
     model <- build.model()
-    history <- fit(model,
-        X,
-        Y,
+    fit.args <- list(
+        model, X, Y,
         epochs = max.epochs,
         batch_size = batch.size,
         validation_split = 0.3,   # last 30% of samples are used for validation
-        sample_weight = weights,
         callbacks = c(callback_early_stopping(patience = 3)),
         verbose = 0
     )
+    fit.args[[if (tf.above.2.11) "weighted_metrics" else "sample_weights"]] <- weights
+    history <- do.call(fit, fit.args)
     history$metrics <- history$metrics[sort(names(history$metrics))]    # fix unstable ordering
     history$params <- history$params[sort(names(history$params))]
 
