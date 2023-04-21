@@ -187,6 +187,11 @@ neuralNetwork <- function(X,
                           rand.verbose = FALSE,
                           weights = NULL) {
 
+    # If using tensorflow>=2.12, use legacy optimizer
+    tf.above.2.11 <- package_version(tensorflow::tf$version$VERSION) >= package_version("2.12")
+    if (tf.above.2.11)
+        optimizer <- tensorflow::tf$optimizers$legacy$RMSprop()
+
     # Note - below disables GPU computations and CPU parallelization by default, so slows performance
     # This should be removed when we require more speed
     # https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development
