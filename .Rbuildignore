@@ -1,4 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+\.circleci/config\.yml$
+.travis.yml
 .*~
-^\.circleci/config\.yml$
+runTravisTests.sh
+tools/travis_run_before_install.R$
