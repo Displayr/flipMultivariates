@@ -1,14 +1,50 @@
-## tic Circle CI template: linux-deploy
-## revision date: 2022-08-28
 version: 2.1
+
+# @param trigger-message: A summary message of what triggered the pipeline to run
+# set when triggering pipelines in flipDevTools::TriggerRevDepPipelines() step
+# @param remote-deps: A comma-separated string of GitHub refs, which can
+# be used to install specific branches of dependencies; used by both
+# flipDevTools::InstallDeps() and TriggerRevDepPipelines;
+# e.g. "Displayr/flipU@DS-4300,cran/survey@4.0"
+# @param plugins-branch String specifying a branch of the Displayr/Plugins
+# repo to trigger a build in (if the workflow is a success), the default "" does not
+# trigger a build in Plugins
+# @param triggered-packages: A comma-separated string of reverse depenendency
+# packages which have already been triggered, i.e. should be excluded (not triggered)
+# by TriggerRevDepPipelines() in the Trigger reverse dependencies step; it is updated
+# automatically by that function to ensure each package is triggered at most once.
+parameters:
+    trigger-message:
+        type: string
+        default: ""
+    remote-deps:
+        type: string
+        default: ""
+    plugins-branch:
+        type: string
+        default: ""
+    triggered-packages:
+        type: string
+        default: ""
+
 jobs:
   r-release:
     machine:
         image: ubuntu-2204:current
     resource_class: small
+    environment:
+        REMOTE_DEPS: <<pipeline.parameters.remote-deps>>
+        PLUGINS_BRANCH: <<pipeline.parameters.plugins-branch>>
+        TRIGGER_MESSAGE: <<pipeline.parameters.trigger-message>>
+        TRIGGERED_PACKAGES: <<pipeline.parameters.triggered-packages>>
 
     steps:
       - checkout
+
+      - when:
+          condition: <<pipeline.parameters.trigger-message>>
+          steps:
+            - run: echo "<<pipeline.parameters.trigger-message>>"
 
       # create a unique env var for the cache. Unfortunately normal env vars
       # are not picked up by the cache, therefore this workaround is needed.
@@ -44,7 +80,7 @@ jobs:
             echo "$(which python)"
             echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
             sudo tee -a $R_HOME/etc/Renviron.site
-            R -q -e 'options(warn = 2); devtools::install_deps(dependencies = TRUE)'
+            R -q -e 'options(warn = 2); flipDevTools::InstallDeps(dependencies = TRUE)'
 
       - save_cache:
           key: R-package-library-{{ checksum "/tmp/cache_vers" }}-{{ checksum "/tmp/R_version" }}
@@ -69,6 +105,10 @@ jobs:
 
       - store_artifacts:
           path: testthat.xml
+
+      - run:
+          name: "Trigger reverse dependencies"
+          command: R -e 'flipDevTools::TriggerRevDepPipelines()'
 
 workflows:
   build-and-check-R-package:
