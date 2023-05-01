@@ -19,7 +19,7 @@ parameters:
         default: ""
     remote-deps:
         type: string
-        default: ""
+        default: "flipData@DS-4360-4,flipRegression@DS-4360-3"
     plugins-branch:
         type: string
         default: ""
