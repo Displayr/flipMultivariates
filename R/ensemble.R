@@ -19,7 +19,6 @@
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
 #' @importFrom flipFormat Labels
-#' @importFrom flipData Probabilities
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
@@ -340,21 +339,13 @@ prepareEnsembleChartData <- function(x)
 #' @export
 predict.MachineLearningEnsemble <- function(object, ...)
 {
-    return(object$prediction)
+    object$prediction
 }
 
-#' \code{Probabilities.MachineLearningEnsemble}
-#'
-#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including
-#' missing and filtered values).
-#' @param object A \code{MachineLearningEnsemble} object.
-#' @export
-Probabilities.MachineLearningEnsemble <- function(object)
+Probabilities.MachineLearningEnsemble <- function(object, newdata = NULL, ...)
 {
-    if(object$numeric.outcome)
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
-
-    return(object$probabilities)
+    requireCategoricalOutcome(object)
+    object$probabilities
 }
 
 

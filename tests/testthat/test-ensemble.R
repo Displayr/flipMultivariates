@@ -1,6 +1,5 @@
 context("Machine Learning Ensembles")
 
-library(flipMultivariates)
 data(adult.2000, package = "flipExampleData")
 
 suppressWarnings(RNGversion("3.5.3"))

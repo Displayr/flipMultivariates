@@ -12,14 +12,12 @@
 #' The default is to predict \code{NA}.
 #' @param ... Additional arguments to pass to predict.lda.
 #' @importFrom stats na.pass
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @export
 predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    # CheckPredictionVariables is still required without newdata because empty training levels are removed
-    if (is.null(newdata)) {
-        # no warnings from CheckPredictionVariables if predicting training data
-        newdata <- suppressWarnings(CheckPredictionVariables(object, object$model))
+    no.newdata.provided <- is.null(newdata)
+    if (no.newdata.provided) {
         predictions <- ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
         return(predictions)
     }
@@ -56,15 +54,15 @@ predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
     ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
 }
 
-#' \code{Probabilities.LDA}
-#'
-#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
-#' @param x A \code{LDA} object.
-#' @importFrom stats na.pass
+#' @importFrom flipData Probabilities
 #' @export
-Probabilities.LDA <- function(x)
+flipData::Probabilities
+
+#' @importFrom flipData ValidateNewData
+Probabilities.LDA <- function(object, newdata = NULL, ...)
 {
-    ldaExtractVariables(x, "posterior", x$prior, newdata = x$model, na.action = na.pass)
+    newdata <- ValidateNewData(object, newdata)
+    ldaExtractVariables(object, "posterior", object$prior, newdata = newdata, na.action = na.pass, ...)
 }
 
 #' \code{DiscriminantVariables}
@@ -83,7 +81,7 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 {
     newdata[, object$outcome.name] <- NULL
     set.seed(12321) # avoid random tie-breaking from max.col within predict()
-    suppressWarnings(predict(object$original, prior = prior , newdata = newdata, na.action = na.action)[[type]])
+    suppressWarnings(predict(object$original, prior = prior, newdata = newdata, na.action = na.action, ...)[[type]])
 }
 
 #' \code{predict.RandomForest}
@@ -97,39 +95,28 @@ ldaExtractVariables <- function(object, type, prior, newdata = object$model, na.
 #' If omitted, the \code{data} supplied to \code{RandomForest()} is used before any filtering.
 #' @param na.action Function determining what should be done with missing values in \code{newdata}.
 #' The default is to predict \code{NA}.
-#' @param ... Additional arguments to pass to predict.RandomForest.
+#' @param ... Additional arguments to pass to \code{predict}
 #' @importFrom stats na.pass
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @export
 predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
-    # CheckPredictionVariables is still required without newdata because empty training levels are removed
-    newdata <- if (is.null(newdata))
-        # no warnings from CheckPredictionVariables if predicting training data
-        suppressWarnings(CheckPredictionVariables(object, object$model))
-    else
-        CheckPredictionVariables(object, newdata)
-
+    newdata <- ValidateNewData(object, newdata)
     randomForestExtractVariables(object, "response", newdata = newdata, na.action = na.action)
 }
 
-#' \code{Probabilities.RandomForest}
-#'
-#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
-#' @param x A \code{RandomForest} object.
-#' @importFrom stats na.pass
-#' @export
-Probabilities.RandomForest <- function(x)
+#' @importFrom flipData ValidateNewData
+Probabilities.RandomForest <- function(object, newdata = NULL, ...)
 {
-    if(x$numeric.outcome)
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
-    randomForestExtractVariables(x, "prob", newdata = x$model)
+    requireCategoricalOutcome(object)
+    newdata <- ValidateNewData(object, newdata)
+    randomForestExtractVariables(object, "prob", newdata, ...)
 }
 
-#' @import randomForest
-randomForestExtractVariables <- function(object, type, newdata = object$model, na.action = na.pass)
+#' @importFrom stats predict
+randomForestExtractVariables <- function(object, type, newdata = object$model, na.action = na.pass, ...)
 {
-    pred <- predict(object$original, type, newdata = newdata, na.action = na.action)
+    pred <- predict(object$original, type, newdata = newdata, na.action = na.action, ...)
     names(pred) <- NULL
     pred
 }
@@ -146,38 +133,28 @@ randomForestExtractVariables <- function(object, type, newdata = object$model, n
 #' If omitted, the \code{data} supplied to \code{SupportVectorMachine()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.svm.
 #' @importFrom stats complete.cases
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @export
 predict.SupportVectorMachine <- function(object, newdata = NULL, ...)
 {
-    # CheckPredictionVariables is still required without newdata because empty training levels are removed
-    newdata <- if (is.null(newdata))
-        # no warnings from CheckPredictionVariables if predicting training data
-        suppressWarnings(CheckPredictionVariables(object, object$model))
-    else
-        CheckPredictionVariables(object, newdata)
-
+    newdata <- ValidateNewData(object, newdata)
     # Since e1071 svm predictions cannot return NA for missing data, we predict only for complete.cases
     # (without NA or new levels). Default to NA for other instances.
-    newdata[complete.cases(newdata), "prediction"] <-
-        predict(object$original, newdata = newdata[complete.cases(newdata), , drop = FALSE], ...)
-    return(newdata$prediction)
+    complete.observations <- complete.cases(newdata)
+    newdata[complete.observations, "prediction"] <-
+        predict(object$original, newdata = newdata[complete.observations, , drop = FALSE], ...)
+    newdata$prediction
 }
 
-#' \code{Probabilities.SupportVectorMachine}
-#'
-#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including missing and filtered values).
-#' @param x A \code{SupportVectorMachine} object.
-#' @export
-Probabilities.SupportVectorMachine <- function(x)
+#' @importFrom flipData ValidateNewData
+Probabilities.SupportVectorMachine <- function(object, newdata = NULL, ...)
 {
-    if(x$numeric.outcome)
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
-
-    predictions <- predict(x$original, newdata = x$model, probability = TRUE)
+    requireCategoricalOutcome(object)
+    newdata <- ValidateNewData(object, newdata)
+    predictions <- predict(object$original, newdata = newdata, probability = TRUE)
     prob.excluding.na <- attr(predictions, "probabilities")
     # add NA probability for instances with missing prediction variables
-    all.probs <- data.frame(matrix(NA, ncol = ncol(prob.excluding.na), nrow = nrow(x$model)))
+    all.probs <- data.frame(matrix(NA, ncol = ncol(prob.excluding.na), nrow = nrow(object$model)))
     all.probs[row.names(prob.excluding.na), ] <- prob.excluding.na
     colnames(all.probs) <- colnames(prob.excluding.na)
     return(as.matrix(all.probs[, order(names(all.probs))]))
@@ -197,17 +174,12 @@ Probabilities.SupportVectorMachine <- function(x)
 #' via the largest probability.
 #' @param ... Additional arguments to pass to predict.xgb.Booster.
 #' @importFrom stats complete.cases
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @importFrom xgboost xgb.load.raw
 #' @export
 predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALSE, ...)
 {
-    # CheckPredictionVariables is still required without newdata because empty training levels are removed
-    newdata <- if (is.null(newdata))
-        # no warnings from CheckPredictionVariables if predicting training data
-        suppressWarnings(CheckPredictionVariables(object, object$model))
-    else
-        CheckPredictionVariables(object, newdata)
+    newdata <- ValidateNewData(object, newdata)
     newdata <- OneHot(newdata, object$outcome.name)$X
     object$original$feature_names <- colnames(newdata) # avoids error if newdata uses names and model uses labels
     prediction <- try(predict(object$original, newdata = newdata, reshape = TRUE, ...),
@@ -243,18 +215,12 @@ predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALS
     return(prediction)
 }
 
-#' \code{Probabilities.GradientBoost}
-#'
-#' Estimates probabilities of group membership for the entire sample passed into the original analysis (including
-#' missing and filtered values).
-#' @param object A \code{GradientBoost} object.
-#' @export
-Probabilities.GradientBoost <- function(object)
+#' @importFrom flipData ValidateNewData
+Probabilities.GradientBoost <- function(object, newdata = NULL, ...)
 {
-    if(object$numeric.outcome)
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
-
-    probabilities <- data.frame(predict(object, newdata = object$model, keep.soft.probs = TRUE))
+    requireCategoricalOutcome(object)
+    newdata <- ValidateNewData(object, newdata)
+    probabilities <- data.frame(predict(object, newdata = newdata, keep.soft.probs = TRUE))
     if (object$original$params$objective == "binary:logistic")
         probabilities <- cbind(1 - probabilities, probabilities)
 
@@ -298,5 +264,11 @@ PropensityWeights <- function(object)
     positive.class <- levels(outcome.variable)[2L]
     # Return the inverse of the probability depending on the outcome variable
     # If positive class, return the second column, otherwise first, use single indexing for speed.
-    1/probabilities[1:n.obs + n.obs * (outcome.variable == positive.class)]
+    1 / probabilities[1:n.obs + n.obs * (outcome.variable == positive.class)]
+}
+
+requireCategoricalOutcome <- function(object)
+{
+    if (object[["numeric.outcome"]])
+        stop("Probabilities are only applicable to models with categorical outcome variables.")
 }
