@@ -18,7 +18,7 @@ predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 {
     no.newdata.provided <- is.null(newdata)
     if (no.newdata.provided) {
-        predictions <- ldaExtractVariables(object, "class", object$prior, newdata = newdata, na.action, ...)
+        predictions <- ldaExtractVariables(object, "class", object$prior, newdata = object$model, na.action, ...)
         return(predictions)
     }
     stopifnot("newdata must be a data.frame" = is.data.frame(newdata))
