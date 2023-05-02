@@ -59,6 +59,7 @@ predict.LDA <- function(object, newdata = NULL, na.action = na.pass, ...)
 flipData::Probabilities
 
 #' @importFrom flipData ValidateNewData
+#' @export
 Probabilities.LDA <- function(object, newdata = NULL, ...)
 {
     newdata <- ValidateNewData(object, newdata)
@@ -106,6 +107,7 @@ predict.RandomForest <- function(object, newdata = NULL, na.action = na.pass, ..
 }
 
 #' @importFrom flipData ValidateNewData
+#' @export
 Probabilities.RandomForest <- function(object, newdata = NULL, ...)
 {
     requireCategoricalOutcome(object)
@@ -147,6 +149,7 @@ predict.SupportVectorMachine <- function(object, newdata = NULL, ...)
 }
 
 #' @importFrom flipData ValidateNewData
+#' @export
 Probabilities.SupportVectorMachine <- function(object, newdata = NULL, ...)
 {
     requireCategoricalOutcome(object)
@@ -216,6 +219,7 @@ predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALS
 }
 
 #' @importFrom flipData ValidateNewData
+#' @export
 Probabilities.GradientBoost <- function(object, newdata = NULL, ...)
 {
     requireCategoricalOutcome(object)

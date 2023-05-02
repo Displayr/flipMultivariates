@@ -392,6 +392,7 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
 #' @importFrom flipData ValidateNewData
 #' @importFrom keras unserialize_model
 #' @importFrom reticulate py_is_null_xptr
+#' @export
 Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
 {
     requireCategoricalOutcome(object)

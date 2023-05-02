@@ -342,6 +342,7 @@ predict.MachineLearningEnsemble <- function(object, ...)
     object$prediction
 }
 
+#' @export
 Probabilities.MachineLearningEnsemble <- function(object, newdata = NULL, ...)
 {
     requireCategoricalOutcome(object)
