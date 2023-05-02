@@ -50,7 +50,7 @@ jobs:
       # are not picked up by the cache, therefore this workaround is needed.
       # See https://discuss.circleci.com/t/cannot-use-circle-yml-environment-variables-in-cache-keys/10994/7
       - run: echo "$(Rscript -e 'cat(format(getRversion()))')" > /tmp/R_version
-      - run: echo "v1" > /tmp/cache_vers  # Increment this to invalidate cache
+      - run: echo "v2" > /tmp/cache_vers  # Increment this to invalidate cache
       - restore_cache:
           key: R-package-library-{{ checksum "/tmp/cache_vers" }}-{{ checksum "/tmp/R_version" }}
 
