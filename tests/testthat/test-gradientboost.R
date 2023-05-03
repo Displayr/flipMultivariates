@@ -14,7 +14,7 @@ hair1$bin <- hair1$num > 1
 # Create a smaller subset of variables for testing dot on RHS
 hair2  <- flipTransformations::AsNumeric(hair[, paste0("x",6:18)], binary = FALSE, remove.first = TRUE)
 
-test_that("Print Gradient Boost: outputs and boosters",{
+test_that("Print Gradient Boost: outputs and boosters", {
     for (output in c("Detail", "Accuracy", "Prediction-Accuracy Table"))
         for (booster in c("gbtree", "gblinear"))
             for (grid.search in c(TRUE, FALSE))
@@ -140,7 +140,7 @@ test_that("Save variables",
               expect_error(predict(z), NA)
               expect_equal(length(predict(z)), 100)
               expect_error(flipData::Observed(z), NA)
-              expect_error(flipData::Probabilities(z), "Probabilities are only applicable to models with categorical outcome variables.")
+              expect_error(Probabilities(z), "Probabilities are only applicable to models with categorical outcome variables.")
               z <- GradientBoost(cat ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18,
                                  booster = "gbtree", data = hair1, subset = split60 == "Estimation Sample")
               expect_error(predict(z), NA)

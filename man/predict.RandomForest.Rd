@@ -15,7 +15,7 @@ If omitted, the \code{data} supplied to \code{RandomForest()} is used before any
 \item{na.action}{Function determining what should be done with missing values in \code{newdata}.
 The default is to predict \code{NA}.}
 
-\item{...}{Additional arguments to pass to predict.RandomForest.}
+\item{...}{Additional arguments to pass to \code{predict}}
 }
 \description{
 Predicts values for numeric outcomes and group membership for categories based on \code{newdata}

@@ -41,7 +41,7 @@ test_that("Print Deep Learning: outcome types", {
 
 })
 
-test_that("Deep Learning: Weights and Filters",{
+test_that("Deep Learning: Weights and Filters", {
 
     expect_error(dl <- suppressWarnings(DeepLearning(hrs_per_week ~ ., data = adult.2000,
                                     hidden.nodes = 15, max.epochs = 10, subset = subset)), NA)
@@ -57,12 +57,12 @@ test_that("Deep Learning: predictions and probabilities",
               dl <- suppressWarnings(DeepLearning(age ~ ., data = adult.2000,
                                               hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt))
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
-              expect_error(flipData::Probabilities(dl), "Probabilities are only applicable to models with categorical outcome variables.")
+              expect_error(Probabilities(dl), "Probabilities are only applicable to models with categorical outcome variables.")
 
               dl <- suppressWarnings(DeepLearning(marital ~ ., data = adult.2000,
                                  hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt))
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
-              expect_error(suppressWarnings(flipData::Probabilities(dl)), NA)
+              expect_error(suppressWarnings(Probabilities(dl)), NA)
 })
 
 test_that("Deep Learning: errors",{

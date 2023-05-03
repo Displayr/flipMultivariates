@@ -1,15 +1,5 @@
 context("LDA")
 
-# x1 <- runif(100)
-# x2 <- runif(100) * 3
-# flipFormat::Labels(x1) <- "Predictors x1"
-# flipFormat::Labels(x2) <- "Predictors x2"
-# y <- x1 + x2
-# y <- round(y / max(y) * 2)
-# LDA(y ~ x1 + x2)
-# dat <- data.frame(x1, x2)
-# flipFormat::ExtractCommonPrefix(flipFormat::Labels(dat))
-
 data(hbatwithsplits, package = "flipExampleData")
 hair <- hbatwithsplits
 
@@ -19,7 +9,6 @@ hair1$split60 <- hair$split60
 hair1$id <- hair$id
 hair2 <- hair1
 hair2$split60 <- hair2$id <- NULL
-
 
 test_that("LDA: plots",
           {
@@ -108,7 +97,7 @@ test_that("LDA Replicating SPSS defaults - unweighted",
               expect_equal(0.86959956, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(.45479754052345, as.numeric(abs(zLDA.discriminant.variables[2,2])), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(0.8929186, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(21,0,0,1,10,0,0,3,25))
               expect_equal(24.56271, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)
@@ -124,7 +113,7 @@ test_that("LDA Replicating SPSS defaults - weighted",
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(0.07987, as.numeric(abs(zLDA.discriminant.variables[2,2])), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(0.9294585, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(1056,8,0,10,493,0,0,43,1107))
               expect_equal(19.98625, zLDA$original$discriminant.functions[3,3], tolerance = 0.001)
@@ -141,7 +130,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - unweighted",
               expect_equal(0.87, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(0.45480, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(0.89292, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(21,0,0,1,10,0,0,3,25))
               expect_equal(-7.578596, zLDA$original$discriminant.functions[4,1], tolerance = 0.001)
@@ -180,7 +169,7 @@ test_that("LDA Replicating SPSS - compute prior from group sizes - weighted",
               expect_equal(0.787, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(0.07987, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(0.92946, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion), c(1056,8,0,10,493,0,0,43,1107))
               expect_equal(-359.3452, zLDA$original$discriminant.functions[1,1], tolerance = 0.001)
@@ -195,7 +184,7 @@ test_that("Replicating colas example in SPSS - default", {
               expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(0.3144915587291, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(0.1965148, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(-0.9738335, zLDA$original$discriminant.functions[1,1], tolerance = 0.001)
               # Note that confusion does not match, due to multiple groups with equivalent probabilities.
@@ -209,7 +198,7 @@ test_that("Replicating colas example in SPSS - compute from group sizes", {
               expect_equal(0.7650, variance.explained[1], tolerance = 0.001)
               zLDA.discriminant.variables <- DiscriminantVariables(zLDA)
               expect_equal(.3144915587291, abs(as.numeric(abs(zLDA.discriminant.variables[2,2]))), tolerance = 0.001)
-              zLDA.probs <- flipData::Probabilities(zLDA)
+              zLDA.probs <- Probabilities(zLDA)
               expect_equal(.19651, as.numeric(zLDA.probs[5,3]), tolerance = 0.001)
               expect_equal(as.numeric(zLDA$confusion[, 1]), c(141, 37, 61, 25, 9, 43, 2, 3))
               expect_equal(0.2883744, zLDA$original$discriminant.functions[2,2], tolerance = 0.001)

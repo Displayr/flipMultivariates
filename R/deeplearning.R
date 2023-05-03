@@ -354,7 +354,7 @@ print.DeepLearning <- function(x, ...)
 #' @param newdata Optionally, a data frame including the variables used to fit the model.
 #' If omitted, the \code{data} supplied to \code{DeepLearning()} is used before any filtering.
 #' @param ... Additional arguments to pass to predict.DeepLearning.
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @importFrom keras k_argmax unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
@@ -363,11 +363,7 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
     if (py_is_null_xptr(object$original))
         object$original <- unserialize_model(object$original.serial)
 
-    newdata <- if (is.null(newdata))
-        # no warnings from CheckPredictionVariables if predicting training data
-        suppressWarnings(CheckPredictionVariables(object, object$model))
-    else
-        CheckPredictionVariables(object, newdata)
+    newdata <- ValidateNewData(object, newdata)
 
     X <- as.matrix(AsNumeric(newdata))
     constants <- object$training.stdevs == 0
@@ -393,26 +389,19 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
     return(predictions)
 }
 
-
-#' \code{Probabilities.DeepLearning}
-#'
-#' Estimates probabilities of class membership for the entire sample passed into the original
-#' analysis (including missing and filtered values).
-#' @param object A \code{DeepLearning} object.
-#' @importFrom flipData CheckPredictionVariables
+#' @importFrom flipData ValidateNewData
 #' @importFrom keras unserialize_model
 #' @importFrom reticulate py_is_null_xptr
 #' @export
-Probabilities.DeepLearning <- function(object)
+Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
 {
-    if(object$numeric.outcome)
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
+    requireCategoricalOutcome(object)
+    newdata <- ValidateNewData(object, newdata)
 
     if (py_is_null_xptr(object$original))
         object$original <- unserialize_model(object$original.serial)
 
-    data <- CheckPredictionVariables(object, object$model)
-    X <- as.matrix(AsNumeric(data))
+    X <- as.matrix(AsNumeric(newdata))
     constants <- object$training.stdevs == 0
     if (object$normalize)
         X[, !constants] <- scale(X[, !constants],
@@ -423,5 +412,5 @@ Probabilities.DeepLearning <- function(object)
     if (length(object$outcome.levels) == 2)
         probabilities <- cbind(1 - probabilities,probabilities)
     colnames(probabilities) <- object$outcome.levels
-    return(probabilities)
+    probabilities
 }
