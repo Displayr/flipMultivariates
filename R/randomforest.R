@@ -118,15 +118,16 @@ prepareRFChartData <- function(x)
             rownames(importance) <- x$variable.labels
         if (x$sort.by.importance && nrow(importance) != 1)
         {
-            ind <- sort(importance[, ncol(importance)], decreasing = TRUE, index.return = TRUE)$ix
+            ind <- order(importance[, ncol(importance)], decreasing = TRUE)
             importance <- importance[ind, ]
         }
         return(importance)
+    }
 
-    } else if (x$output == "Prediction-Accuracy Table")
+    if (x$output == "Prediction-Accuracy Table")
         return(ExtractChartData(x$confusion))
-    else
-        return(as.matrix(capture.output(print(x$original))))
+
+    as.matrix(capture.output(print(x$original)))
 }
 
 
