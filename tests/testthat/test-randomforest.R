@@ -27,7 +27,10 @@ test_that("Random forests: Outputs, labels and outcome variable types",{
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = TRUE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
-    expect_equal(attr(z, "ChartData"), z$original$importance, check.attributes = FALSE)
+    z.importance = z$original$importance
+    ind  = sort(z.importance[, ncol(z.importance)], decreasing = TRUE, index.return = TRUE)$ix
+    z.importance = z.importance[ind, ]
+    expect_equal(attr(z, "ChartData"), z.importance, check.attributes = FALSE)
     z <- RandomForest(numeric ~ x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + dollar$x18,
                       show.labels = FALSE, output = "Importance", data = hair1, subset = split60 == "Estimation Sample")
     expect_error(capture.output(print(z)), NA)
