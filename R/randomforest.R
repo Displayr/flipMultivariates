@@ -116,15 +116,11 @@ prepareRFChartData <- function(x)
         importance <- x$original$importance
         if (x$show.labels)
             rownames(importance) <- x$variable.labels
-
-        numeric.outcome <- ncol(importance) == 2
-
         if (x$sort.by.importance && nrow(importance) != 1)
         {
             ind <- sort(importance[, ncol(importance)], decreasing = TRUE, index.return = TRUE)$ix
             importance <- importance[ind, ]
         }
-
         return(importance)
 
     } else if (x$output == "Prediction-Accuracy Table")
