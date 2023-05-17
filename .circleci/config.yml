@@ -1,118 +1,55 @@
 version: 2.1
-
-# @param trigger-message: A summary message of what triggered the pipeline to run
-# set when triggering pipelines in flipDevTools::TriggerRevDepPipelines() step
-# @param remote-deps: A comma-separated string of GitHub refs, which can
-# be used to install specific branches of dependencies; used by both
-# flipDevTools::InstallDeps() and TriggerRevDepPipelines;
-# e.g. "Displayr/flipU@DS-4300,cran/survey@4.0"
-# @param plugins-branch String specifying a branch of the Displayr/Plugins
-# repo to trigger a build in (if the workflow is a success), the default "" does not
-# trigger a build in Plugins
-# @param triggered-packages: A comma-separated string of reverse depenendency
-# packages which have already been triggered, i.e. should be excluded (not triggered)
-# by TriggerRevDepPipelines() in the Trigger reverse dependencies step; it is updated
-# automatically by that function to ensure each package is triggered at most once.
+orbs:
+  r-packages: displayr/r-packages@dev:013ae4ad417eb5b415c8a3bd70cb766b145f9a4a
 parameters:
-    trigger-message:
-        type: string
-        default: ""
-    remote-deps:
-        type: string
-        default: ""
-    plugins-branch:
-        type: string
-        default: ""
-    triggered-packages:
-        type: string
-        default: ""
-
-jobs:
-  r-release:
-    machine:
-        image: ubuntu-2204:current
-    resource_class: small
-    environment:
-        REMOTE_DEPS: <<pipeline.parameters.remote-deps>>
-        PLUGINS_BRANCH: <<pipeline.parameters.plugins-branch>>
-        TRIGGER_MESSAGE: <<pipeline.parameters.trigger-message>>
-        TRIGGERED_PACKAGES: <<pipeline.parameters.triggered-packages>>
-
-    steps:
-      - checkout
-
-      - when:
-          condition: <<pipeline.parameters.trigger-message>>
-          steps:
-            - run: echo "<<pipeline.parameters.trigger-message>>"
-
-      # create a unique env var for the cache. Unfortunately normal env vars
-      # are not picked up by the cache, therefore this workaround is needed.
-      # See https://discuss.circleci.com/t/cannot-use-circle-yml-environment-variables-in-cache-keys/10994/7
-      - run: echo "$(Rscript -e 'cat(format(getRversion()))')" > /tmp/R_version
-      - run: echo "v2" > /tmp/cache_vers  # Increment this to invalidate cache
-      - restore_cache:
-          key: R-package-library-{{ checksum "/tmp/cache_vers" }}-{{ checksum "/tmp/R_version" }}
-
-      # install deps and check pkg ---------------------------------------------
-      - run:
-          name: "[r-release] Install dependencies"
-          command: |
-            sudo apt update -qq
-            sudo apt install --no-install-recommends software-properties-common dirmngr
-            wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-            sudo add-apt-repository -y "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-            sudo add-apt-repository -y ppa:c2d4u.team/c2d4u4.0+
-            sudo apt update && sudo apt install -y ccache pandoc libgit2-dev libharfbuzz-dev \
-            libfribidi-dev libprotoc-dev libprotobuf-dev libv8-dev librsvg2-dev libmpfr-dev \
-            libnlopt-dev libgdal-dev libproj-dev r-base r-cran-devtools r-cran-tensorflow \
-            python3-pip python3.10-venv
-            R -q -e 'if (!dir.exists("~/R/library")) dir.create("~/R/library", recursive = TRUE)'
-            echo -e 'options(Ncpus = 4, repos = structure(c(CRAN = "https://cloud.r-project.org/")))' > $HOME/.Rprofile
-            export R_HOME=`R RHOME`
-            echo -e ".libPaths(c('$HOME/R/library', '/usr/lib/R/site-library', '/usr/lib/R/library'))" | \
-            sudo tee -a $R_HOME/etc/Rprofile.site
-            R -q -e 'remotes::install_github("Displayr/flipDevTools")'
-            python3.10 -m venv ~/.virtualenvs/r-tensorflow
-            source ~/.virtualenvs/r-tensorflow/bin/activate
-            python -m pip install --upgrade pip
-            python -m pip install tensorflow keras
-            echo "$(which python)"
-            echo 'RETICULATE_PYTHON="~/.virtualenvs/r-tensorflow/bin/python"' | \
-            sudo tee -a $R_HOME/etc/Renviron.site
-            R -q -e 'options(warn = 2); flipDevTools::InstallDeps(dependencies = TRUE)'
-
-      - save_cache:
-          key: R-package-library-{{ checksum "/tmp/cache_vers" }}-{{ checksum "/tmp/R_version" }}
-          paths:
-            - ../R/library
-
-      - run:
-          name: "Check package"
-          command: >-
-            R -q -e 'rcmdcheck::rcmdcheck(
-            args = c("--no-manual", "--ignore-vignettes", "--no-tests"),
-            build_args = c("--no-build-vignettes", "--no-manual"),
-            error_on = "warning")'
-
-      - run:
-          name: "Run unit tests"
-          no_output_timeout: 80m
-          command: R -e 'q(status = flipDevTools::RunTestsOnCircleCI(), save = "no")'
-
-      - store_test_results:
-          path: testthat.xml
-
-      - store_artifacts:
-          path: testthat.xml
-
-      - run:
-          name: "Trigger reverse dependencies"
-          command: R -e 'flipDevTools::TriggerRevDepPipelines()'
-
+  trigger-message:
+    type: string
+    default: ""
+  remote-deps:
+    type: string
+    default: ""
+  plugins-branch:
+    type: string
+    default: ""
+  triggered-packages:
+    type: string
+    default: ""
 workflows:
   build-and-check-R-package:
     jobs:
-      - r-release:
+      - r-packages/build-and-check-package:
+          executor: nightly
+          resource-class: large
+          name: BuildAndCheckPackage
           context:
             - r_packages
+          remote-deps: << pipeline.parameters.remote-deps >>
+          separate-test-job: true
+      - r-packages/test-package:
+          executor: nightly
+          resource-class: large
+          name: TestPackage
+          requires:
+            - BuildAndCheckPackage
+          context:
+            - r_packages
+      - r-packages/deploy-package:
+          resource-class: small
+          requires:
+            - TestPackage
+          context:
+            - r_packages
+          filters:
+            branches:
+              only:
+                - master
+      - r-packages/trigger-revdeps:
+          resource-class: small
+          requires:
+            - TestPackage
+          context:
+            - r_packages
+          remote-deps: << pipeline.parameters.remote-deps >>
+          plugins-branch: << pipeline.parameters.plugins-branch >>
+          trigger-message: << pipeline.parameters.trigger-message >>
+          triggered-packages: << pipeline.parameters.triggered-packages >>
