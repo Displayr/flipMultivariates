@@ -14,11 +14,16 @@ parameters:
   triggered-packages:
     type: string
     default: ""
+  executor:
+    type: enum
+    enum: [nightly, rocker, machine]
+    default: nightly
+
 workflows:
   build-and-check-R-package:
     jobs:
       - r-packages/build-and-check-package:
-          executor: nightly
+          executor: << pipeline.parameters.executor >>
           resource-class: large
           name: BuildAndCheckPackage
           context:
@@ -26,7 +31,7 @@ workflows:
           remote-deps: << pipeline.parameters.remote-deps >>
           separate-test-job: true
       - r-packages/test-package:
-          executor: nightly
+          executor: << pipeline.parameters.executor >>
           resource-class: large
           name: TestPackage
           requires:
@@ -34,7 +39,7 @@ workflows:
           context:
             - r_packages
       - r-packages/deploy-package:
-          executor: rocker
+          executor: << pipeline.parameters.executor >>
           resource-class: small
           requires:
             - TestPackage
@@ -45,7 +50,7 @@ workflows:
               only:
                 - master
       - r-packages/trigger-revdeps:
-          executor: rocker
+          executor: << pipeline.parameters.executor >>
           resource-class: small
           requires:
             - TestPackage
