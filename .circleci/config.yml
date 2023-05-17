@@ -34,6 +34,7 @@ workflows:
           context:
             - r_packages
       - r-packages/deploy-package:
+          executor: rocker
           resource-class: small
           requires:
             - TestPackage
@@ -44,6 +45,7 @@ workflows:
               only:
                 - master
       - r-packages/trigger-revdeps:
+          executor: rocker
           resource-class: small
           requires:
             - TestPackage
