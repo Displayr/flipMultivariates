@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  r-packages: displayr/r-packages@dev:0f57d47fa15fc2089d422f12a85315ab93d4c975
+  r-packages: displayr/r-packages@dev:865f83e42a58c9bb2005455547e25d79d84aef7d
 parameters:
   trigger-message:
     type: string
@@ -60,3 +60,4 @@ workflows:
           plugins-branch: << pipeline.parameters.plugins-branch >>
           trigger-message: << pipeline.parameters.trigger-message >>
           triggered-packages: << pipeline.parameters.triggered-packages >>
+
