@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  r-packages: displayr/r-packages@dev:8bab5fd1a8a255dcab8be8244e356ad286a77ca7
+  r-packages: displayr/r-packages@dev:a328223a23f6fc26f92fb09d8f0e4ff97b32cb8e
 parameters:
   trigger-message:
     type: string
@@ -32,6 +32,7 @@ workflows:
           separate-test-job: true
       - r-packages/test-package:
           executor: << pipeline.parameters.executor >>
+          parallelism: 2
           resource-class: large
           name: TestPackage
           requires:
