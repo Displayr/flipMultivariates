@@ -32,7 +32,7 @@ workflows:
           separate-test-job: true
       - r-packages/test-package:
           executor: << pipeline.parameters.executor >>
-          parallelism: 2
+          num-executors: 2
           resource-class: large
           name: TestPackage
           requires:
