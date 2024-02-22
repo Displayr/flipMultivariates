@@ -30,10 +30,10 @@ workflows:
             - r_packages
           remote_deps: << pipeline.parameters.remote_deps >>
           separate_test_job: true
-      - r-packages/test-package:
+      - r-packages/test_package:
           executor: << pipeline.parameters.executor >>
           num_executors: 2
-          resource-class: large
+          resource_class: large
           name: TestPackage
           requires:
             - BuildAndCheckPackage
