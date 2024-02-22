@@ -16,32 +16,32 @@ parameters:
     default: ""
   executor:
     type: enum
-    enum: [nightly, rocker, machine]
+    enum: [nightly, rocker, machine, rocker_geo]
     default: nightly
 
 workflows:
   build-and-check-R-package:
     jobs:
-      - r-packages/build-and-check-package:
+      - r-packages/build_and_check_package:
           executor: << pipeline.parameters.executor >>
-          resource-class: large
+          resource_class: large
           name: BuildAndCheckPackage
           context:
             - r_packages
-          remote-deps: << pipeline.parameters.remote-deps >>
-          separate-test-job: true
-      - r-packages/test-package:
+          remote_deps: << pipeline.parameters.remote_deps >>
+          separate_test_job: true
+      - r-packages/test_package:
           executor: << pipeline.parameters.executor >>
-          num-executors: 2
-          resource-class: large
+          num_executors: 2
+          resource_class: large
           name: TestPackage
           requires:
             - BuildAndCheckPackage
           context:
             - r_packages
-      - r-packages/deploy-package:
+      - r-packages/deploy_package:
           executor: << pipeline.parameters.executor >>
-          resource-class: small
+          resource_class: small
           requires:
             - TestPackage
           context:
@@ -50,15 +50,14 @@ workflows:
             branches:
               only:
                 - master
-      - r-packages/trigger-revdeps:
+      - r-packages/trigger_revdeps:
           executor: << pipeline.parameters.executor >>
-          resource-class: small
+          resource_class: small
           requires:
             - TestPackage
           context:
             - r_packages
-          remote-deps: << pipeline.parameters.remote-deps >>
-          plugins-branch: << pipeline.parameters.plugins-branch >>
-          trigger-message: << pipeline.parameters.trigger-message >>
-          triggered-packages: << pipeline.parameters.triggered-packages >>
-
+          remote_deps: << pipeline.parameters.remote-deps >>
+          plugins_branch: << pipeline.parameters.plugins-branch >>
+          trigger_message: << pipeline.parameters.trigger-message >>
+          triggered_packages: << pipeline.parameters.triggered-packages >>
