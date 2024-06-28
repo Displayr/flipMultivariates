@@ -483,6 +483,7 @@ prepareLDAChartData <- function(x)
 #' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
+#' @importFrom rhtmlCombinedScatter CombinedScatter
 #' @importFrom rhtmlMoonPlot moonplot
 #' @importFrom verbs Sum
 #' @export
@@ -532,20 +533,20 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
             coords <- rbind(x$centroids, correlations)
             groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
             gcolors <- c(x$outcome.color, x$predictors.color)
-            print(LabeledScatter(X = coords[, 1],
-                                             Y = coords[, 2],
-                                             label = rownames(coords),
-                                             group = groups,
-                                             colors = gcolors,
-                                             fixed.aspect = TRUE,
-                                             title = "Linear Discriminant Analysis",
-                                             x.title = "First linear discriminant",
-                                             y.title = "Second linear discriminant",
-                                             axis.font.size = 10,
-                                             labels.font.size = 12,
-                                             title.font.size = 20,
-                                             y.title.font.size = 16,
-                                             x.title.font.size = 16))
+            print(CombinedScatter(X = coords[, 1],
+                                  Y = coords[, 2],
+                                  label = rownames(coords),
+                                  group = groups,
+                                  colors = gcolors,
+                                  fixed.aspect = TRUE,
+                                  title = "Linear Discriminant Analysis",
+                                  x.title = "First linear discriminant",
+                                  y.title = "Second linear discriminant",
+                                  axis.font.size = 10,
+                                  labels.font.size = 12,
+                                  title.font.size = 20,
+                                  y.title.font.size = 16,
+                                  x.title.font.size = 16))
         }
     }
     else if (output == "Discriminant Functions") {
