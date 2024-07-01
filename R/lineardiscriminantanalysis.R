@@ -482,7 +482,6 @@ prepareLDAChartData <- function(x)
 #' @importFrom flipFormat Labels Labels ExtractCommonPrefix
 #' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @importFrom MASS lda
-#' @importFrom rhtmlLabeledScatter LabeledScatter
 #' @importFrom rhtmlCombinedScatter CombinedScatter
 #' @importFrom rhtmlMoonPlot moonplot
 #' @importFrom verbs Sum

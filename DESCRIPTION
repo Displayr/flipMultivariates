@@ -25,7 +25,6 @@ Imports:
     randomForest,
     reticulate,
     rhtmlCombinedScatter,
-    rhtmlLabeledScatter,
     rhtmlMoonPlot,
     tensorflow,
     utils,
@@ -48,7 +47,6 @@ Remotes:
     Displayr/flipU,
     Displayr/rhtmlCombinedScatter,
     Displayr/rhtmlHeatmap,
-    Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
 RoxygenNote: 7.2.3
