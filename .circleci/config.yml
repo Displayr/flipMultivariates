@@ -24,26 +24,15 @@ workflows:
     jobs:
       - r-packages/build_and_check_package:
           executor: << pipeline.parameters.executor >>
-          resource_class: large
           name: BuildAndCheckPackage
           context:
             - r_packages
-          remote_deps: << pipeline.parameters.remote_deps >>
-          separate_test_job: true
-      - r-packages/test_package:
-          executor: << pipeline.parameters.executor >>
-          num_executors: 2
-          resource_class: large
-          name: TestPackage
-          requires:
-            - BuildAndCheckPackage
-          context:
-            - r_packages
+          remote_deps: << pipeline.parameters.remote-deps >>
+          separate_test_job: false
       - r-packages/deploy_package:
           executor: << pipeline.parameters.executor >>
-          resource_class: small
           requires:
-            - TestPackage
+            - BuildAndCheckPackage
           context:
             - r_packages
           filters:
@@ -52,9 +41,8 @@ workflows:
                 - master
       - r-packages/trigger_revdeps:
           executor: << pipeline.parameters.executor >>
-          resource_class: small
           requires:
-            - TestPackage
+            - BuildAndCheckPackage
           context:
             - r_packages
           remote_deps: << pipeline.parameters.remote-deps >>
