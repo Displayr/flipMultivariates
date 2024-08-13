@@ -24,7 +24,6 @@ workflows:
     jobs:
       - r-packages/build_and_check_package:
           executor: << pipeline.parameters.executor >>
-          resource_class: large
           name: BuildAndCheckPackage
           context:
             - r_packages
@@ -42,9 +41,8 @@ workflows:
           remote_deps: << pipeline.parameters.remote-deps >>
       - r-packages/deploy_package:
           executor: << pipeline.parameters.executor >>
-          resource_class: small
           requires:
-            - TestPackage
+            - BuildAndCheckPackage
           context:
             - r_packages
           filters:
@@ -53,9 +51,8 @@ workflows:
                 - master
       - r-packages/trigger_revdeps:
           executor: << pipeline.parameters.executor >>
-          resource_class: small
           requires:
-            - TestPackage
+            - BuildAndCheckPackage
           context:
             - r_packages
           remote_deps: << pipeline.parameters.remote-deps >>
