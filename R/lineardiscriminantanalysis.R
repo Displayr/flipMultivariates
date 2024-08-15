@@ -536,7 +536,7 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
             coords <- rbind(x$centroids, correlations)
             groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
             gcolors <- c(x$outcome.color, x$predictors.color)
-            if (x$use.combined.scatter) {
+            if (!is.null(x$use.combined.scatter) && x$use.combined.scatter) {
                 print(CombinedScatter(X = coords[, 1],
                                       Y = coords[, 2],
                                       label = rownames(coords),
