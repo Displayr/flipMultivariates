@@ -34,6 +34,7 @@
 #'  as they will both slow down the data and are unlikely to be useful.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #'  variable's label is an attribute (e.g., attr(foo, "label")).
+#' @param use.combined.scatter Draw scatterplots using rhtmlCombinedScatter.
 #' @param ... Additional argments to be past to  \code{LDA.formula}.
 #' @details Imputation (replace missing values with estimates): All selected
 #'   outcome and predictor variables are included in the imputation, along with
@@ -70,6 +71,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
                 seed = 12321,
                 auxiliary.data = NULL,
                 show.labels = FALSE,
+                use.combined.scatter = FALSE,
                 ...)
 {
 
@@ -199,6 +201,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     result$factor.levels <- factor.levels
     result$correlations <- Correlation(x, dv)
     rownames(result$correlations) <- labels
+    result$use.combined.scatter <- use.combined.scatter
 
     if (show.labels)
     {
@@ -483,6 +486,7 @@ prepareLDAChartData <- function(x)
 #' @importFrom flipAnalysisOfVariance CompareMultipleMeans
 #' @importFrom MASS lda
 #' @importFrom rhtmlLabeledScatter LabeledScatter
+#' @importFrom rhtmlCombinedScatter CombinedScatter
 #' @importFrom rhtmlMoonPlot moonplot
 #' @importFrom verbs Sum
 #' @export
@@ -532,20 +536,39 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
             coords <- rbind(x$centroids, correlations)
             groups <- c(rep(x$outcome.label, nrow(x$centroids)), rep(x$predictors.label, nrow(correlations)))
             gcolors <- c(x$outcome.color, x$predictors.color)
-            print(LabeledScatter(X = coords[, 1],
-                                             Y = coords[, 2],
-                                             label = rownames(coords),
-                                             group = groups,
-                                             colors = gcolors,
-                                             fixed.aspect = TRUE,
-                                             title = "Linear Discriminant Analysis",
-                                             x.title = "First linear discriminant",
-                                             y.title = "Second linear discriminant",
-                                             axis.font.size = 10,
-                                             labels.font.size = 12,
-                                             title.font.size = 20,
-                                             y.title.font.size = 16,
-                                             x.title.font.size = 16))
+            if (isTRUE(x$use.combined.scatter)) {
+                print(CombinedScatter(X = coords[, 1],
+                                      Y = coords[, 2],
+                                      label = rownames(coords),
+                                      group = groups,
+                                      colors = gcolors,
+                                      fixed.aspect = TRUE,
+                                      title = "Linear Discriminant Analysis",
+                                      x.title = "First linear discriminant",
+                                      y.title = "Second linear discriminant",
+                                      axis.font.size = 10,
+                                      labels.font.size = 12,
+                                      title.font.size = 20,
+                                      y.title.font.size = 16,
+                                      x.title.font.size = 16,
+                                      plot.border.show = TRUE,
+                                      origin = TRUE))
+            } else {
+                print(LabeledScatter(X = coords[, 1],
+                                     Y = coords[, 2],
+                                     label = rownames(coords),
+                                     group = groups,
+                                     colors = gcolors,
+                                     fixed.aspect = TRUE,
+                                     title = "Linear Discriminant Analysis",
+                                     x.title = "First linear discriminant",
+                                     y.title = "Second linear discriminant",
+                                     axis.font.size = 10,
+                                     labels.font.size = 12,
+                                     title.font.size = 20,
+                                     y.title.font.size = 16,
+                                     x.title.font.size = 16))
+            }
         }
     }
     else if (output == "Discriminant Functions") {

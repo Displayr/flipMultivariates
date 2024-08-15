@@ -19,6 +19,7 @@ LDA(
   seed = 12321,
   auxiliary.data = NULL,
   show.labels = FALSE,
+  use.combined.scatter = FALSE,
   ...
 )
 }
@@ -69,6 +70,8 @@ as they will both slow down the data and are unlikely to be useful.}
 
 \item{show.labels}{Shows the variable labels, as opposed to the labels, in the outputs, where a
 variable's label is an attribute (e.g., attr(foo, "label")).}
+
+\item{use.combined.scatter}{Draw scatterplots using rhtmlCombinedScatter.}
 
 \item{...}{Additional argments to be past to  \code{LDA.formula}.}
 }
