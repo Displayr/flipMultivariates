@@ -1,7 +1,7 @@
 Package: flipMultivariates
 Type: Package
 Title: Multivariate models
-Version: 1.2.2
+Version: 1.2.3
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Multivariate models (e.g. LDA, random forest, SVM) according to the flip Project conventions.
@@ -17,7 +17,7 @@ Imports:
     flipStatistics,
     flipTransformations,
     flipTrees (>= 1.0.6),
-    flipU,
+    flipU (>= 1.6.2),
     ggplot2,
     keras,
     MASS,
@@ -51,5 +51,5 @@ Remotes:
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8

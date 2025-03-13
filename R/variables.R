@@ -178,6 +178,7 @@ Probabilities.SupportVectorMachine <- function(object, newdata = NULL, ...)
 #' @param ... Additional arguments to pass to predict.xgb.Booster.
 #' @importFrom stats complete.cases
 #' @importFrom flipData CheckPredictionVariables ValidateNewData
+#' @importFrom flipU StopForUserError
 #' @importFrom xgboost xgb.load.raw
 #' @export
 predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALSE, ...)
@@ -198,10 +199,10 @@ predict.GradientBoost <- function(object, newdata = NULL, keep.soft.probs = FALS
         }
         # If still throwing an error after attempted salvaging old output attempt, suggest user recompute
         if (inherits(prediction, "try-error"))
-            stop("Unable to predict values on this gradient boosting output. If it is an old ",
-                 "output, please re-compute it since older gradient boosting outputs are ",
-                 "not compatible with newer versions of the gradient boosting prediction method. ",
-                 "If errors persist after recomputing, please contact support for further help")
+            StopForUserError("Unable to predict values on this gradient boosting output. If it is an old ",
+                            "output, please re-compute it since older gradient boosting outputs are ",
+                            "not compatible with newer versions of the gradient boosting prediction method. ",
+                            "If errors persist after recomputing, please contact support for further help")
     }
 
     if (object$original$params$objective == "binary:logistic" && !keep.soft.probs)
@@ -240,7 +241,7 @@ Probabilities.GradientBoost <- function(object, newdata = NULL, ...)
 #'   positive class.
 #' @param object A \code{Regression} or \code{MachineLearning} output.
 #' @return A vector of numeric propensity weights for each case in the model.
-#' @importFrom flipU OutcomeVariable
+#' @importFrom flipU OutcomeVariable StopForUserError
 #' @export
 PropensityWeights <- function(object)
 {
@@ -250,7 +251,7 @@ PropensityWeights <- function(object)
                                  "e.g., Binary Logit Regression or Machine Learning classification model with an ",
                                  "outcome variable that is ordinal or nominal variable with two categories.")
     if (!(is.binary.ml.model || is.binary.regression))
-        stop(binary.outcome.msg)
+        StopForUserError(binary.outcome.msg)
     probabilities <- Probabilities(object)
     n.classes <- NCOL(probabilities)
     if (n.classes > 2L)
@@ -259,11 +260,11 @@ PropensityWeights <- function(object)
                       n.classes, " outcome categories/class labels. ", binary.outcome.msg,
                       " Consider merging categories in the outcome variable to produce ",
                       "a binary classification before computing propensity weights.")
-        stop(msg)
+        StopForUserError(msg)
     }
     outcome.variable <- OutcomeVariable(object[["formula"]], object[["model"]])
     if (nlevels(outcome.variable) != 2L)
-        stop(binary.outcome.msg)
+        StopForUserError(binary.outcome.msg)
     n.obs <- NROW(probabilities)
     positive.class <- levels(outcome.variable)[2L]
     # Return the inverse of the probability depending on the outcome variable
@@ -271,8 +272,9 @@ PropensityWeights <- function(object)
     1 / probabilities[1:n.obs + n.obs * (outcome.variable == positive.class)]
 }
 
+#' @importFrom flipU StopForUserError
 requireCategoricalOutcome <- function(object)
 {
     if (object[["numeric.outcome"]])
-        stop("Probabilities are only applicable to models with categorical outcome variables.")
+        StopForUserError("Probabilities are only applicable to models with categorical outcome variables.")
 }

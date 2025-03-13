@@ -27,6 +27,7 @@
 #'
 #' @importFrom xgboost xgboost xgb.cv
 #' @importFrom flipTransformations OneHot
+#' @importFrom flipU StopForUserError
 #' @aliases GradientBoosting
 #' @export
 GradientBoost <- GradientBoosting <- function(formula,
@@ -45,7 +46,7 @@ GradientBoost <- GradientBoosting <- function(formula,
     ####################################################################
 
     if (booster == "gblinear" && output == "Importance")
-        stop("Importance is only available for gbtree booster.") # https://github.com/dmlc/xgboost/issues/2331
+        StopForUserError("Importance is only available for gbtree booster.") # https://github.com/dmlc/xgboost/issues/2331
 
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######

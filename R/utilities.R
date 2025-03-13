@@ -3,7 +3,7 @@
 #'
 #' @importFrom flipData GetData EstimationData EstimationDataTemplate DataFormula ErrorIfInfinity
 #' @importFrom flipFormat Labels
-#' @importFrom flipU OutcomeName AllVariablesNames
+#' @importFrom flipU OutcomeName AllVariablesNames StopForUserError
 #' @importFrom flipTransformations AdjustDataToReflectWeights
 #' @importFrom stats reformulate var
 #' @noRd
@@ -93,9 +93,9 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     if (outcome.label == "data[, outcome.name]")
         outcome.label <- outcome.name
     if (!is.null(weights) && length(weights) != nrow(data))
-        stop("'weights' and 'data' are required to have the same number of observations. They do not.")
+        StopForUserError("'weights' and 'data' are required to have the same number of observations. They do not.")
     if (!is.null(subset) && length(subset) > 1 && length(subset) != nrow(data))
-        stop("'subset' and 'data' are required to have the same number of observations. They do not.")
+        StopForUserError("'subset' and 'data' are required to have the same number of observations. They do not.")
 
     # Treatment of missing values.
     # rebuild formula because there are new variables for each level of factorial predictors
@@ -110,8 +110,11 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
 
     n <- nrow(unweighted.training.data)
     if (n <= ncol(unweighted.training.data))
-        stop("The sample size is too small. There should be more samples than predictor variables, but there are ",
-             n, " samples and ", ncol(unweighted.training.data), " predictors.")
+        StopForUserError(
+            "The sample size is too small. ",
+            "There should be more samples than predictor variables, but there are ",
+            n, " samples and ", ncol(unweighted.training.data), " predictors."
+        )
     cleaned.weights <- processed.data$weights
 
     # Resampling to generate a weighted sample, if necessary.
@@ -125,10 +128,10 @@ prepareMachineLearningData <- function(formula, data, subset, subset.description
     level.counts <- vapply(weighted.training.data, nlevels, integer(1L))
     if (!allow.single.categories && any(level.counts == 1))
     {
-        stop("Categorical predictors must have more than one category, after applying any ",
-             "filter, weights and missing data treatment. This is not the case for: ",
-             paste(names(level.counts)[level.counts == 1], collapse = ", "), ". ",
-             "Please remove those variables to proceed.")
+        StopForUserError("Categorical predictors must have more than one category, after applying any ",
+                         "filter, weights and missing data treatment. This is not the case for: ",
+                         paste(names(level.counts)[level.counts == 1], collapse = ", "), ". ",
+                         "Please remove those variables to proceed.")
     }
 
     list(

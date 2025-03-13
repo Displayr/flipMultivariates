@@ -19,6 +19,7 @@
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
 #' @importFrom flipFormat Labels
+#' @importFrom flipU StopForUserError
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
@@ -29,9 +30,9 @@ MachineLearningEnsemble <- function(models,
 
     n.models <- length(models)
     if (n.models <= 1 && !compare.only)
-        stop("At least 2 models are required to create an ensemble.")
+        StopForUserError("At least 2 models are required to create an ensemble.")
     if (optimal.ensemble && compare.only)
-        stop("Cannot create an optimal ensemble if only performing comparison.")
+        StopForUserError("Cannot create an optimal ensemble if only performing comparison.")
 
     # Treat TRUE filter as NULL, i.e., no evaluation.subset statistics are calculated.
     if (!is.null(evaluation.subset))
@@ -233,40 +234,42 @@ categoricalPerformance <- function(x, evaluation.subset, evaluation.weights) {
     return(result)
 }
 
+#' @importFrom flipU StopForUserError
 checkModelsComparable <- function(models, evaluation.subset, evaluation.weights) {
 
     numeric.outcomes <- sapply(models, hasNumericOutcome)
     if (length(unique(numeric.outcomes)) != 1)
-        stop("Outcomes must be all either numeric or categorical to compare models.")
+        StopForUserError("Outcomes must be all either numeric or categorical to compare models.")
 
     valid.classes <- sapply(models, function(model) (any(c("Regression", "MachineLearning") %in% class(model))))
     if (!all(valid.classes))
-        stop("Ensemble requires all models to be MachineLearning or Regression.")
+        StopForUserError("Ensemble requires all models to be MachineLearning or Regression.")
 
     outcome.names <- sapply(models, function(model) model$outcome.name)
     if (length(unique(outcome.names)) != 1)
-        stop("All models must predict the same outcome but they do not.")
+        StopForUserError("All models must predict the same outcome but they do not.")
 
     data.lengths <- sapply(models, function(m) nrow(m$model))
     if (!is.null(evaluation.subset) && length(unique(c(length(evaluation.subset), data.lengths))) != 1)
-            stop("Filter must be the same length as the input data for each model, but is not.")
+            StopForUserError("Filter must be the same length as the input data for each model, but is not.")
     if (!is.null(evaluation.weights) && length(unique(c(length(evaluation.weights), data.lengths))) != 1)
-        stop("Weights must be the same length as the input data for each model, but is not.")
+        StopForUserError("Weights must be the same length as the input data for each model, but is not.")
 
     return(numeric.outcomes[[1]])
 }
 
+#' @importFrom flipU StopForUserError
 extractCommonData <- function(models) {
 
     outcomes <- unique(lapply(models, Observed))
     if (length(outcomes) != 1)
-        stop("Models must have the same outcome variable.")
+        StopForUserError("Models must have the same outcome variable.")
     subsets <- unique(lapply(models, function(x) x$subset))
     if (length(subsets) != 1)
-        stop("Models must have the same filter and missing data cases.")
+        StopForUserError("Models must have the same filter and missing data cases.")
     weights <- unique(lapply(models, function(x) x$weights))
     if (length(weights) != 1)
-        stop("Models must have the same weights.")
+        StopForUserError("Models must have the same weights.")
 
     return(list(outcome = outcomes[[1]], subset = subsets[[1]],
                 weights = weights[[1]]))
