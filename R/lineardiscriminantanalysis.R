@@ -53,7 +53,7 @@
 #' @importFrom flipFormat Labels Names
 #' @importFrom flipTransformations CreatingFactorDependentVariableIfNecessary AsNumeric Factor StandardizeData
 #' @importFrom flipStatistics Correlation MeanByGroup
-#' @importFrom flipU OutcomeName IsCount
+#' @importFrom flipU OutcomeName IsCount StopForUserError
 #' @importFrom stats aggregate
 #' @importFrom verbs Sum
 #' @aliases LinearDiscriminantAnalysis
@@ -107,7 +107,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
     ####################################################################
 
     if (!is.factor(required.data[[outcome.name]]) && !IsCount(required.data[[outcome.name]]))
-        stop("LDA requires the outcome variable to be categorical or a count.")
+        StopForUserError("LDA requires the outcome variable to be categorical or a count.")
     factor.levels <- attr(required.data, "factor.levels")
     required.data <- CreatingFactorDependentVariableIfNecessary(formula, required.data)
     unweighted.training.data <- CreatingFactorDependentVariableIfNecessary(formula, unweighted.training.data)
@@ -134,9 +134,9 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
                 "appropriate for such data (e.g., Linear Regression).",
                 call. = FALSE)
     if (n.levels == 1)
-        stop("The outcome variable contains only one category, after ",
-             "applying any filter. At least 2 categories are required to ",
-             "produce a model.", call. = FALSE)
+        StopForUserError("The outcome variable contains only one category, after ",
+                         "applying any filter. At least 2 categories are required to ",
+                         "produce a model.", call. = FALSE)
     n.smallest <- round((min.o <- min(observed.prior)) * prepared.data$n)
     if (n.smallest < 30)
     {
@@ -248,6 +248,7 @@ LDA <- LinearDiscriminantAnalysis <- function(formula,
 #' @importFrom flipTransformations WeightedSVD
 #' @importFrom stats cov.wt cor alias
 #' @importFrom verbs Sum SumEachColumn
+#' @importFrom flipU StopForUserError
 #' @export
 LDA.fit <- function (x,
                    grouping,
@@ -264,8 +265,7 @@ LDA.fit <- function (x,
     if (is.null(dim(x)))
         stop("'x' is not a matrix")
     x <- as.matrix(x)
-    if (any(!is.finite(x)))
-    stop("Input data contains infinite, NA or NaN values.")
+    if (any(!is.finite(x))) StopForUserError("Input data contains infinite, NA or NaN values.")
     if (is.null(weights))
         weights <- rep(1, nrow(x))
     n <- Sum(weights, remove.missing = FALSE)
@@ -281,12 +281,12 @@ LDA.fit <- function (x,
     if (!missing(prior))
     {
         if (any(prior < 0))
-            stop("Prior probabilities of class membership must not be negative.")
+            StopForUserError("Prior probabilities of class membership must not be negative.")
         if (round(Sum(prior, remove.missing = FALSE), 5) != 1)
-            stop("Prior probabilities of class membership must sum to 1.")
+            StopForUserError("Prior probabilities of class membership must sum to 1.")
         if (length(prior) != nlevels(g))
-            stop("There shoul be ", nlevels(g), " prior probabilities but ",
-                 length(prior), " have been supplied.")
+            StopForUserError("There should be ", nlevels(g), " prior probabilities but ",
+                             length(prior), " have been supplied.")
         prior <- prior[counts > 0L]
     }
     if (any(counts == 0L))
@@ -317,7 +317,7 @@ LDA.fit <- function (x,
     if (any(f1 < tol))
     {
         const <- format((1L:k)[f1 < tol])
-        stop(sprintf(ngettext(length(const),
+        StopForUserError(sprintf(ngettext(length(const),
                               "Variable %s is constant within groups and an LDA model cannot be fitted. Please remove the variable.",
                               "Variables %s are constant within groups and an LDA model cannot be fitted. Please remove the variables."),
                      paste(const, collapse = " ")), domain = NA)
@@ -332,7 +332,7 @@ LDA.fit <- function (x,
     X.s$d[is.nan(X.s$d)] <- 0
     rank <- Sum(X.s$d > tol, remove.missing = FALSE)
     if (rank == 0L)
-        stop("Variable(s) are constant but must contain different values.")
+        StopForUserError("Variable(s) are constant but must contain different values.")
 
     scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank],, rank)
     # if (CV)
@@ -374,7 +374,7 @@ LDA.fit <- function (x,
     X.s <- svd(X, nu = 0L)
     rank <- Sum(X.s$d > tol * X.s$d[1L], remove.missing = FALSE)
     if (rank == 0L)
-        stop("group means are numerically identical")
+        StopForUserError("group means are numerically identical")
     scaling <- scaling %*% X.s$v[, 1L:rank]
     if (is.null(dimnames(x)))
       dimnames(scaling) <- list(NULL, paste("LD", 1L:rank,
@@ -419,7 +419,7 @@ lda.functions <- function(x, groups, grp.means, prior, weights, functions.output
     {
         message <- "Error calculating discriminant functions. This may sometimes be fixed by removing colinear variables."
         if (functions.output)
-            stop(message)
+            StopForUserError(message)
         warning(message)
         return(NULL)
     }
@@ -582,10 +582,10 @@ print.LDA <- function(x, p.cutoff = 0.05, digits = max(3L, getOption("digits") -
 }
 
 # Throws an error for invalid prior
+#' @importFrom flipU StopForUserError
 throwErrorInvalidPrior <- function(n.levels) {
-    stop("The 'prior' must be one of: (1) 'Equal', ",
-         "(2) 'Observed', ",
-         "(3) or a vector of length ", n.levels, " containing values greater ",
-         "than 0 and less than 1 which sum to 1.", call. = FALSE)
-
+    StopForUserError("The 'prior' must be one of: (1) 'Equal', ",
+                     "(2) 'Observed', ",
+                     "(3) or a vector of length ", n.levels, " containing values greater ",
+                     "than 0 and less than 1 which sum to 1.", call. = FALSE)
 }

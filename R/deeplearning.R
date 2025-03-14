@@ -34,7 +34,7 @@
 #' is then retrained on all data (after any \code{"subset"}).
 #'
 #' @importFrom stats sd
-#' @importFrom flipU ConvertCommaSeparatedStringToVector
+#' @importFrom flipU ConvertCommaSeparatedStringToVector StopForUserError
 #' @export
 DeepLearning <- function(formula,
                          data = NULL,
@@ -58,7 +58,7 @@ DeepLearning <- function(formula,
         hidden.nodes <- ConvertCommaSeparatedStringToVector(hidden.nodes)
         hidden.nodes <- suppressWarnings(as.integer(hidden.nodes))
         if (any(is.na(hidden.nodes)) || any(hidden.nodes <= 0))
-            stop("Nodes of hidden layers must be specified as comma separated positive integers.")
+            StopForUserError("Nodes of hidden layers must be specified as comma separated positive integers.")
     }
 
     ####################################################################
