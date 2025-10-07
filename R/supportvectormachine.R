@@ -25,6 +25,7 @@
 #' @param ... Other arguments to be supplied to \code{\link{svm}}.
 #'
 #' @importFrom e1071 svm
+#' @importFrom flipU StopForUserError
 #' @export
 SupportVectorMachine <- function(formula,
                                  data = NULL,
@@ -42,8 +43,9 @@ SupportVectorMachine <- function(formula,
     ##### Error checking specific to this function                ######
     ####################################################################
 
-    if (cost <= 0)
-        stop("cost must be positive but is ", cost)
+    if (cost <= 0) {
+        StopForUserError("cost must be positive but is ", cost)
+    }
 
     ####################################################################
     ##### Reading in the data and doing some basic tidying        ######
