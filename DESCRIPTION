@@ -19,7 +19,7 @@ Imports:
     flipTrees (>= 1.0.6),
     flipU (>= 1.6.2),
     ggplot2,
-    keras,
+    keras3,
     MASS,
     methods,
     randomForest,
@@ -27,7 +27,6 @@ Imports:
     rhtmlLabeledScatter,
     rhtmlCombinedScatter,
     rhtmlMoonPlot,
-    tensorflow,
     utils,
     xgboost (>= 1.1.1.1),
     verbs
@@ -51,5 +50,5 @@ Remotes:
     Displayr/rhtmlLabeledScatter,
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8
