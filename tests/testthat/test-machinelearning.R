@@ -7,8 +7,10 @@ set.seed(1234)
 adult.2000$wgt <- runif(2000) * 10
 adult.2000$subset <- rep(c(TRUE, TRUE, TRUE, FALSE), 500)
 
-algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
-                "Gradient Boosting", "Linear Discriminant Analysis", "CART", "Regression")
+algorithms <- c(
+    "Support Vector Machine", "Random Forest", "Deep Learning",
+    "Gradient Boosting", "Linear Discriminant Analysis", "CART", "Regression"
+)
 
 ml.args <- list(
     formula = sex ~ education_num + marital + workclass,
@@ -24,10 +26,12 @@ for (alg in algorithms)
 {
     test_that(paste0("Machine Learning: ", alg), {
         test.args <- c(ml.args, list(algorithm = alg))
-        if (alg == "Deep Learning") # Avoid warning about convergence
+        if (alg == "Deep Learning") { # Avoid warning about convergence
             test.args[["max.epochs"]] <- 120L
-        if (alg == "Regression") # Avoid warnings about binary class in Linear Reg
+        }
+        if (alg == "Regression") { # Avoid warnings about binary class in Linear Reg
             test.args[["type"]] <- "Binary Logit"
+        }
         # Avoid warnings about outlier removal in printing
         expected.warn <- if (alg == "Regression") "Unusual observations detected" else NA
         expect_error(ml <- do.call(MachineLearning, test.args), NA)
@@ -47,25 +51,30 @@ for (alg in algorithms)
 adult.2000$race[runif(2000) > 0.9] <- NA
 adult.2000$age[runif(2000) > 0.9] <- -Inf
 adult.2000$hrs_per_week[runif(2000) > 0.9] <- Inf
-algorithms <- c("Support Vector Machine", "Random Forest", "Deep Learning",
-                "Gradient Boosting", "Linear Discriminant Analysis")
+algorithms <- c(
+    "Support Vector Machine", "Random Forest", "Deep Learning",
+    "Gradient Boosting", "Linear Discriminant Analysis"
+)
 ml.args[["formula"]] <- sex ~ education_num + marital + age + hrs_per_week
 ml.args[["data"]] <- adult.2000
-expected.error <- paste0("Variable(s) age, hrs_per_week contain infinite values. ",
-                         "Either recode the infinities to finite values or set ",
-                         "them as missing data.")
+expected.error <- paste0(
+    "Variable(s) age, hrs_per_week contain infinite values. ",
+    "Either recode the infinities to finite values or set ",
+    "them as missing data."
+)
 
 for (alg in algorithms)
 {
     test_that(paste0("Machine Learning infinity: ", alg), {
         ml.args[["algorithm"]] <- alg
         expect_error(ml <- do.call(MachineLearning, ml.args),
-                     expected.error, fixed = TRUE)
+            expected.error,
+            fixed = TRUE
+        )
     })
 }
 
-test_that("DS-2304: effects plot with colinear variable",
-{
+test_that("DS-2304: effects plot with colinear variable", {
     load("DS2304data.rda")
     dat <- data.frame(Overall, Fees, Interest, Phone, Branch, Online, ATM, Fees2)
 
@@ -98,7 +107,8 @@ test_that("DS-2304: effects plot with colinear variable",
         robust.se = get0("formRobustSE", ifnotfound = FALSE),
         importance.absolute = get0("formAbsoluteImportance"),
         interaction = get0("formInteraction"),
-        relative.importance = formOutput == "Relative Importance Analysis"))
+        relative.importance = formOutput == "Relative Importance Analysis"
+    ))
 
     expect_error(suppressWarnings(print(model)), NA)
 
@@ -130,10 +140,10 @@ test_that("DS-2304: effects plot with colinear variable",
         robust.se = get0("formRobustSE", ifnotfound = FALSE),
         importance.absolute = get0("formAbsoluteImportance"),
         interaction = get0("formInteraction"),
-        relative.importance = formOutput == "Relative Importance Analysis"))
+        relative.importance = formOutput == "Relative Importance Analysis"
+    ))
 
     expect_error(suppressWarnings(print(model)), NA)
-
 })
 
 test_that("DS-4360 Estimation Data template created correctly", {
@@ -146,15 +156,21 @@ test_that("DS-4360 Estimation Data template created correctly", {
     original.overall[original.overall >= 6] <- 5
     original.overall[original.overall == 1] <- 4
     sbank[["Overall"]] <- original.overall
-    sbank <- transform(sbank, Overall = factor(cut(Overall, breaks = c(-Inf, 3, Inf),
-                                                   labels = c("<=3", ">=4"))))
-    interest.levels <- c("Very dissatisfied", "unsatisfied", "a little unsatisfied",
-                         "Neutral", "A little satisfied", "Satisfied", "Very satisfied")
+    sbank <- transform(sbank, Overall = factor(cut(Overall,
+        breaks = c(-Inf, 3, Inf),
+        labels = c("<=3", ">=4")
+    )))
+    interest.levels <- c(
+        "Very dissatisfied", "unsatisfied", "a little unsatisfied",
+        "Neutral", "A little satisfied", "Satisfied", "Very satisfied"
+    )
     short.levels <- c("VeDi", "Uns", "ALiUn", "Neu", "ALiSa", "Sat", "VeSa")
     sbank <- transform(sbank, Interest = factor(Interest, labels = interest.levels))
-    algorithm.types <- list("Regression", "CART", "Random Forest", #"Deep Learning",
-                            "Support Vector Machine", "Gradient Boosting",
-                            "Linear Discriminant Analysis")
+    algorithm.types <- list(
+        "Regression", "CART", "Random Forest", # "Deep Learning",
+        "Support Vector Machine", "Gradient Boosting",
+        "Linear Discriminant Analysis"
+    )
     ml.args <- list(formula = bank.formula, data = sbank)
     # Helper function to test same data across all model types
     fitModelForTest <- function(algorithm, arguments = ml.args, use.binary.logit = TRUE) {
@@ -217,9 +233,11 @@ test_that("DS-4360 Estimation Data template created correctly", {
     numeric.out.args <- ml.args
     numeric.out.args[["data"]][["Overall"]] <- original.overall
     for (algorithm in algorithm.types) {
-        fit <- fitModelForTest(algorithm = algorithm,
-                               arguments = numeric.out.args,
-                               use.binary.logit = FALSE)
+        fit <- fitModelForTest(
+            algorithm = algorithm,
+            arguments = numeric.out.args,
+            use.binary.logit = FALSE
+        )
         expected.template <- basic.expected.template
         if (algorithm == "CART") {
             expected.template[["Interest"]][["levels.shortened"]] <- TRUE
@@ -228,5 +246,4 @@ test_that("DS-4360 Estimation Data template created correctly", {
         }
         checkEstimationDataTemplate(fit, expected.template)
     }
-
 })
