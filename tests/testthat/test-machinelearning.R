@@ -45,6 +45,27 @@ for (alg in algorithms)
         #       be updated with the new class name.
         expected.class <- if (alg == "Regression") "Regression" else "MachineLearning"
         expect_true(inherits(ml, expected.class))
+
+        # Simulator test
+        input.model <- ml
+        combobox.1 <- c(" Federal-gov")
+        textbox <- c("1")
+        combobox.2 <- c(" Divorced")
+        all.combo.boxes <- c(combobox.1, combobox.2)
+        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        DF <- data.frame(
+            "workclass" = factor(combobox.1, levels = xlevels[["workclass"]], ordered = FALSE),
+            "education_num" = as.numeric(textbox),
+            "marital" = factor(combobox.2, levels = xlevels[["marital"]], ordered = FALSE),
+            check.names = FALSE
+        )
+        outcome1 <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        expect_equal(outcome1, pred.from.chars)
+        probabilities1 <- predictProbabilities(input.model, DF)
+        combobox.2 <- c(" Widowed")
+        all.combo.boxes <- c(combobox.1, combobox.2)
+        outcome2 <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        predictProbabilities(input.model, DF)
     })
 }
 
