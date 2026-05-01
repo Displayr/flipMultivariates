@@ -216,6 +216,8 @@ organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
 #' @param is.numeric A logical value indicating if the outcome is numeric.
+#' @importFrom rpart predict.rpart
+#' @export
 #' @noRd
 predictOutcome <- function(input.model, DF, is.numeric) {
     vector.or.class <- if (is.numeric) "vector" else "class"
@@ -232,7 +234,7 @@ predictOutcome <- function(input.model, DF, is.numeric) {
     }
     arguments <- list(input.model, newdata = DF)
     if (is.cart) {
-        prediction.function <- rpart:::predict.rpart
+        prediction.function <- predict.rpart
         type <- vector.or.class
         arguments <- c(arguments, type = type)
     }
@@ -250,11 +252,15 @@ predictOutcome <- function(input.model, DF, is.numeric) {
 #' Predict the probabilities for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
+#' @importFrom e1071 predict.svm
+#' @importFrom rpart predict.rpart
+#' @importFrom flipRegression Probabilities.Regression
+#' @export
 #' @noRd
 predictProbabilities <- function(input.model, DF) {
     model.classes <- class(input.model)
     if ("SupportVectorMachine" %in% model.classes) {
-        svm.probs <- e1071:::predict.svm(input.model$original, newdata = DF, probability = TRUE)
+        svm.probs <- predict.svm(input.model$original, newdata = DF, probability = TRUE)
         new.probs <- attr(svm.probs, "probabilities")
     } else if ("RandomForest" %in% model.classes) {
         new.probs <- randomForestExtractVariables(input.model, "prob", newdata = DF)
@@ -276,7 +282,7 @@ predictProbabilities <- function(input.model, DF) {
         }
         colnames(new.probs) <- input.model$outcome.levels
     } else if ("CART" %in% model.classes) {
-        new.probs <- tryCatch(rpart:::predict.rpart(input.model, newdata = DF, type = "prob"),
+        new.probs <- tryCatch(predict.rpart(input.model, newdata = DF, type = "prob"),
             error = function(e) {
                 if (grepl("new level", e$message)) {
                     StopForUserError("Cannot match categories. Please set Inputs > Predictor category labels to 'Full labels' in the CART model.")
@@ -302,14 +308,14 @@ predictProbabilities <- function(input.model, DF) {
     } else if ("BinaryLogitRegression" %in% model.classes) {
         new.probs <- Probabilities(input.model, newdata = DF)
     } else if ("MultinomialLogitRegression" %in% model.classes) {
-        new.probs <- flipRegression:::Probabilities.Regression(input.model, newdata = DF)
+        new.probs <- Probabilities.Regression(input.model, newdata = DF)
         if (nrow(new.probs) == 1L) {
             colnames(new.probs) <- input.model$original$lev
         } else {
             new.probs <- new.probs[, 2, drop = FALSE]
         }
     } else if ("OrderedLogitRegression" %in% model.classes) {
-        new.probs <- flipRegression:::Probabilities.Regression(input.model, newdata = rbind(DF, DF)) # Doesn't like new data with a single row
+        new.probs <- Probabilities.Regression(input.model, newdata = rbind(DF, DF)) # Doesn't like new data with a single row
         new.probs <- as.matrix(new.probs[1, , drop = FALSE])
     }
 
