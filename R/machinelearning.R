@@ -216,7 +216,6 @@ organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
 #' @param is.numeric A logical value indicating if the outcome is numeric.
-#' @importFrom rpart predict.rpart
 #' @export
 #' @noRd
 predictOutcome <- function(input.model, DF, is.numeric) {
@@ -234,7 +233,7 @@ predictOutcome <- function(input.model, DF, is.numeric) {
     }
     arguments <- list(input.model, newdata = DF)
     if (is.cart) {
-        prediction.function <- predict.rpart
+        prediction.function <- getS3method("predict", "rpart")
         type <- vector.or.class
         arguments <- c(arguments, type = type)
     }
@@ -252,15 +251,13 @@ predictOutcome <- function(input.model, DF, is.numeric) {
 #' Predict the probabilities for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
-#' @importFrom e1071 predict.svm
-#' @importFrom rpart predict.rpart
 #' @importFrom flipRegression Probabilities.Regression
 #' @export
 #' @noRd
 predictProbabilities <- function(input.model, DF) {
     model.classes <- class(input.model)
     if ("SupportVectorMachine" %in% model.classes) {
-        svm.probs <- predict.svm(input.model$original, newdata = DF, probability = TRUE)
+        svm.probs <- predict(input.model$original, newdata = DF, probability = TRUE)
         new.probs <- attr(svm.probs, "probabilities")
     } else if ("RandomForest" %in% model.classes) {
         new.probs <- randomForestExtractVariables(input.model, "prob", newdata = DF)
@@ -282,7 +279,7 @@ predictProbabilities <- function(input.model, DF) {
         }
         colnames(new.probs) <- input.model$outcome.levels
     } else if ("CART" %in% model.classes) {
-        new.probs <- tryCatch(predict.rpart(input.model, newdata = DF, type = "prob"),
+        new.probs <- tryCatch(getS3method("predict", "rpart")(input.model, newdata = DF, type = "prob"),
             error = function(e) {
                 if (grepl("new level", e$message)) {
                     StopForUserError("Cannot match categories. Please set Inputs > Predictor category labels to 'Full labels' in the CART model.")
