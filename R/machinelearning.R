@@ -251,7 +251,6 @@ predictOutcome <- function(input.model, DF, is.numeric) {
 #' Predict the probabilities for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
-#' @importFrom flipRegression Probabilities.Regression
 #' @export
 #' @noRd
 predictProbabilities <- function(input.model, DF) {
@@ -305,14 +304,14 @@ predictProbabilities <- function(input.model, DF) {
     } else if ("BinaryLogitRegression" %in% model.classes) {
         new.probs <- Probabilities(input.model, newdata = DF)
     } else if ("MultinomialLogitRegression" %in% model.classes) {
-        new.probs <- Probabilities.Regression(input.model, newdata = DF)
+        new.probs <- getS3method("Probabilities", "Regression")(input.model, newdata = DF)
         if (nrow(new.probs) == 1L) {
             colnames(new.probs) <- input.model$original$lev
         } else {
             new.probs <- new.probs[, 2, drop = FALSE]
         }
     } else if ("OrderedLogitRegression" %in% model.classes) {
-        new.probs <- Probabilities.Regression(input.model, newdata = rbind(DF, DF)) # Doesn't like new data with a single row
+        new.probs <- getS3method("Probabilities", "Regression")(input.model, newdata = rbind(DF, DF)) # Doesn't like new data with a single row
         new.probs <- as.matrix(new.probs[1, , drop = FALSE])
     }
 
