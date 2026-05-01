@@ -216,6 +216,7 @@ organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
 #' @param is.numeric A logical value indicating if the outcome is numeric.
+#' @importFrom utils getS3method
 #' @export
 #' @noRd
 predictOutcome <- function(input.model, DF, is.numeric) {
@@ -251,6 +252,7 @@ predictOutcome <- function(input.model, DF, is.numeric) {
 #' Predict the probabilities for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
 #' @param DF The data frame containing the predictor values.
+#' @importFrom utils getS3method
 #' @export
 #' @noRd
 predictProbabilities <- function(input.model, DF) {
