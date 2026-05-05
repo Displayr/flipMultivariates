@@ -492,7 +492,7 @@ test_that("CART Numeric", {
         expect_equal(outcome, -12.5)
     }
 })
-test_that("Deep Learning - Categories", {
+test_that("Deep Learning Categories", {
     Q13_2_3 <- cell.phone.driver.analysis$Q13_2_3
     Q16_1 <- cell.phone.driver.analysis$Q16_1
     Q16_2 <- cell.phone.driver.analysis$Q16_2
@@ -574,7 +574,7 @@ test_that("Deep Learning - Categories", {
         expect_equal(as.vector(probabilities), c(29.9336612224600, 48.9298105239900, 21.1365327239000))
     }
 })
-test_that("Deep Learning - Numeric", {
+test_that("Deep Learning Numeric", {
     Q13_2 <- cell.phone.driver.analysis$Q13_2
     Q16_1 <- cell.phone.driver.analysis$Q16_1
     Q16_2 <- cell.phone.driver.analysis$Q16_2
