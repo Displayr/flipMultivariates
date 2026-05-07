@@ -48,7 +48,7 @@ variables label is an attribute (e.g., attr(foo, "label")).}
 \item{sort.by.importance}{Sort the last column of the importance table
 in descending order.}
 
-\item{...}{Other arguments to be supplied to \code{\link{randomForest}}.}
+\item{...}{Other arguments to be supplied to \code{\link[randomForest]{randomForest}}.}
 }
 \description{
 Fit a random forest model

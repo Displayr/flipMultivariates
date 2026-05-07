@@ -32,7 +32,7 @@ training weights.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a
-\code{\link{ConfusionMatrix}}.}
+\code{\link[flipRegression]{ConfusionMatrix}}.}
 
 \item{optimal.ensemble}{Logical; whether to find the ensemble with the best accuracy or
 r-squared, calculated on the \code{evaluation.subset} if given, else on the training

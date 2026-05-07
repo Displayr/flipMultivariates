@@ -33,10 +33,12 @@ Imports:
     verbs
 Suggests:
     Ckmeans.1d.dp,
+    flipDevTools,
     testthat,
     flipExampleData
 Remotes:
     Displayr/flipAnalysisOfVariance,
+    Displayr/flipDevTools,
     Displayr/flipChartBasics,
     Displayr/flipData,
     Displayr/flipExampleData,
