@@ -20,6 +20,7 @@
 #'     \code{\link{ConfusionMatrix}}.
 #' @importFrom flipFormat Labels
 #' @importFrom flipU StopForUserError
+#' @importFrom flipRegression ConfusionMatrix
 #' @export
 MachineLearningEnsemble <- function(models,
                            compare.only = FALSE,
@@ -387,6 +388,7 @@ Probabilities.MachineLearningEnsemble <- function(object, newdata = NULL, ...)
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
 #'     \code{\link{ConfusionMatrix}}.
+#' @importFrom flipRegression ConfusionMatrix
 #' @export
 MachineLearningMulti <- function(formula,
                                  data = NULL,
