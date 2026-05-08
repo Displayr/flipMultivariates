@@ -8,7 +8,6 @@ adult.2000$wgt <- runif(2000) * 10
 adult.2000$subset <- rep(c(TRUE, TRUE, TRUE, FALSE), 500)
 
 test_that("Print Deep Learning: outcome types", {
-    skip("Skipping deep learning tests")
 
     # binary outcome, confusion output
     dl <- suppressWarnings(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
@@ -43,7 +42,6 @@ test_that("Print Deep Learning: outcome types", {
 })
 
 test_that("Deep Learning: Weights and Filters", {
-    skip("Skipping deep learning tests")
 
     expect_error(dl <- suppressWarnings(DeepLearning(hrs_per_week ~ ., data = adult.2000,
                                     hidden.nodes = 15, max.epochs = 10, subset = subset)), NA)
@@ -56,7 +54,6 @@ test_that("Deep Learning: Weights and Filters", {
 
 test_that("Deep Learning: predictions and probabilities",
           {
-              skip("Skipping deep learning tests")
               dl <- suppressWarnings(DeepLearning(age ~ ., data = adult.2000,
                                               hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt))
               expect_equal(length(suppressWarnings(predict(dl))), 2000)
@@ -69,7 +66,6 @@ test_that("Deep Learning: predictions and probabilities",
 })
 
 test_that("Deep Learning: errors",{
-    skip("Skipping deep learning tests")
 
     expect_error(DeepLearning(income ~ ., data = adult.2000,
                                                      hidden.nodes = "10, hello"), "Nodes of hidden layers.")
@@ -78,7 +74,6 @@ test_that("Deep Learning: errors",{
 })
 
 test_that("Deep Learning: missing data",{
-    skip("Skipping deep learning tests")
     expect_warning(DeepLearning(sex ~ occupation + relationship + race + workclass + hrs_per_week, data = adult.2000,
                               hidden.nodes = 15, max.epochs = 10, output = "Prediction-Accuracy Table",
                               missing = "Imputation (replace missing values with estimates)"),
