@@ -246,7 +246,6 @@ predictOutcome <- function(input.model, DF, is.numeric) {
     }
     as.vector(do.call(prediction.function, arguments))
 }
-
 #' predictProbabilities
 #'
 #' Predict the probabilities for a simulator for a machine learning model.
