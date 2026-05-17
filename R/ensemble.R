@@ -17,7 +17,7 @@
 #'     training weights.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
-#'     \code{\link{ConfusionMatrix}}.
+#'     \code{\link[flipRegression]{ConfusionMatrix}}.
 #' @importFrom flipFormat Labels
 #' @importFrom flipU StopForUserError
 #' @export
@@ -386,7 +386,7 @@ Probabilities.MachineLearningEnsemble <- function(object, newdata = NULL, ...)
 #'     data. Ignored if \code{compare.only} is TRUE.
 #' @param output If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 #'     produces a table comparing the models, or \code{"Ensemble"} which produces a
-#'     \code{\link{ConfusionMatrix}}.
+#'     \code{\link[flipRegression]{ConfusionMatrix}}.
 #' @export
 MachineLearningMulti <- function(formula,
                                  data = NULL,
