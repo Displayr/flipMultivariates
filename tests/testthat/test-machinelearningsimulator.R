@@ -74,7 +74,7 @@ test_that("Linear Regression", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -91,7 +91,7 @@ test_that("Linear Regression", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -150,7 +150,7 @@ test_that("Ordered Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -170,7 +170,7 @@ test_that("Ordered Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -232,7 +232,7 @@ test_that("Binary Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -252,7 +252,7 @@ test_that("Binary Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -314,7 +314,7 @@ test_that("Multinomial Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -334,7 +334,7 @@ test_that("Multinomial Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -396,7 +396,7 @@ test_that("CART Categories", {
         combo.box.2 <- c("VeDi")
         combo.box.3 <- c("VeDi")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -416,7 +416,7 @@ test_that("CART Categories", {
         combo.box.2 <- c("VeDi")
         combo.box.3 <- c("VeSa")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -478,7 +478,7 @@ test_that("CART Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -495,7 +495,7 @@ test_that("CART Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -554,7 +554,7 @@ test_that("Deep Learning Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -574,7 +574,7 @@ test_that("Deep Learning Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -636,7 +636,7 @@ test_that("Deep Learning Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -653,7 +653,7 @@ test_that("Deep Learning Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -712,7 +712,7 @@ test_that("SVM Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -732,7 +732,7 @@ test_that("SVM Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -794,7 +794,7 @@ test_that("SVM Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -811,7 +811,7 @@ test_that("SVM Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -870,7 +870,7 @@ test_that("Gradient Boost Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -890,7 +890,7 @@ test_that("Gradient Boost Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -952,7 +952,7 @@ test_that("Gradient Boost Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -969,7 +969,7 @@ test_that("Gradient Boost Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -1028,7 +1028,7 @@ test_that("LDA Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -1048,7 +1048,7 @@ test_that("LDA Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
@@ -1121,7 +1121,7 @@ test_that("Deep Learning Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1151,7 +1151,7 @@ test_that("Deep Learning Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1223,7 +1223,7 @@ test_that("Binary Logit Multi", {
         combo.box.1 <- c("Male")
         combo.box.2 <- c("18 to 24")
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2.from.Cola.sav" = factor(combo.box.1, levels = xlevels[["Q2.from.Cola.sav"]], ordered = FALSE),
             "Q3.from.Cola.sav" = factor(combo.box.2, levels = xlevels[["Q3.from.Cola.sav"]], ordered = FALSE),
@@ -1241,7 +1241,7 @@ test_that("Binary Logit Multi", {
         combo.box.1 <- c("Female")
         combo.box.2 <- c("18 to 24")
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2.from.Cola.sav" = factor(combo.box.1, levels = xlevels[["Q2.from.Cola.sav"]], ordered = FALSE),
             "Q3.from.Cola.sav" = factor(combo.box.2, levels = xlevels[["Q3.from.Cola.sav"]], ordered = FALSE),
@@ -1312,7 +1312,7 @@ test_that("CART Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1342,7 +1342,7 @@ test_that("CART Multi", {
         text.box.5 <- 3 # This is the only change that I could find that produces a different result
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1419,7 +1419,7 @@ test_that("Gradient Boost Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1449,7 +1449,7 @@ test_that("Gradient Boost Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1526,7 +1526,7 @@ test_that("LDA Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1556,7 +1556,7 @@ test_that("LDA Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1621,7 +1621,7 @@ test_that("Linear Regression Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1636,7 +1636,7 @@ test_that("Linear Regression Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(1)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1692,7 +1692,7 @@ test_that("Multinomial Logit Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1710,7 +1710,7 @@ test_that("Multinomial Logit Multi", {
         combo.box.1 <- c("65 or more")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1769,7 +1769,7 @@ test_that("Ordered Logit Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1787,7 +1787,7 @@ test_that("Ordered Logit Multi", {
         combo.box.1 <- c("65 or more")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
@@ -1858,7 +1858,7 @@ test_that("Random Forest Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1888,7 +1888,7 @@ test_that("Random Forest Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1965,7 +1965,7 @@ test_that("SVM Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1995,7 +1995,7 @@ test_that("SVM Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganizeCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
