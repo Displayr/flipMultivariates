@@ -155,11 +155,10 @@ parametersEqual <- function(recipient, donor) {
 
 #' OrganiseCategoricalPredictors
 #'
-#' Organize information about categorical predictors in the model
+#' Organize information about categorical predictors in the model.
 #' @param input.model The machine learning model.
 #' @param all.combo.boxes The selection of predictor values.
 #' @export
-#' @noRd
 OrganiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
     estimation.data.template <- input.model$estimation.data.template
     all.variable.names <- names(estimation.data.template)
@@ -219,7 +218,6 @@ OrganiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
 #' @param is.numeric A logical value indicating if the outcome is numeric.
 #' @importFrom utils getS3method
 #' @export
-#' @noRd
 PredictOutcome <- function(input.model, DF, is.numeric) {
     vector.or.class <- if (is.numeric) "vector" else "class"
     is.cart <- inherits(input.model, "CART")
@@ -255,7 +253,6 @@ PredictOutcome <- function(input.model, DF, is.numeric) {
 #' @param DF The data frame containing the predictor values.
 #' @importFrom utils getS3method
 #' @export
-#' @noRd
 PredictProbabilities <- function(input.model, DF) {
     model.classes <- class(input.model)
     if ("SupportVectorMachine" %in% model.classes) {
