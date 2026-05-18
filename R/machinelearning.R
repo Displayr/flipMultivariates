@@ -153,14 +153,14 @@ parametersEqual <- function(recipient, donor) {
     return(FALSE)
 }
 
-#' organiseCategoricalPredictors
+#' OrganiseCategoricalPredictors
 #'
 #' Organize information about categorical predictors in the model
 #' @param input.model The machine learning model.
 #' @param all.combo.boxes The selection of predictor values.
 #' @export
 #' @noRd
-organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
+OrganiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
     estimation.data.template <- input.model$estimation.data.template
     all.variable.names <- names(estimation.data.template)
     outcome.name <- attr(estimation.data.template, "outcome.name")
@@ -211,7 +211,7 @@ organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
     return(xlevels)
 }
 
-#' predictOutcome
+#' PredictOutcome
 #'
 #' Predict the outcome for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
@@ -220,7 +220,7 @@ organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
 #' @importFrom utils getS3method
 #' @export
 #' @noRd
-predictOutcome <- function(input.model, DF, is.numeric) {
+PredictOutcome <- function(input.model, DF, is.numeric) {
     vector.or.class <- if (is.numeric) "vector" else "class"
     is.cart <- inherits(input.model, "CART")
     is.lda <- inherits(input.model, "LDA")
@@ -248,7 +248,7 @@ predictOutcome <- function(input.model, DF, is.numeric) {
     as.vector(do.call(prediction.function, arguments))
 }
 
-#' predictProbabilities
+#' PredictProbabilities
 #'
 #' Predict the probabilities for a simulator for a machine learning model.
 #' @param input.model The machine learning model.
@@ -256,7 +256,7 @@ predictOutcome <- function(input.model, DF, is.numeric) {
 #' @importFrom utils getS3method
 #' @export
 #' @noRd
-predictProbabilities <- function(input.model, DF) {
+PredictProbabilities <- function(input.model, DF) {
     model.classes <- class(input.model)
     if ("SupportVectorMachine" %in% model.classes) {
         svm.probs <- predict(input.model$original, newdata = DF, probability = TRUE)
