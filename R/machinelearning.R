@@ -153,13 +153,13 @@ parametersEqual <- function(recipient, donor) {
     return(FALSE)
 }
 
-#' OrganiseCategoricalPredictors
+#' OrganizeCategoricalPredictors
 #'
 #' Organize information about categorical predictors in the model.
 #' @param input.model The machine learning model.
 #' @param all.combo.boxes The selection of predictor values.
 #' @export
-OrganiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
+OrganizeCategoricalPredictors <- function(input.model, all.combo.boxes) {
     estimation.data.template <- input.model$estimation.data.template
     all.variable.names <- names(estimation.data.template)
     outcome.name <- attr(estimation.data.template, "outcome.name")
