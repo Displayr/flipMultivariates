@@ -74,14 +74,14 @@ test_that("Linear Regression", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, -16.3405532431000)
     }
 
@@ -91,14 +91,14 @@ test_that("Linear Regression", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, 33.2749874513800)
     }
 })
@@ -150,16 +150,16 @@ test_that("Ordered Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "0")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("-100", "0", "100"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(32.3396052526200, 52.1032768699700, 15.5571178774200))
     }
@@ -170,16 +170,16 @@ test_that("Ordered Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "100")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("-100", "0", "100"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(8.5373174159710, 42.9193007783300, 48.5433818057000))
     }
@@ -232,16 +232,16 @@ test_that("Binary Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Not Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Not Promoter", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(69.4728031533800, 30.5271968466200))
     }
@@ -252,16 +252,16 @@ test_that("Binary Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Not Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Not Promoter", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(51.5989954910700, 48.4010045089300))
     }
@@ -314,16 +314,16 @@ test_that("Multinomial Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Detractor")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(45.2439578781600, 23.6893962716900, 31.0666458501500))
     }
@@ -334,16 +334,16 @@ test_that("Multinomial Logit", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(7.6778488023430, 41.4464962371100, 50.8756549605400))
     }
@@ -396,16 +396,16 @@ test_that("CART Categories", {
         combo.box.2 <- c("VeDi")
         combo.box.3 <- c("VeDi")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Detractor")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(58.2417582417600, 30.7692307692300, 10.9890109890100))
     }
@@ -416,16 +416,16 @@ test_that("CART Categories", {
         combo.box.2 <- c("VeDi")
         combo.box.3 <- c("VeSa")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(3.0303030303030, 24.2424242424200, 72.7272727272700))
     }
@@ -478,14 +478,14 @@ test_that("CART Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, -32.7868852459000)
     }
 
@@ -495,14 +495,14 @@ test_that("CART Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, -12.5)
     }
 })
@@ -554,16 +554,16 @@ test_that("Deep Learning Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Passive/Neutral")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(29.2548567056700, 46.7373937368400, 24.0077510476100))
     }
@@ -574,16 +574,16 @@ test_that("Deep Learning Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Passive/Neutral")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(29.9336612224600, 48.9298105239900, 21.1365327239000))
     }
@@ -636,14 +636,14 @@ test_that("Deep Learning Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, 1.1728953123090)
     }
 
@@ -653,14 +653,14 @@ test_that("Deep Learning Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, 1.3864848613740)
     }
 })
@@ -712,16 +712,16 @@ test_that("SVM Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Detractor")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Promoter", "Detractor", "Passive/Neutral"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(14.1110897286000, 51.3360502440900, 34.5528600273100))
     }
@@ -732,16 +732,16 @@ test_that("SVM Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Promoter", "Detractor", "Passive/Neutral"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(40.5388607042300, 24.6634939674600, 34.7976453283100))
     }
@@ -794,14 +794,14 @@ test_that("SVM Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, 10.4188913913500)
     }
 
@@ -811,14 +811,14 @@ test_that("SVM Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, 22.4643491266700)
     }
 })
@@ -870,16 +870,16 @@ test_that("Gradient Boost Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(37.1048539876900, 22.4186316132500, 40.4765099287000))
     }
@@ -890,16 +890,16 @@ test_that("Gradient Boost Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Passive/Neutral")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(17.5841569900500, 51.3770222663900, 31.0388177633300))
     }
@@ -952,14 +952,14 @@ test_that("Gradient Boost Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, -3.8710298538210)
     }
 
@@ -969,14 +969,14 @@ test_that("Gradient Boost Numeric", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = TRUE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = TRUE)
         expect_equal(outcome, -81.2083892822300)
     }
 })
@@ -1028,16 +1028,16 @@ test_that("LDA Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very dissatisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Detractor")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(59.8302617032700, 23.7648499676300, 16.4048883291000))
     }
@@ -1048,16 +1048,16 @@ test_that("LDA Categories", {
         combo.box.2 <- c("Very dissatisfied")
         combo.box.3 <- c("Very satisfied")
         all.combo.boxes <- c(combo.box.1, combo.box.2, combo.box.3)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q16_1" = factor(combo.box.1, levels = xlevels[["Q16_1"]], ordered = FALSE),
             "Q16_2" = factor(combo.box.2, levels = xlevels[["Q16_2"]], ordered = FALSE),
             "Q16_3" = factor(combo.box.3, levels = xlevels[["Q16_3"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "Promoter")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("Detractor", "Passive/Neutral", "Promoter"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(5.4001325582240, 44.0048361643000, 50.5950312774800))
     }
@@ -1121,7 +1121,7 @@ test_that("Deep Learning Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1133,9 +1133,9 @@ test_that("Deep Learning Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(24.4136109948200, 36.7897808551800, 38.7966066598900))
     }
@@ -1151,7 +1151,7 @@ test_that("Deep Learning Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1163,9 +1163,9 @@ test_that("Deep Learning Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(34.5954507589300, 38.9608293771700, 26.4437168836600))
     }
@@ -1223,15 +1223,15 @@ test_that("Binary Logit Multi", {
         combo.box.1 <- c("Male")
         combo.box.2 <- c("18 to 24")
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2.from.Cola.sav" = factor(combo.box.1, levels = xlevels[["Q2.from.Cola.sav"]], ordered = FALSE),
             "Q3.from.Cola.sav" = factor(combo.box.2, levels = xlevels[["Q3.from.Cola.sav"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, q5.first.factor)
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(q5.factors, c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(98.2944227629900, 1.7055772370060))
     }
@@ -1241,15 +1241,15 @@ test_that("Binary Logit Multi", {
         combo.box.1 <- c("Female")
         combo.box.2 <- c("18 to 24")
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2.from.Cola.sav" = factor(combo.box.1, levels = xlevels[["Q2.from.Cola.sav"]], ordered = FALSE),
             "Q3.from.Cola.sav" = factor(combo.box.2, levels = xlevels[["Q3.from.Cola.sav"]], ordered = FALSE),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, q5.first.factor)
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(q5.factors, c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(92.6146681461000, 7.3853318539030))
     }
@@ -1312,7 +1312,7 @@ test_that("CART Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1324,9 +1324,9 @@ test_that("CART Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(6.4516129032260, 30.6451612903200, 62.9032258064500))
     }
@@ -1342,7 +1342,7 @@ test_that("CART Multi", {
         text.box.5 <- 3 # This is the only change that I could find that produces a different result
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1354,9 +1354,9 @@ test_that("CART Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(9.5454545454550, 58.6363636363600, 31.8181818181800))
     }
@@ -1419,7 +1419,7 @@ test_that("Gradient Boost Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1431,9 +1431,9 @@ test_that("Gradient Boost Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(21.3520139455800, 37.6844733953500, 40.9635156393100))
     }
@@ -1449,7 +1449,7 @@ test_that("Gradient Boost Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1461,9 +1461,9 @@ test_that("Gradient Boost Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(23.4692707657800, 31.5052866935700, 45.0254410505300))
     }
@@ -1526,7 +1526,7 @@ test_that("LDA Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1538,9 +1538,9 @@ test_that("LDA Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(1.4156325527480, 53.4222514983900, 45.1621159488600))
     }
@@ -1556,7 +1556,7 @@ test_that("LDA Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1568,9 +1568,9 @@ test_that("LDA Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(1.6308676460910, 50.8039694425900, 47.5651629113200))
     }
@@ -1621,13 +1621,13 @@ test_that("Linear Regression Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, 4.7369237093650)
     }
 
@@ -1636,13 +1636,13 @@ test_that("Linear Regression Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(1)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, 4.4983280123950)
     }
 })
@@ -1692,15 +1692,15 @@ test_that("Multinomial Logit Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "6")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("2", "3", "4", "5", "6"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(.0000354214575, 18.6135511652300, 14.2351821751200, 16.4345753140100, 50.7166559241900))
     }
@@ -1710,15 +1710,15 @@ test_that("Multinomial Logit Multi", {
         combo.box.1 <- c("65 or more")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "2")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("2", "3", "4", "5", "6"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(43.6754070967400, 32.9271783689800, .0000000000000, 14.5672302485900, 8.8301842856970))
     }
@@ -1769,15 +1769,15 @@ test_that("Ordered Logit Multi", {
         combo.box.1 <- c("18 to 24")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "5")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("2", "3", "4", "5", "6"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(4.1870727024600, 6.7535080370060, 15.4590049661700, 43.8472250435000, 29.7531892508700))
     }
@@ -1787,15 +1787,15 @@ test_that("Ordered Logit Multi", {
         combo.box.1 <- c("65 or more")
         text.box.1 <- c(2)
         all.combo.boxes <- c(combo.box.1)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q3" = factor(combo.box.1, levels = xlevels[["Q3"]], ordered = FALSE),
             "Q6_D" = as.numeric(text.box.1),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "5")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("2", "3", "4", "5", "6"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(10.3163249828900, 14.1184235637500, 24.1289532458000, 37.5756569936400, 13.8606412139200))
     }
@@ -1858,7 +1858,7 @@ test_that("Random Forest Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1870,9 +1870,9 @@ test_that("Random Forest Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(14.0000000000000, 20.0000000000000, 66.0000000000000))
     }
@@ -1888,7 +1888,7 @@ test_that("Random Forest Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1900,9 +1900,9 @@ test_that("Random Forest Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I typically eat and drink whatever I feel like")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I am on a diet, so I tend to watch what I eat and drink", "I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(18.8000000000000, 18.8000000000000, 62.4000000000000))
     }
@@ -1965,7 +1965,7 @@ test_that("SVM Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -1977,9 +1977,9 @@ test_that("SVM Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like", "I am on a diet, so I tend to watch what I eat and drink"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(47.5147625695800, 41.6768051872900, 10.8084322431300))
     }
@@ -1995,7 +1995,7 @@ test_that("SVM Multi", {
         text.box.5 <- 2
         text.box.6 <- 2
         all.combo.boxes <- c(combo.box.1, combo.box.2)
-        xlevels <- organiseCategoricalPredictors(input.model, all.combo.boxes)
+        xlevels <- OrganiseCategoricalPredictors(input.model, all.combo.boxes)
         DF <- data.frame(
             "Q2" = factor(combo.box.1, levels = xlevels[["Q2"]], ordered = FALSE),
             "Q3" = factor(combo.box.2, levels = xlevels[["Q3"]], ordered = FALSE),
@@ -2007,9 +2007,9 @@ test_that("SVM Multi", {
             "Q6_F" = as.numeric(text.box.6),
             check.names = FALSE
         )
-        outcome <- predictOutcome(input.model, DF, is.numeric = FALSE)
+        outcome <- PredictOutcome(input.model, DF, is.numeric = FALSE)
         expect_equal(outcome, "I tend watch what I eat and drink, but don’t consider myself")
-        probabilities <- predictProbabilities(input.model, DF)
+        probabilities <- PredictProbabilities(input.model, DF)
         expect_equal(attr(probabilities, "dimnames"), list(c("I tend watch what I eat and drink, but don’t consider myself", "I typically eat and drink whatever I feel like", "I am on a diet, so I tend to watch what I eat and drink"), c("Probability (%)")))
         expect_equal(as.vector(probabilities), c(48.4407112954800, 40.7734690820800, 10.7858196224400))
     }
