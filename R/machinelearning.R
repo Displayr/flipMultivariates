@@ -158,6 +158,7 @@ parametersEqual <- function(recipient, donor) {
 #' Organize information about categorical predictors in the model
 #' @param input.model The machine learning model.
 #' @param all.combo.boxes The selection of predictor values.
+#' @export
 #' @noRd
 organiseCategoricalPredictors <- function(input.model, all.combo.boxes) {
     estimation.data.template <- input.model$estimation.data.template
