@@ -1,7 +1,7 @@
 Package: flipMultivariates
 Type: Package
 Title: Multivariate models
-Version: 1.2.4
+Version: 1.2.5
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Multivariate models (e.g. LDA, random forest, SVM) according to the flip Project conventions.
@@ -29,7 +29,7 @@ Imports:
     rhtmlMoonPlot,
     tensorflow,
     utils,
-    xgboost (>= 1.1.1.1),
+    xgboost (>= 2.0.0),
     verbs
 Suggests:
     Ckmeans.1d.dp,
