@@ -25,7 +25,7 @@
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #'
-#' @importFrom xgboost xgboost xgb.cv
+#' @importFrom xgboost xgb.DMatrix xgb.train xgb.cv
 #' @importFrom flipTransformations OneHot
 #' @importFrom flipU StopForUserError
 #' @aliases GradientBoosting
@@ -106,13 +106,17 @@ GradientBoost <- GradientBoosting <- function(formula,
         params.default <- list(booster = booster, objective = objective, num_class = n.class,
                         lambda = 0, alpha = 0, nthread = 1, eval_metric = eval.metric)
 
+    # xgboost >= 2.0 requires xgb.cv/xgb.train inputs to be xgb.DMatrix objects
+    # and no longer accepts data/label as raw matrices.
+    dtrain <- xgb.DMatrix(data = numeric.data$X, label = numeric.data$y)
+
     if (!grid.search)
     {
-        xval <- xgb.cv(data = numeric.data$X, label = numeric.data$y, nrounds = 1000, nfold = 10,
+        xval <- xgb.cv(data = dtrain, nrounds = 1000, nfold = 10,
                        params = params.default, early_stopping_rounds = 8, maximize = FALSE, verbose = 0)
         best.rounds <- which.min(xval$evaluation_log[, xval.metric])
-        result <- list(original = xgboost(data = numeric.data$X, label = numeric.data$y, params = params.default,
-                                          save_period = NULL, nrounds = best.rounds, verbose = 0))
+        result <- list(original = xgb.train(data = dtrain, params = params.default,
+                                            save_period = NULL, nrounds = best.rounds, verbose = 0))
     }
     else
     {
@@ -121,11 +125,13 @@ GradientBoost <- GradientBoosting <- function(formula,
             for (param in names(variable.params))
                 all.params[param] <- variable.params[[param]]
 
-            xgbcv <- xgb.cv(data = numeric.data$X, label = numeric.data$y, params = all.params,
+            set.seed(seed)
+            xgbcv <- xgb.cv(data = dtrain, params = all.params,
                             nfold = cv.nfold, nrounds = n.rounds,
-                            verbose = 0, early_stopping_rounds = 8, maximize = FALSE, seed = seed)
+                            verbose = 0, early_stopping_rounds = 8, maximize = FALSE)
 
-            return(c(min.error = min(xgbcv$evaluation_log[, xval.metric]), rounds = xgbcv$best_iteration, all.params))
+            return(c(min.error = min(xgbcv$evaluation_log[, xval.metric]),
+                     rounds = xgbcv$early_stop$best_iteration, all.params))
         }
 
         n.rounds <- 1000
@@ -147,12 +153,11 @@ GradientBoost <- GradientBoosting <- function(formula,
         best.error.rounds <- search.results[best.index, "rounds"]
         best.param <- as.list(search.results[best.index, -(1:2)])
         set.seed(seed)      # reset seed after searching
-        result <- list(original = xgboost(data = numeric.data$X,
-                                          label = numeric.data$y,
-                                          verbose = 0,
-                                          params = best.param,
-                                          save_period = NULL,
-                                          nrounds = best.error.rounds))
+        result <- list(original = xgb.train(data = dtrain,
+                                            verbose = 0,
+                                            params = best.param,
+                                            save_period = NULL,
+                                            nrounds = best.error.rounds))
     }
 
     ####################################################################
