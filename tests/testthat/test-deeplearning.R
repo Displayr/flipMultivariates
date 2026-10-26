@@ -90,7 +90,7 @@ test_that("Deep Learning: predictions and probabilities", {
         expect_warning("Cross validation loss is still decreasing.")
     predict(dl) |> expect_length(2000)
     prob <- Probabilities(dl)
-    prob |> expect_shape(dim = c(2000, 6))
+    expect_equal(dim(prob), c(2000L, 6L))
 
     # A reloaded output has a null Python pointer, so the model must be rebuilt from original.serial.
     rds <- tempfile(fileext = ".rds")
