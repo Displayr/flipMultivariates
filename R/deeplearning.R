@@ -312,7 +312,7 @@ padMetrics <- function(cv)
 print.DeepLearning <- function(x, ...)
 {
     if (py_is_null_xptr(x[["original"]])) {
-        x[["original"]] <- unserialize_model(x[["original.serial"]])
+        x[["original"]] <- load_model(x[["original.serial"]])
     }
 
     if (x[["output"]] == "Accuracy") {
@@ -362,7 +362,7 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
     if (!object[["numeric.outcome"]])
     {
         predictions <- if (length(object[["outcome.levels"]]) > 2L) {
-            as.numeric(op_argmax(predict(object[["original"]], X), axis = 1L))
+            as.numeric(op_argmax(predict(object[["original"]], X), axis = -1L, zero_indexed = TRUE))
         } else {
             predict(object[["original"]], X) > 0.5
         }
@@ -388,7 +388,7 @@ Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
     newdata <- ValidateNewData(object, newdata)
 
     if (py_is_null_xptr(object[["original"]])) {
-        object[["original"]] <- unserialize_model(object[["original.serial"]])
+        object[["original"]] <- load_model(object[["original.serial"]])
     }
 
     X <- as.matrix(AsNumeric(newdata))

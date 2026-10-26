@@ -91,6 +91,13 @@ test_that("Deep Learning: predictions and probabilities", {
     predict(dl) |> expect_length(2000)
     prob <- Probabilities(dl)
     prob |> expect_shape(dim = c(2000, 6))
+
+    # A reloaded output has a null Python pointer, so the model must be rebuilt from original.serial.
+    rds <- tempfile(fileext = ".rds")
+    saveRDS(dl, rds)
+    reloaded <- readRDS(rds)
+    expect_equal(predict(reloaded), predict(dl))
+    expect_equal(Probabilities(reloaded), prob)
 })
 
 test_that("Deep Learning: errors", {
