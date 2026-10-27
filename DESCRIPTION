@@ -33,7 +33,8 @@ Imports:
 Suggests:
     Ckmeans.1d.dp,
     testthat,
-    flipExampleData
+    flipExampleData,
+    withr
 Remotes:
     Displayr/flipAnalysisOfVariance,
     Displayr/flipChartBasics,
