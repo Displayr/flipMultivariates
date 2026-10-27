@@ -262,7 +262,7 @@ PredictProbabilities <- function(input.model, DF) {
         new.probs <- randomForestExtractVariables(input.model, "prob", newdata = DF)
     } else if ("DeepLearning" %in% model.classes) {
         if (reticulate::py_is_null_xptr(input.model$original)) {
-            input.model$original <- keras::unserialize_model(input.model$original.serial)
+            input.model$original <- keras3::load_model(input.model$original.serial)
         }
         X <- as.matrix(flipTransformations::AsNumeric(DF))
         constants <- input.model$training.stdevs == 0
