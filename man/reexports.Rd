@@ -12,8 +12,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{flipData}{\code{\link[flipData]{Probabilities}}}
+  \item{flipData}{\code{\link[flipData:Probabilities]{Probabilities()}}}
 
-  \item{flipFormat}{\code{\link[flipFormat]{ExtractChartData}}}
+  \item{flipFormat}{\code{\link[flipFormat:ExtractChartData]{ExtractChartData()}}}
 }}
 
