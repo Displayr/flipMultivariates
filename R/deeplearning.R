@@ -261,11 +261,13 @@ neuralNetwork <- function(X,
     history[["metrics"]] <- history[["metrics"]][sort(names(history[["metrics"]]))]    # fix unstable ordering
     history[["params"]] <- history[["params"]][sort(names(history[["params"]]))]
 
-    if ((optimal.epochs <- length(history[["metrics"]][["val_loss"]])) == max.epochs)
+    optimal.epochs <- length(history[["metrics"]][["val_loss"]])
+    if (optimal.epochs == max.epochs) {
         warning("Cross validation loss is still decreasing after maximum number of epochs.",
                 " Model may not have converged, consider increasing the maximum number of epochs.")
-    else
-        optimal.epochs <- max(1, optimal.epochs - 3)
+    } else {
+        optimal.epochs <- max(1L, optimal.epochs - 3L)
+    }
 
     # retrain on all data for optimal number of epochs
     model <- build.model()
