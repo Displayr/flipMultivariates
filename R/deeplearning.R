@@ -167,6 +167,7 @@ prepareDLChartData <- function(x, ...)
 
 #' @importFrom keras3 keras_model_sequential optimizer_rmsprop layer_dense layer_dropout to_categorical
 #' @importFrom keras3 compile fit callback_early_stopping set_random_seed save_model
+#' @importFrom utils tail
 neuralNetwork <- function(X,
                           Y,
                           hidden.nodes = c(256, 128),
