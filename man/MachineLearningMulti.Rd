@@ -62,7 +62,7 @@ data. Ignored if \code{compare.only} is TRUE.}
 
 \item{output}{If \code{compare.only} is \code{FALSE}, one of \code{"Comparison"} which
 produces a table comparing the models, or \code{"Ensemble"} which produces a
-\code{\link{ConfusionMatrix}}.}
+\code{\link[flipRegression]{ConfusionMatrix}}.}
 }
 \description{
 Create an ensemble or comparison table of new MachineLearning and/or Regression models

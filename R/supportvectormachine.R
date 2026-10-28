@@ -22,7 +22,7 @@
 #' @param statistical.assumptions A Statistical Assumptions object.
 #' @param show.labels Shows the variable labels, as opposed to the labels, in the outputs, where a
 #' variables label is an attribute (e.g., attr(foo, "label")).
-#' @param ... Other arguments to be supplied to \code{\link{svm}}.
+#' @param ... Other arguments to be supplied to \code{\link[e1071]{svm}}.
 #'
 #' @importFrom e1071 svm
 #' @importFrom flipU StopForUserError

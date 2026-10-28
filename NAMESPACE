@@ -137,7 +137,8 @@ importFrom(stats,
 importFrom(utils,
   capture.output,
   getS3method,
-  read.table
+  read.table,
+  tail
 )
 importFrom(verbs,
   Sum,
