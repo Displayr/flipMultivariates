@@ -131,6 +131,7 @@ importFrom(stats,
   predict,
   reformulate,
   sd,
+  setNames,
   var
 )
 importFrom(utils,

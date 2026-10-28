@@ -146,6 +146,7 @@ DeepLearning <- function(formula,
 
 #' @importFrom keras3 load_model
 #' @importFrom reticulate py_is_null_xptr
+#' @importFrom stats setNames
 prepareDLChartData <- function(x, ...)
 {
     if (py_is_null_xptr(x[["original"]])) {
