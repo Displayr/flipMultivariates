@@ -212,15 +212,13 @@ neuralNetwork <- function(X,
     # create a function that builds the model one layer at a time.
     # called for cross-validation then again for the final model
     build.model <- function() {
-        model <- keras_model_sequential()
+        model <- keras_model_sequential(input_shape = ncol(X))
         # hidden layers
         for (i in seq_along(hidden.nodes)) {
-            # input layer
             model <- layer_dense(
                 model,
                 units = hidden.nodes[i],
-                activation = activation.functions[i],
-                input_shape = ncol(X)
+                activation = activation.functions[i]
             )
             if (i <= length(dropout.rates)) {
                 model <- layer_dropout(model, rate = dropout.rates[i])
