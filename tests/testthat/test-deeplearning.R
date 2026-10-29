@@ -88,9 +88,16 @@ test_that("Deep Learning: predictions and probabilities", {
         hidden.nodes = 20, max.epochs = 10, subset = subset, weights = wgt
     )) |>
         expect_warning("Cross validation loss is still decreasing.")
-    predict(dl) |> expect_length(2000)
+    predictions <- predict(dl)
+    predictions |> expect_length(2000)
     prob <- Probabilities(dl)
-    expect_equal(dim(prob), c(2000L, 6L))
+    dim(prob) |> expect_equal(c(2000L, 6L))
+    # The network can't score cases with missing predictors, so they have no probabilities or class
+    all(is.na(predictions[1:200])) |> expect_true()
+    scored <- complete.cases(prob)
+    is.na(predictions) |> expect_equal(!scored)
+    as.character(predictions[scored]) |>
+        expect_equal(colnames(prob)[max.col(prob[scored, ], ties.method = "first")])
 
     # A reloaded output has a null Python pointer, so the model must be rebuilt from original.serial.
     rds <- tempfile(fileext = ".rds")

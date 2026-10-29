@@ -344,6 +344,7 @@ print.DeepLearning <- function(x, ...)
 #' @importFrom flipData CheckPredictionVariables ValidateNewData
 #' @importFrom keras3 op_argmax load_model
 #' @importFrom reticulate py_is_null_xptr
+#' @importFrom stats complete.cases
 #' @export
 predict.DeepLearning <- function(object, newdata = NULL, ...)
 {
@@ -362,13 +363,15 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
             scale = object[["training.stdevs"]][!constants]
         )
     }
-    if (!object[["numeric.outcome"]])
-    {
+    if (!object[["numeric.outcome"]]) {
+        output <- predict(object[["original"]], X)
         predictions <- if (length(object[["outcome.levels"]]) > 2L) {
-            as.numeric(op_argmax(predict(object[["original"]], X), axis = -1L, zero_indexed = TRUE))
+            as.numeric(op_argmax(output, axis = -1L, zero_indexed = TRUE))
         } else {
-            predict(object[["original"]], X) > 0.5
+            output > 0.5
         }
+        # The network outputs NaN for cases with missing predictors, which op_argmax maps to the first class
+        predictions[!complete.cases(output)] <- NA
 
         predictions <- factor(
             predictions + 1L,
