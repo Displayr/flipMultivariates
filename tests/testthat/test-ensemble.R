@@ -2,7 +2,8 @@ context("Machine Learning Ensembles")
 
 data(adult.2000, package = "flipExampleData")
 
-suppressWarnings(RNGversion("3.5.3"))
+# Restored when this file finishes, so the old sampling doesn't leak into test files that run after it.
+suppressWarnings(withr::local_rng_version("3.5.3"))
 set.seed(1234)
 missing.marital <- runif(2000) > 0.9
 missing.occupation <- runif(2000) > 0.9

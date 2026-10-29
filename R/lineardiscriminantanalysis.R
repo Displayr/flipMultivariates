@@ -400,6 +400,7 @@ LDA.fit <- function (x,
 # Calculate linear discriminant functions
 # as per equation 4.10 in Hastie, Elements of Statistical Learning
 #' @importFrom verbs Sum
+#' @exportS3Method NULL
 lda.functions <- function(x, groups, grp.means, prior, weights, functions.output){
 
     gr <- length(unique(groups))

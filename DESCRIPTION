@@ -19,7 +19,7 @@ Imports:
     flipTrees (>= 1.0.6),
     flipU (>= 1.6.2),
     ggplot2,
-    keras,
+    keras3,
     MASS,
     methods,
     randomForest,
@@ -27,14 +27,14 @@ Imports:
     rhtmlLabeledScatter,
     rhtmlCombinedScatter,
     rhtmlMoonPlot,
-    tensorflow,
     utils,
     xgboost (>= 1.1.1.1),
     verbs
 Suggests:
     Ckmeans.1d.dp,
     testthat,
-    flipExampleData
+    flipExampleData,
+    withr
 Remotes:
     Displayr/flipAnalysisOfVariance,
     Displayr/flipChartBasics,
@@ -52,4 +52,4 @@ Remotes:
     Displayr/rhtmlMoonPlot,
     Displayr/verbs
 Encoding: UTF-8
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.1
