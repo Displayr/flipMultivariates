@@ -174,7 +174,6 @@ neuralNetwork <- function(X,
                           max.epochs = 100,
                           activation.functions = "relu",
                           dropout.rates = c(),
-                          optimizer = function() optimizer_rmsprop(),
                           batch.size = 128,
                           numeric.outcome = TRUE,
                           seed = 12321,
@@ -232,7 +231,7 @@ neuralNetwork <- function(X,
 
         model |> compile(
             loss = cost.function,
-            optimizer = optimizer(),
+            optimizer = optimizer_rmsprop(),
             metrics = metrics
         )
         model
