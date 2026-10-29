@@ -150,7 +150,7 @@ DeepLearning <- function(formula,
 prepareDLChartData <- function(x, ...)
 {
     if (py_is_null_xptr(x[["original"]])) {
-        x$original <- load_model(x[["original.serial"]])
+        x[["original"]] <- load_model(x[["original.serial"]])
     }
     output.type <- x[["output"]]
     if (output.type == "Accuracy") {
@@ -406,7 +406,7 @@ Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
 
     probabilities <- predict(object[["original"]], X)
     if (length(object[["outcome.levels"]]) == 2) {
-        probabilities <- cbind(1 - probabilities ,probabilities)
+        probabilities <- cbind(1 - probabilities, probabilities)
     }
     colnames(probabilities) <- object[["outcome.levels"]]
     probabilities
