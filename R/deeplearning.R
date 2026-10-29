@@ -352,6 +352,8 @@ predict.DeepLearning <- function(object, newdata = NULL, ...)
     newdata <- ValidateNewData(object, newdata)
 
     X <- as.matrix(AsNumeric(newdata))
+    # R's NA is a NaN that numpy warns about when keras casts it to float32; a plain NaN casts silently
+    X[is.na(X)] <- NaN
     constants <- object[["training.stdevs"]] == 0
     if (object[["normalize"]]) {
         X[, !constants] <- scale(
@@ -395,6 +397,8 @@ Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
     }
 
     X <- as.matrix(AsNumeric(newdata))
+    # R's NA is a NaN that numpy warns about when keras casts it to float32; a plain NaN casts silently
+    X[is.na(X)] <- NaN
     constants <- object[["training.stdevs"]] == 0
     if (object[["normalize"]]) {
         X[, !constants] <- scale(
