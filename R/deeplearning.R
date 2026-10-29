@@ -401,7 +401,7 @@ Probabilities.DeepLearning <- function(object, newdata = NULL, ...)
     constants <- object[["training.stdevs"]] == 0
     if (object[["normalize"]]) {
         X[, !constants] <- scale(
-            X[, !constants],
+            X[, !constants, drop = FALSE],
             center = object[["training.means"]][!constants],
             scale = object[["training.stdevs"]][!constants]
         )

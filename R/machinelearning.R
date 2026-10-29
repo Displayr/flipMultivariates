@@ -261,22 +261,7 @@ PredictProbabilities <- function(input.model, DF) {
     } else if ("RandomForest" %in% model.classes) {
         new.probs <- randomForestExtractVariables(input.model, "prob", newdata = DF)
     } else if ("DeepLearning" %in% model.classes) {
-        if (reticulate::py_is_null_xptr(input.model$original)) {
-            input.model$original <- keras3::load_model(input.model$original.serial)
-        }
-        X <- as.matrix(flipTransformations::AsNumeric(DF))
-        constants <- input.model$training.stdevs == 0
-        if (input.model$normalize) {
-            X[, !constants] <- scale(X[, !constants, drop = FALSE],
-                center = input.model$training.means[!constants],
-                scale = input.model$training.stdevs[!constants]
-            )
-        }
-        new.probs <- predict(input.model$original, X)
-        if (length(input.model$outcome.levels) == 2) {
-            new.probs <- cbind(1 - new.probs, new.probs)
-        }
-        colnames(new.probs) <- input.model$outcome.levels
+        new.probs <- Probabilities(input.model, newdata = DF)
     } else if ("CART" %in% model.classes) {
         new.probs <- tryCatch(getS3method("predict", "rpart")(input.model, newdata = DF, type = "prob"),
             error = function(e) {
