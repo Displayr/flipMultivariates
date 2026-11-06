@@ -5,3 +5,5 @@
 .*~
 runTravisTests.sh
 tools/travis_run_before_install.R$
+^AGENTS\.md$
+^CLAUDE\.md$
