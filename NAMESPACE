@@ -43,90 +43,113 @@ export(SupportVectorMachine)
 import(randomForest)
 importFrom(MASS,lda)
 importFrom(e1071,svm)
-importFrom(flipAnalysisOfVariance,CompareMultipleMeans)
-importFrom(flipAnalysisOfVariance,MultipleANOVAs)
-importFrom(flipData,CalibrateWeight)
-importFrom(flipData,CheckPredictionVariables)
-importFrom(flipData,CleanSubset)
-importFrom(flipData,CleanWeights)
-importFrom(flipData,DataFormula)
-importFrom(flipData,ErrorIfInfinity)
-importFrom(flipData,EstimationData)
-importFrom(flipData,EstimationDataTemplate)
-importFrom(flipData,GetData)
-importFrom(flipData,Observed)
-importFrom(flipData,Probabilities)
-importFrom(flipData,ValidateNewData)
-importFrom(flipFormat,ComparisonTable)
-importFrom(flipFormat,DeepLearningTable)
-importFrom(flipFormat,ExtractChartData)
-importFrom(flipFormat,ExtractCommonPrefix)
-importFrom(flipFormat,FormatAsPercent)
-importFrom(flipFormat,FormatAsReal)
-importFrom(flipFormat,Labels)
-importFrom(flipFormat,Names)
-importFrom(flipFormat,RandomForestTable)
-importFrom(flipRegression,Accuracy)
-importFrom(flipRegression,ConfusionMatrix)
-importFrom(flipStatistics,Correlation)
-importFrom(flipStatistics,MeanByGroup)
-importFrom(flipStatistics,WeightedCounts)
-importFrom(flipTransformations,AdjustDataToReflectWeights)
-importFrom(flipTransformations,AsNumeric)
-importFrom(flipTransformations,CreatingFactorDependentVariableIfNecessary)
-importFrom(flipTransformations,Factor)
-importFrom(flipTransformations,OneHot)
-importFrom(flipTransformations,StandardizeData)
-importFrom(flipTransformations,WeightedSVD)
-importFrom(flipU,AllVariablesNames)
-importFrom(flipU,ConvertCommaSeparatedStringToVector)
-importFrom(flipU,IsCount)
-importFrom(flipU,OutcomeName)
-importFrom(flipU,OutcomeVariable)
-importFrom(flipU,StopForUserError)
+importFrom(flipAnalysisOfVariance,
+  CompareMultipleMeans,
+  MultipleANOVAs
+)
+importFrom(flipData,
+  CalibrateWeight,
+  CheckPredictionVariables,
+  CleanSubset,
+  CleanWeights,
+  DataFormula,
+  ErrorIfInfinity,
+  EstimationData,
+  EstimationDataTemplate,
+  GetData,
+  Observed,
+  Probabilities,
+  ValidateNewData
+)
+importFrom(flipFormat,
+  ComparisonTable,
+  DeepLearningTable,
+  ExtractChartData,
+  ExtractCommonPrefix,
+  FormatAsPercent,
+  FormatAsReal,
+  Labels,
+  Names,
+  RandomForestTable
+)
+importFrom(flipRegression,
+  Accuracy,
+  ConfusionMatrix
+)
+importFrom(flipStatistics,
+  Correlation,
+  MeanByGroup,
+  WeightedCounts
+)
+importFrom(flipTransformations,
+  AdjustDataToReflectWeights,
+  AsNumeric,
+  CreatingFactorDependentVariableIfNecessary,
+  Factor,
+  OneHot,
+  StandardizeData,
+  WeightedSVD
+)
+importFrom(flipU,
+  AllVariablesNames,
+  ConvertCommaSeparatedStringToVector,
+  IsCount,
+  OutcomeName,
+  OutcomeVariable,
+  StopForUserError
+)
 importFrom(ggplot2,ggtitle)
 importFrom(graphics,plot)
-importFrom(keras,"%>%")
-importFrom(keras,callback_early_stopping)
-importFrom(keras,compile)
-importFrom(keras,fit)
-importFrom(keras,k_argmax)
-importFrom(keras,keras_model_sequential)
-importFrom(keras,layer_dense)
-importFrom(keras,layer_dropout)
-importFrom(keras,optimizer_rmsprop)
-importFrom(keras,serialize_model)
-importFrom(keras,shape)
-importFrom(keras,to_categorical)
-importFrom(keras,unserialize_model)
+importFrom(keras3,
+  callback_early_stopping,
+  compile,
+  fit,
+  keras_model_sequential,
+  layer_dense,
+  layer_dropout,
+  load_model,
+  op_argmax,
+  optimizer_rmsprop,
+  save_model,
+  set_random_seed,
+  to_categorical
+)
 importFrom(methods,formalArgs)
 importFrom(randomForest,randomForest)
 importFrom(reticulate,py_is_null_xptr)
-importFrom(reticulate,py_set_seed)
 importFrom(rhtmlCombinedScatter,CombinedScatter)
 importFrom(rhtmlLabeledScatter,LabeledScatter)
 importFrom(rhtmlMoonPlot,moonplot)
-importFrom(stats,aggregate)
-importFrom(stats,alias)
-importFrom(stats,complete.cases)
-importFrom(stats,cor)
-importFrom(stats,cov.wt)
-importFrom(stats,na.pass)
-importFrom(stats,pnorm)
-importFrom(stats,predict)
-importFrom(stats,reformulate)
-importFrom(stats,sd)
-importFrom(stats,var)
-importFrom(tensorflow,tf)
-importFrom(utils,capture.output)
-importFrom(utils,getS3method)
-importFrom(utils,read.table)
-importFrom(verbs,Sum)
-importFrom(verbs,SumEachColumn)
-importFrom(verbs,SumEachRow)
-importFrom(verbs,SumEmptyHandling)
-importFrom(xgboost,xgb.cv)
-importFrom(xgboost,xgb.ggplot.importance)
-importFrom(xgboost,xgb.importance)
-importFrom(xgboost,xgb.load.raw)
-importFrom(xgboost,xgboost)
+importFrom(stats,
+  aggregate,
+  alias,
+  complete.cases,
+  cor,
+  cov.wt,
+  na.pass,
+  pnorm,
+  predict,
+  reformulate,
+  sd,
+  setNames,
+  var
+)
+importFrom(utils,
+  capture.output,
+  getS3method,
+  read.table,
+  tail
+)
+importFrom(verbs,
+  Sum,
+  SumEachColumn,
+  SumEachRow,
+  SumEmptyHandling
+)
+importFrom(xgboost,
+  xgb.cv,
+  xgb.ggplot.importance,
+  xgb.importance,
+  xgb.load.raw,
+  xgboost
+)

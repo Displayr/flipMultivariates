@@ -21,7 +21,7 @@
 #' variables label is an attribute (e.g., attr(foo, "label")).
 #' @param sort.by.importance Sort the last column of the importance table
 #' in descending order.
-#' @param ... Other arguments to be supplied to \code{\link{randomForest}}.
+#' @param ... Other arguments to be supplied to \code{\link[randomForest]{randomForest}}.
 #' @importFrom stats pnorm
 #' @importFrom randomForest randomForest
 #' @export

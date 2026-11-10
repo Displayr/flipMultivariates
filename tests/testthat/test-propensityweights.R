@@ -21,7 +21,8 @@ test_that("Only relevant models are possible to use", {
     numeric.regression <- c("Linear", "Poisson", "Quasi-Poisson", "NBD")
     reg.models <- lapply(numeric.regression,
                          function(x) flipRegression::Regression(numeric.formula, data = burg, type = x))
-    lapply(reg.models, function(x) expect_error(PropensityWeights(x), binary.classifier.error.msg))
+    lapply(reg.models, function(x) expect_error(PropensityWeights(x), binary.classifier.error.msg)) |>
+        invisible()
     ordinal.reg <- flipRegression::Regression(numeric.formula, data = burg, type = "Ordered Logit")
     expect_error(PropensityWeights(ordinal.reg), binary.classifier.error.msg)
     binary.class.reg <- c("Binary Logit", "Multinomial Logit")
